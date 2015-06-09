@@ -20,8 +20,9 @@ struct symbolDef symbolDefs[10];
 
 int main() {
     FILE *file;
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-16", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-18", "r");
     int a;
+    int b = 0;
     int idefcount;
     int m;
     int ideclareCount;
@@ -37,14 +38,19 @@ int main() {
     /* read symbol defintion */
       
     for (int i = 0; i < idefcount; i ++) {
-        if (fscanf(file, "%s", &symbolDefs[i].symbolName) == EOF) {
-            printf("SYM_EXPECTED");
-            break;
+        if (fscanf(file, "%s", &symbolDefs[i].symbolName) != EOF) {
+            printf("%s", &symbolDefs[i].symbolName);
+            b++;
         } else {
-            printf("%s", &symbolDefs[i].symbolAddress);
-        }
-        fscanf(file, "%s", &symbolDefs[i].symbolAddress);
+            if ((b != 0) && (b < idefcount)) {
+                printf("TO_MANY_DEF_IN_MODULE");
+                break;
+            } else if (b ==0) {
+                printf("SYM_EXPECTED");
+              break;
+            }}
 //        printf("%s ", &symbolDefs[i].symbolAddress);
+        fscanf(file, "%s", &symbolDefs[i].symbolAddress);
         m = atoi(&symbolDefs[i].symbolAddress);
         if (m == 0) {
             printf("NUM_EXPECTED");
