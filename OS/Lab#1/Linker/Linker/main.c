@@ -64,7 +64,7 @@ int main() {
 
     for (int i = 0; i < ideclareCount; i++) {
         while(fscanf(file, "%s", &symbolDeclare[i]) != EOF) {
-            printf("%i %s ",i, &symbolDeclare);
+            printf("%s ", &symbolDeclare[i]);
             a ++;
         }
         
