@@ -11,7 +11,6 @@
 #include <ctype.h>
 
 FILE *file;
-//file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
 int a = 0;
 int b = 0;
 int scanValue;
@@ -24,7 +23,7 @@ char *declareCount;
 char *numInstructions;
 char tempIns[10];
 char tempInsAdds[4];
-char symbolDeclare[16][10];
+char *symbolDeclare[16][10];
 
 /* define symbol table */
 struct symbolDef
@@ -36,7 +35,7 @@ struct symbolDef symbolDefs[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-4", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         ReadDefList(file);
@@ -62,7 +61,7 @@ int ReadDefList(FILE *file) {
     /* read symbol defintion */
     
         for (int i = 0; i < idefcount; i ++) {
-            if (fscanf(file, "%s", &symbolDefs[i].symbolName) != EOF) {
+            if ((scanValue = fscanf(file, "%s", &symbolDefs[i].symbolName))> 0) {
 //              fscanf(file, "%s", &symbolDefs[i].symbolName);
                 b++;
             } else {
@@ -77,13 +76,13 @@ int ReadDefList(FILE *file) {
         
             fscanf(file, "%s", &symbolDefs[i].symbolAddress);
             m = atoi(&symbolDefs[i].symbolAddress);
-            if (m == 0) {
+            if (isalpha(&symbolDefs[i].symbolAddress)) {
                 printf("NUM_EXPECTED");
                 break;
             } else
             {
                 printf("%s ", &symbolDefs[i].symbolName);
-                printf("%s", &symbolDefs[i].symbolAddress);
+                printf("%s ", &symbolDefs[i].symbolAddress);
             }
         }
     }
@@ -98,13 +97,14 @@ int ReadUseList(FILE *file){
         printf("%s ", &declareCount);
     
         for (int i = 0; i < ideclareCount; i++) {
-            if (fscanf(file, "%s", &symbolDeclare[16][i]) != EOF) {
-                printf("%s ", &symbolDeclare[16][i]);
-                a ++;
+            if ((scanValue = fscanf(file, "%s", &symbolDeclare[16][i])) > 0) {
+                
+                    printf("%s ", &symbolDeclare[16][i]);
+                    a ++;
             }
         }
     
-        if (a < ideclareCount) {
+        if (a != 0 && a < ideclareCount) {
             printf("TO_MANY_USE_IN_MODULE");
         }
     }
@@ -118,10 +118,16 @@ int ReadInstructions(FILE *file){
         printf("%s ", &numInstructions);
         inumIns = atoi(&numInstructions);
         for (int i = 0; i < inumIns; i++) {
-            fscanf(file, "%s", &tempIns);
-            printf("%s ", &tempIns);
-            fscanf(file, "%s", &tempInsAdds);
-            printf("%s ", &tempInsAdds);
+//            fscanf(file, "%s", &tempIns);
+            if ((scanValue = fscanf(file, "%s", &tempIns))> 0) {
+                printf("%s ", &tempIns);
+                fscanf(file, "%s ", &tempInsAdds);
+                printf("%s ", &tempInsAdds);
+            } else {
+                printf("ADDR_EXPECTED");
+                break;
+            }
+            
         }
     }
     printf("\n");
