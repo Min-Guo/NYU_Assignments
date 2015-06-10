@@ -18,6 +18,7 @@ int idefcount;
 int m;
 int prevDefcount;
 int ideclareCount;
+int prevDeclareCount;
 int inumIns;
 char *defcount;
 char *declareCount;
@@ -42,14 +43,13 @@ struct symbolList symbolLists[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-14", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
 
     while (!feof(file)) {
         ReadDefList(file);
         ReadUseList(file);
         ReadInstructions(file);
     };
-    
     fclose(file);
     return 0;
 }
@@ -103,13 +103,13 @@ int ReadUseList(FILE *file){
         printf("%s ", &declareCount);
     
         for (int i = 0; i < ideclareCount; i++) {
-            if ((scanValue = fscanf(file, "%s", &symbolLists[i].symbolDeclare)) > 0) {
-                if (isdigit(&symbolLists[i].symbolDeclare)) {
+            if ((scanValue = fscanf(file, "%s", &symbolLists[i + prevDeclareCount].symbolDeclare)) > 0) {
+                if (isdigit(&symbolLists[i + prevDeclareCount].symbolDeclare)) {
                     printf("SYM_EXPECTED");
                     break;
-                } else {
+                }else{
                 
-                    printf("%s ", &symbolLists[i].symbolDeclare);
+                    printf("%s ", &symbolLists[i + prevDeclareCount].symbolDeclare);
                     a ++;
                 }
             }
@@ -118,7 +118,9 @@ int ReadUseList(FILE *file){
         if (a != 0 && a < ideclareCount) {
             printf("TO_MANY_USE_IN_MODULE");
         }
+        prevDeclareCount += atoi(&declareCount);
     }
+    
     printf("\n");
     return 0;
 };
@@ -138,7 +140,6 @@ int ReadInstructions(FILE *file){
                 printf("ADDR_EXPECTED");
                 break;
             }
-            
         }
     }
     printf("\n");
