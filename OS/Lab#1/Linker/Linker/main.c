@@ -16,6 +16,7 @@ int b = 0;
 int scanValue;
 int idefcount;
 int m;
+int prevDefcount;
 int ideclareCount;
 int inumIns;
 char *defcount;
@@ -23,26 +24,32 @@ char *declareCount;
 char *numInstructions;
 char tempIns[10];
 char tempInsAdds[4];
-char *symbolDeclare[16][10];
+char symbolDeclare[16][10];
 
 /* define symbol table */
 struct symbolDef
 {
     char symbolName[16];
-    char *symbolAddress;
+    char symbolAddress[4];
 };
-struct symbolDef symbolDefs[10];
+struct symbolDef symbolDefs[20];
+
+struct symbolList
+{
+    char symbolDeclare[16];
+};
+struct symbolList symbolLists[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-14", "r");
 
     while (!feof(file)) {
         ReadDefList(file);
         ReadUseList(file);
         ReadInstructions(file);
     };
-        
+    
     fclose(file);
     return 0;
 }
@@ -61,8 +68,7 @@ int ReadDefList(FILE *file) {
     /* read symbol defintion */
     
         for (int i = 0; i < idefcount; i ++) {
-            if ((scanValue = fscanf(file, "%s", &symbolDefs[i].symbolName))> 0) {
-//              fscanf(file, "%s", &symbolDefs[i].symbolName);
+            if ((scanValue = fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolName))> 0) {
                 b++;
             } else {
                 if ((b != 0) && (b < idefcount)) {
@@ -74,17 +80,17 @@ int ReadDefList(FILE *file) {
                 }
             }
         
-            fscanf(file, "%s", &symbolDefs[i].symbolAddress);
-            m = atoi(&symbolDefs[i].symbolAddress);
-            if (isalpha(&symbolDefs[i].symbolAddress)) {
+            fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolAddress);
+            if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress)) {
                 printf("NUM_EXPECTED");
                 break;
             } else
             {
-                printf("%s ", &symbolDefs[i].symbolName);
-                printf("%s ", &symbolDefs[i].symbolAddress);
+                printf("%s ", &symbolDefs[i + prevDefcount].symbolName);
+                printf("%s ", &symbolDefs[i + prevDefcount].symbolAddress);
             }
         }
+        prevDefcount  += atoi(&defcount);
     }
     printf("\n");
     return 0;
@@ -97,10 +103,15 @@ int ReadUseList(FILE *file){
         printf("%s ", &declareCount);
     
         for (int i = 0; i < ideclareCount; i++) {
-            if ((scanValue = fscanf(file, "%s", &symbolDeclare[16][i])) > 0) {
+            if ((scanValue = fscanf(file, "%s", &symbolLists[i].symbolDeclare)) > 0) {
+                if (isdigit(&symbolLists[i].symbolDeclare)) {
+                    printf("SYM_EXPECTED");
+                    break;
+                } else {
                 
-                    printf("%s ", &symbolDeclare[16][i]);
+                    printf("%s ", &symbolLists[i].symbolDeclare);
                     a ++;
+                }
             }
         }
     
