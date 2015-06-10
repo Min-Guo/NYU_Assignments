@@ -20,15 +20,19 @@ struct symbolDef symbolDefs[10];
 
 int main() {
     FILE *file;
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-18", "r");
-    int a;
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
+    int a = 0;
     int b = 0;
     int idefcount;
     int m;
     int ideclareCount;
+    int inumIns;
     char *defcount;
     char *declareCount;
-    char symbolDeclare[10];
+    char *numInstructions;
+    char *tempIns;
+    char *tempInsAdds;
+    char symbolDeclare[16][10];
     //
     /* read definiton number */
     fscanf(file, "%s", &defcount);
@@ -69,16 +73,26 @@ int main() {
     printf("\n%s ", &declareCount);
 
     for (int i = 0; i < ideclareCount; i++) {
-        while(fscanf(file, "%s", &symbolDeclare[i]) != EOF) {
-            printf("%s ", &symbolDeclare[i]);
+        if (fscanf(file, "%s", &symbolDeclare[16][i]) != EOF) {
+        printf("%s ", &symbolDeclare[16][i]);
             a ++;
         }
-        
+    }
+    
         if (a < ideclareCount) {
             printf("TO_MANY_USE_IN_MODULE");
         }
     
+    /* read num-instructions */
+    
+    fscanf(file, "%s", &numInstructions);
+    printf("\n%s", &numInstructions);
+    inumIns = atoi(&numInstructions);
+    for (int i = 0; i < inumIns; i++) {
+            fscanf(file, "%s", &tempIns);
+            fscanf(file, "%s", &tempInsAdds);
+        }
     fclose(file);
     return 0;
 }
-}
+
