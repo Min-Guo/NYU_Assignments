@@ -52,7 +52,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-10", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
 
     while (!feof(file)) {
         numModule ++;
@@ -163,6 +163,7 @@ int checkReAdd(){
     for (int i = prevDefcount - 1; i < atoi(&defcount); i ++) {
         if (atoi(&symbolDefs[i].symbolAddress) > atoi(&numInstructions)) {
             printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", numModule, &symbolDefs[i].symbolName, atoi(&symbolDefs[i].symbolAddress), (atoi(&numInstructions) -1));
+            strcpy(symbolDefs[i].symbolAddress, "0"); /* the value is printed before reassign, but reassign works. */
         }
     }
     return 0;
