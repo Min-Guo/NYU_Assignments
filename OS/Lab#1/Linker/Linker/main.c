@@ -23,7 +23,7 @@ int prevDeclareCount;
 int inumIns;
 char *defcount;
 char *declareCount;
-char numInstructions[2][10];
+char numInstructions[10][2];
 char tempIns[10];
 char tempInsAdds[4];
 char symbolDeclare[16][10];
@@ -52,7 +52,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-10", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-13", "r");
 
     while (!feof(file)) {
         numModule ++;
@@ -88,7 +88,7 @@ int ReadDefList(FILE *file) {
                     break;
                 } else if (b ==0) {
                     printf("SYM_EXPECTED");
-                    break;
+                    exit(0);
                 }
             }
         
@@ -140,6 +140,7 @@ int ReadUseList(FILE *file){
 int ReadInstructions(FILE *file){
     /* read num-instructions */
     if ((scanValue = fscanf(file, "%s", &numInstructions[numModule-1])) >0 ){
+        printf("%s ", &numInstructions[numModule-1]);
         inumIns = atoi(&numInstructions[numModule-1]);
         for (int i = 0; i < inumIns; i++) {
 //            fscanf(file, "%s", &tempIns);
