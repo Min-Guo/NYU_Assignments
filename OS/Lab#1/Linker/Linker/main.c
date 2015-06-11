@@ -13,6 +13,7 @@
 FILE *file;
 int a = 0;
 int b = 0;
+int numModule = 0;
 int scanValue;
 int idefcount;
 int m;
@@ -41,14 +42,25 @@ struct symbolList
 };
 struct symbolList symbolLists[10];
 
+struct module
+{
+    int moduleNum;
+    int lenModule;
+};
+struct module modules[10];
+
+
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-10", "r");
 
     while (!feof(file)) {
+        numModule ++;
         ReadDefList(file);
         ReadUseList(file);
         ReadInstructions(file);
+        checkReAdd();
+//        printf("numModule is %i\n", numModule);
     };
     fclose(file);
     return 0;
@@ -144,6 +156,15 @@ int ReadInstructions(FILE *file){
     }
     printf("\n");
 
+    return 0;
+};
+
+int checkReAdd(){
+    for (int i = prevDefcount - 1; i < atoi(&defcount); i ++) {
+        if (atoi(&symbolDefs[i].symbolAddress) > atoi(&numInstructions)) {
+            printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", numModule, &symbolDefs[i].symbolName, atoi(&symbolDefs[i].symbolAddress), (atoi(&numInstructions) -1));
+        }
+    }
     return 0;
 };
 
