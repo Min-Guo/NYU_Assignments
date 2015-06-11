@@ -52,7 +52,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-13", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         numModule ++;
@@ -85,7 +85,7 @@ int ReadDefList(FILE *file) {
             } else {
                 if ((b != 0) && (b < idefcount)) {
                     printf("TO_MANY_DEF_IN_MODULE");
-                    break;
+                    exit(0);
                 } else if (b ==0) {
                     printf("SYM_EXPECTED");
                     exit(0);
@@ -160,7 +160,7 @@ int ReadInstructions(FILE *file){
 };
 
 int CheckReAdd(){
-    for (int i = prevDefcount - 3 ; i < prevDefcount; i ++) {
+    for (int i = prevDefcount - (atoi(&defcount)) ; i < prevDefcount; i ++) {
         if (atoi(&symbolDefs[i].symbolAddress) > atoi(&numInstructions[numModule-1])) {
             
             printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", numModule, &symbolDefs[i].symbolName, atoi(&symbolDefs[i].symbolAddress), (atoi(&numInstructions[numModule-1]) -1));
