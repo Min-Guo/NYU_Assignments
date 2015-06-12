@@ -25,12 +25,13 @@ char *defcount;
 char *declareCount;
 char numInstructions[10][3];
 //int inumIns[];
-int NumIns[];
+int NumIns[512];
 char tempIns[10];
 char tempInsAdds[4];
 char symbolDeclare[16][10];
 int baseAddress;
 int absoluteAddress[10];
+int prevNumIns = 0;
 
 /* define symbol table */
 struct symbolDef
@@ -99,11 +100,6 @@ int ReadDefList(FILE *file) {
                     exit(0);
                     }
                 }
-        
-//            fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolAddress);
-//            if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress)) {
-//                printf("NUM_EXPECTED");
-//                exit(0);
             }
         }
     
@@ -139,12 +135,18 @@ int ReadInstructions(FILE *file){
     if ((scanValue = fscanf(file, "%s", &numInstructions[numModule-1])) >0 ){
 
         NumIns[numModule-1] = atoi(&numInstructions[numModule-1]);
-        for (int i = 0; i < NumIns[numModule-1]; i++) {
-            if ((scanValue = fscanf(file, "%s", &tempIns))> 0) {
-                fscanf(file, "%s ", &tempInsAdds);
-            } else {
-                printf("ADDR_EXPECTED");
-                exit(0);
+        prevNumIns += atoi(&numInstructions[numModule-1]);
+        if (prevNumIns >512) {
+            printf("TO_MANY_INSTR\n");
+            exit(0);
+        } else {
+            for (int i = 0; i < NumIns[numModule-1]; i++) {
+                if ((scanValue = fscanf(file, "%s", &tempIns))> 0) {
+                    fscanf(file, "%s ", &tempInsAdds);
+                } else {
+                    printf("ADDR_EXPECTED");
+                    exit(0);
+                }
             }
         }
     }
