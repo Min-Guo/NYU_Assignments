@@ -57,7 +57,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         baseAddress = 0;
@@ -154,10 +154,10 @@ int ReadUseList(FILE *file){
 int ReadInstructions(FILE *file){
     /* read num-instructions */
     if ((scanValue = fscanf(file, "%s", &numInstructions[numModule-1])) >0 ){
-        printf("module lenth is %s\n", &numInstructions[numModule-1]);
+//        printf("module lenth is %s\n", &numInstructions[numModule-1]);
 //        inumIns[numModule-1] = atoi(&numInstructions[numModule-1]);
         NumIns[numModule-1] = atoi(&numInstructions[numModule-1]);
-        printf("integer numIns is %i\n", NumIns[numModule-1]);
+//        printf("integer numIns is %i\n", NumIns[numModule-1]);
         for (int i = 0; i < NumIns[numModule-1]; i++) {
 //            fscanf(file, "%s", &tempIns);
             if ((scanValue = fscanf(file, "%s", &tempIns))> 0) {
@@ -193,7 +193,7 @@ int CheckReAdd(){
 int PrintSymbolTable(){
     printf("Symbol Table\n");
     for (int i = 0; i < prevDefcount; i++) {
-        printf("%s=%s\n", &symbolDefs[i].symbolName, &symbolDefs[i].symbolAbsoluteAddress);
+        printf("%s=%i\n", &symbolDefs[i].symbolName, absoluteAddress[i]);
     }
     
     return 0;
