@@ -57,7 +57,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-10", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         baseAddress = 0;
@@ -81,29 +81,32 @@ int ReadDefList(FILE *file) {
     if ((scanValue = fscanf(file, "%s", &defcount))> 0){
 
         idefcount = atoi(&defcount);
-        
+        if (idefcount > 16) {
+            printf("TO_MANY_DEF_IN_MODULE");
+            exit(0);
+        } else {
     /* read symbol defintion */
     
-        for (int i = 0; i < idefcount; i ++) {
-            if ((scanValue = fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolName))> 0) {
-                b++;
-            } else {
-                if ((b != 0) && (b < idefcount)) {
-                    printf("TO_MANY_DEF_IN_MODULE");
-                    exit(0);
-                } else if (b ==0) {
+            for (int i = 0; i < idefcount; i ++) {
+                if ((scanValue = fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolName))> 0) {
+                    fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolAddress);
+                    if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress)) {
+                        printf("NUM_EXPECTED");
+                        exit(0);
+                    }
+                } else {
                     printf("SYM_EXPECTED");
                     exit(0);
+                    }
                 }
-            }
         
-            fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolAddress);
-            if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress)) {
-                printf("NUM_EXPECTED");
-                exit(0);
+//            fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolAddress);
+//            if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress)) {
+//                printf("NUM_EXPECTED");
+//                exit(0);
             }
         }
-    }
+    
     return 0;
 } ;
 
