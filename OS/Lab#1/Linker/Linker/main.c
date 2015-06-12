@@ -28,7 +28,7 @@ char numInstructions[10][3];
 int NumIns[512];
 char tempIns[10];
 char tempInsAdds[4];
-char symbolDeclare[16][10];
+//char symbolDeclare[16][10];
 int baseAddress;
 int absoluteAddress[10];
 int prevNumIns = 0;
@@ -116,7 +116,7 @@ int ReadUseList(FILE *file){
         } else {
             for (int i = 0; i < ideclareCount; i++) {
                 if ((scanValue = fscanf(file, "%s", &symbolLists[i + prevDeclareCount].symbolDeclare)) > 0) {
-                    if (isdigit(&symbolLists[i + prevDeclareCount].symbolDeclare)) {
+                    if (!isalpha(symbolLists[i + prevDeclareCount].symbolDeclare[0])) {
                         printf("SYM_EXPECTED");
                         exit(0);
                     }
