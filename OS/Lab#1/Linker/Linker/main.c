@@ -57,7 +57,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-16", "r");
 
     while (!feof(file)) {
         baseAddress = 0;
@@ -102,21 +102,7 @@ int ReadDefList(FILE *file) {
                 printf("NUM_EXPECTED");
                 exit(0);
             }
-//            } else
-//            {
-                
-//                absoluteAddress[i+ prevDefcount] = baseAddress + atoi(&symbolDefs[i + prevDefcount].symbolAddress);
-//                for (int j = 0; j < i + prevDefcount; j++)
-//                {
-//
-//                    if (strcmp(&symbolDefs[j].symbolName, &symbolDefs[i + prevDefcount].symbolName) == 0) {
-//                        absoluteAddress[i+ prevDefcount] = absoluteAddress[j];
-//                    }
-//                }
-
-//            }
         }
-//        prevDefcount  += atoi(&defcount);
     }
     return 0;
 } ;
@@ -140,6 +126,7 @@ int ReadUseList(FILE *file){
     
         if (a != 0 && a < ideclareCount) {
             printf("TO_MANY_USE_IN_MODULE");
+            exit(0);
         }
         prevDeclareCount += atoi(&declareCount);
     }
@@ -182,13 +169,6 @@ int CheckReAdd(){
 int CalculateAbAddress(){
     for (int i = 0; i < idefcount; i ++) {
         absoluteAddress[i+ prevDefcount] = baseAddress + atoi(&symbolDefs[i + prevDefcount].symbolAddress);
-//        for (int j = 0; j < i + prevDefcount; j++)
-//            {
-//        
-//                if (strcmp(&symbolDefs[j].symbolName, &symbolDefs[i + prevDefcount].symbolName) == 0) {
-//                    absoluteAddress[i+ prevDefcount] = absoluteAddress[j];
-//                }
-//            }
     }
     prevDefcount  += atoi(&defcount);
     return 0;
