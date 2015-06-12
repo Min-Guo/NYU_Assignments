@@ -23,7 +23,7 @@ int prevDeclareCount;
 int inumIns;
 char *defcount;
 char *declareCount;
-char numInstructions[10][2];
+char numInstructions[10][3];
 //int inumIns[];
 int NumIns[];
 char tempIns[10];
@@ -39,13 +39,13 @@ struct symbolDef
     char symbolAddress[4];
     int symbolAbsoluteAddress[4];
 };
-struct symbolDef symbolDefs[20];
+struct symbolDef symbolDefs[256];
 
 struct symbolList
 {
     char symbolDeclare[16];
 };
-struct symbolList symbolLists[10];
+struct symbolList symbolLists[256];
 
 struct module
 {
@@ -57,7 +57,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-16", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-10", "r");
 
     while (!feof(file)) {
         baseAddress = 0;
@@ -111,23 +111,20 @@ int ReadUseList(FILE *file){
     /* read symbol declaration */
     if ((scanValue = fscanf(file, "%s", &declareCount)) > 0){
         ideclareCount = atoi(&declareCount);
-    
-        for (int i = 0; i < ideclareCount; i++) {
-            if ((scanValue = fscanf(file, "%s", &symbolLists[i + prevDeclareCount].symbolDeclare)) > 0) {
-                if (isdigit(&symbolLists[i + prevDeclareCount].symbolDeclare)) {
-                    printf("SYM_EXPECTED");
-                    exit(0);
-                }else{
-                
-                    a ++;
+        if (ideclareCount > 16) {
+            printf("TO_MANY_USE_IN_MODULE");
+            exit(0);
+        } else {
+            for (int i = 0; i < ideclareCount; i++) {
+                if ((scanValue = fscanf(file, "%s", &symbolLists[i + prevDeclareCount].symbolDeclare)) > 0) {
+                    if (isdigit(&symbolLists[i + prevDeclareCount].symbolDeclare)) {
+                        printf("SYM_EXPECTED");
+                        exit(0);
+                    }
                 }
             }
         }
     
-        if (a != 0 && a < ideclareCount) {
-            printf("TO_MANY_USE_IN_MODULE");
-            exit(0);
-        }
         prevDeclareCount += atoi(&declareCount);
     }
     
@@ -157,7 +154,7 @@ int CheckReAdd(){
         if (atoi(&symbolDefs[i].symbolAddress) > atoi(&numInstructions[numModule-1])) {
             
             printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", numModule, &symbolDefs[i].symbolName, atoi(&symbolDefs[i].symbolAddress), (atoi(&numInstructions[numModule-1]) -1));
-            strcpy(symbolDefs[i].symbolAddress, "0"); /* the value is printed before reassign, but reassign works. */
+            strcpy(symbolDefs[i].symbolAddress, "0");
 
         }
     }
