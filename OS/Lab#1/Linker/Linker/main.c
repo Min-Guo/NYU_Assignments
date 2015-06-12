@@ -57,7 +57,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
 
     while (!feof(file)) {
         baseAddress = 0;
@@ -69,23 +69,18 @@ int main() {
         ReadUseList(file);
         ReadInstructions(file);
         CheckReAdd();
-        PrintSymbolTable();
     };
+    PrintSymbolTable();
     fclose(file);
     return 0;
 }
 
 int ReadDefList(FILE *file) {
     /* read definiton number */
-//    fscanf(file, "%s", &defcount);
     if ((scanValue = fscanf(file, "%s", &defcount))> 0){
-        
-    
-//    printf("%i\n", scanValue);
-        idefcount = atoi(&defcount);
-        printf("%i ", idefcount);
 
-    
+        idefcount = atoi(&defcount);
+        
     /* read symbol defintion */
     
         for (int i = 0; i < idefcount; i ++) {
@@ -107,13 +102,9 @@ int ReadDefList(FILE *file) {
                 exit(0);
             } else
             {
-                printf("%s ", &symbolDefs[i + prevDefcount].symbolName);
-                printf("%s ", &symbolDefs[i + prevDefcount].symbolAddress);
                 
                 absoluteAddress[i+ prevDefcount] = baseAddress + atoi(&symbolDefs[i + prevDefcount].symbolAddress);
-                printf("\nabsoluteAddress is %i\n", absoluteAddress[i+ prevDefcount]);
-//                strcpy(symbolDefs[i + prevDefcount].symbolAbsoluteAddress, 'absoluteAddress');
-//                symbolDefs[i + prevDefcount].symbolAbsoluteAddress = absoluteAddress;
+
             }
         }
         prevDefcount  += atoi(&defcount);
@@ -126,7 +117,6 @@ int ReadUseList(FILE *file){
     /* read symbol declaration */
     if ((scanValue = fscanf(file, "%s", &declareCount)) > 0){
         ideclareCount = atoi(&declareCount);
-        printf("%s ", &declareCount);
     
         for (int i = 0; i < ideclareCount; i++) {
             if ((scanValue = fscanf(file, "%s", &symbolLists[i + prevDeclareCount].symbolDeclare)) > 0) {
@@ -135,7 +125,6 @@ int ReadUseList(FILE *file){
                     exit(0);
                 }else{
                 
-                    printf("%s ", &symbolLists[i + prevDeclareCount].symbolDeclare);
                     a ++;
                 }
             }
@@ -154,16 +143,11 @@ int ReadUseList(FILE *file){
 int ReadInstructions(FILE *file){
     /* read num-instructions */
     if ((scanValue = fscanf(file, "%s", &numInstructions[numModule-1])) >0 ){
-//        printf("module lenth is %s\n", &numInstructions[numModule-1]);
-//        inumIns[numModule-1] = atoi(&numInstructions[numModule-1]);
+
         NumIns[numModule-1] = atoi(&numInstructions[numModule-1]);
-//        printf("integer numIns is %i\n", NumIns[numModule-1]);
         for (int i = 0; i < NumIns[numModule-1]; i++) {
-//            fscanf(file, "%s", &tempIns);
             if ((scanValue = fscanf(file, "%s", &tempIns))> 0) {
-                printf("%s ", &tempIns);
                 fscanf(file, "%s ", &tempInsAdds);
-                printf("%s ", &tempInsAdds);
             } else {
                 printf("ADDR_EXPECTED");
                 exit(0);
@@ -182,7 +166,7 @@ int CheckReAdd(){
             
             printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", numModule, &symbolDefs[i].symbolName, atoi(&symbolDefs[i].symbolAddress), (atoi(&numInstructions[numModule-1]) -1));
             strcpy(symbolDefs[i].symbolAddress, "0"); /* the value is printed before reassign, but reassign works. */
-            printf("New value is %s\n", &symbolDefs[i].symbolAddress);
+
         }
     }
     return 0;
