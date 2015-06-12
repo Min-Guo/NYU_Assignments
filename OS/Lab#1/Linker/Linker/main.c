@@ -40,7 +40,7 @@ struct symbolDef
     char symbolAddress[4];
     int symbolAbsoluteAddress[4];
 };
-struct symbolDef symbolDefs[256];
+struct symbolDef symbolDefs[256] = {NULL};
 
 struct symbolList
 {
@@ -91,10 +91,16 @@ int ReadDefList(FILE *file) {
             for (int i = 0; i < idefcount; i ++) {
                 if ((scanValue = fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolName))> 0) {
                     fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolAddress);
-                    if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress)) {
-                        printf("NUM_EXPECTED");
-                        exit(0);
+                    for (int j =0; j < 4; j++) {
+                        if (!isdigit(symbolDefs[i + prevDefcount].symbolAddress[j]) && (symbolDefs[i + prevDefcount].symbolAddress[j]!= NULL)) {
+                            printf("NUM_EXPECTED");
+                            exit(0);
+                        }
                     }
+//                    if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress[0])) {
+//                        printf("NUM_EXPECTED");
+//                        exit(0);
+//                    }
                 } else {
                     printf("SYM_EXPECTED");
                     exit(0);
