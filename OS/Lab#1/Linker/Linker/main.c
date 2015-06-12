@@ -27,12 +27,15 @@ char numInstructions[10][2];
 char tempIns[10];
 char tempInsAdds[4];
 char symbolDeclare[16][10];
+int baseAddress;
+int absoluteAddress[10];
 
 /* define symbol table */
 struct symbolDef
 {
     char symbolName[16];
     char symbolAddress[4];
+    int symbolAbsoluteAddress[4];
 };
 struct symbolDef symbolDefs[20];
 
@@ -52,15 +55,19 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-18", "r");
 
     while (!feof(file)) {
+        baseAddress = 0;
         numModule ++;
+        for(int i = 0; i < numModule; i++){
+            baseAddress += atoi(&numInstructions[i]);
+        }
         ReadDefList(file);
         ReadUseList(file);
         ReadInstructions(file);
         CheckReAdd();
-//        printf("numModule is %i\n", numModule);
+        PrintSymbolTable();
     };
     fclose(file);
     return 0;
@@ -95,11 +102,16 @@ int ReadDefList(FILE *file) {
             fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolAddress);
             if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress)) {
                 printf("NUM_EXPECTED");
-                break;
+                exit(0);
             } else
             {
                 printf("%s ", &symbolDefs[i + prevDefcount].symbolName);
                 printf("%s ", &symbolDefs[i + prevDefcount].symbolAddress);
+                
+                absoluteAddress[i+ prevDefcount] = baseAddress + atoi(&symbolDefs[i + prevDefcount].symbolAddress);
+                printf("\nabsoluteAddress is %i\n", absoluteAddress[i+ prevDefcount]);
+//                strcpy(symbolDefs[i + prevDefcount].symbolAbsoluteAddress, 'absoluteAddress');
+//                symbolDefs[i + prevDefcount].symbolAbsoluteAddress = absoluteAddress;
             }
         }
         prevDefcount  += atoi(&defcount);
@@ -118,7 +130,7 @@ int ReadUseList(FILE *file){
             if ((scanValue = fscanf(file, "%s", &symbolLists[i + prevDeclareCount].symbolDeclare)) > 0) {
                 if (isdigit(&symbolLists[i + prevDeclareCount].symbolDeclare)) {
                     printf("SYM_EXPECTED");
-                    break;
+                    exit(0);
                 }else{
                 
                     printf("%s ", &symbolLists[i + prevDeclareCount].symbolDeclare);
@@ -150,7 +162,7 @@ int ReadInstructions(FILE *file){
                 printf("%s ", &tempInsAdds);
             } else {
                 printf("ADDR_EXPECTED");
-                break;
+                exit(0);
             }
         }
     }
@@ -159,6 +171,7 @@ int ReadInstructions(FILE *file){
     return 0;
 };
 
+/* Check the relative address is valid or not*/
 int CheckReAdd(){
     for (int i = prevDefcount - (atoi(&defcount)) ; i < prevDefcount; i ++) {
         if (atoi(&symbolDefs[i].symbolAddress) > atoi(&numInstructions[numModule-1])) {
@@ -168,6 +181,17 @@ int CheckReAdd(){
             printf("New value is %s\n", &symbolDefs[i].symbolAddress);
         }
     }
+    return 0;
+};
+
+/* print symbol table*/
+
+int PrintSymbolTable(){
+    printf("Symbol Table\n");
+    for (int i = 0; i < prevDefcount; i++) {
+        printf("%s=%s\n", &symbolDefs[i].symbolName, &symbolDefs[i].symbolAbsoluteAddress);
+    }
+    
     return 0;
 };
 
