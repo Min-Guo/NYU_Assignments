@@ -57,7 +57,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-4", "r");
 
     while (!feof(file)) {
         baseAddress = 0;
@@ -104,12 +104,18 @@ int ReadDefList(FILE *file) {
             {
                 
                 absoluteAddress[i+ prevDefcount] = baseAddress + atoi(&symbolDefs[i + prevDefcount].symbolAddress);
+                for (int j = 0; j < i + prevDefcount; j++)
+                {
+
+                    if (strcmp(&symbolDefs[j].symbolName, &symbolDefs[i + prevDefcount].symbolName) == 0) {
+                        absoluteAddress[i+ prevDefcount] = absoluteAddress[j];
+                    }
+                }
 
             }
         }
         prevDefcount  += atoi(&defcount);
     }
-    printf("\n");
     return 0;
 } ;
 
@@ -136,7 +142,6 @@ int ReadUseList(FILE *file){
         prevDeclareCount += atoi(&declareCount);
     }
     
-    printf("\n");
     return 0;
 };
 
@@ -154,8 +159,6 @@ int ReadInstructions(FILE *file){
             }
         }
     }
-    printf("\n");
-
     return 0;
 };
 
@@ -176,9 +179,19 @@ int CheckReAdd(){
 
 int PrintSymbolTable(){
     printf("Symbol Table\n");
-    for (int i = 0; i < prevDefcount; i++) {
-        printf("%s=%i\n", &symbolDefs[i].symbolName, absoluteAddress[i]);
+    for(int j = 0; j < prevDefcount; j++) {
+        for (int k = j + 1; k < prevDefcount; k++) {
+            if(strcmp(&symbolDefs[j].symbolName, &symbolDefs[k].symbolName)== 0){
+                strcpy(&symbolDefs[k].symbolName, &symbolDefs[k+1].symbolName);
+                strcpy(&symbolDefs[k].symbolAddress, &symbolDefs[k+1].symbolAddress);
+                absoluteAddress[k]= absoluteAddress[k+1];
+                prevDefcount -= 1;
+                printf("%s=%i Error: This variable is multiple times defined; first value used\n", &symbolDefs[j].symbolName, absoluteAddress[j]);
+            }
+        }
+        printf("%s=%i\n", &symbolDefs[j].symbolName, absoluteAddress[j]);
     }
+
     
     return 0;
 };
