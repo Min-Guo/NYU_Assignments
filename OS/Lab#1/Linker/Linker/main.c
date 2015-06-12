@@ -24,6 +24,8 @@ int inumIns;
 char *defcount;
 char *declareCount;
 char numInstructions[10][2];
+//int inumIns[];
+int NumIns[];
 char tempIns[10];
 char tempInsAdds[4];
 char symbolDeclare[16][10];
@@ -55,13 +57,13 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-18", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
 
     while (!feof(file)) {
         baseAddress = 0;
         numModule ++;
         for(int i = 0; i < numModule; i++){
-            baseAddress += atoi(&numInstructions[i]);
+            baseAddress += NumIns[i];
         }
         ReadDefList(file);
         ReadUseList(file);
@@ -152,9 +154,11 @@ int ReadUseList(FILE *file){
 int ReadInstructions(FILE *file){
     /* read num-instructions */
     if ((scanValue = fscanf(file, "%s", &numInstructions[numModule-1])) >0 ){
-        printf("%s ", &numInstructions[numModule-1]);
-        inumIns = atoi(&numInstructions[numModule-1]);
-        for (int i = 0; i < inumIns; i++) {
+        printf("module lenth is %s\n", &numInstructions[numModule-1]);
+//        inumIns[numModule-1] = atoi(&numInstructions[numModule-1]);
+        NumIns[numModule-1] = atoi(&numInstructions[numModule-1]);
+        printf("integer numIns is %i\n", NumIns[numModule-1]);
+        for (int i = 0; i < NumIns[numModule-1]; i++) {
 //            fscanf(file, "%s", &tempIns);
             if ((scanValue = fscanf(file, "%s", &tempIns))> 0) {
                 printf("%s ", &tempIns);
