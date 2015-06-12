@@ -57,7 +57,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-4", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         baseAddress = 0;
@@ -69,6 +69,7 @@ int main() {
         ReadUseList(file);
         ReadInstructions(file);
         CheckReAdd();
+        CalculateAbAddress();
     };
     PrintSymbolTable();
     fclose(file);
@@ -100,21 +101,22 @@ int ReadDefList(FILE *file) {
             if (isalpha(&symbolDefs[i + prevDefcount].symbolAddress)) {
                 printf("NUM_EXPECTED");
                 exit(0);
-            } else
-            {
-                
-                absoluteAddress[i+ prevDefcount] = baseAddress + atoi(&symbolDefs[i + prevDefcount].symbolAddress);
-                for (int j = 0; j < i + prevDefcount; j++)
-                {
-
-                    if (strcmp(&symbolDefs[j].symbolName, &symbolDefs[i + prevDefcount].symbolName) == 0) {
-                        absoluteAddress[i+ prevDefcount] = absoluteAddress[j];
-                    }
-                }
-
             }
+//            } else
+//            {
+                
+//                absoluteAddress[i+ prevDefcount] = baseAddress + atoi(&symbolDefs[i + prevDefcount].symbolAddress);
+//                for (int j = 0; j < i + prevDefcount; j++)
+//                {
+//
+//                    if (strcmp(&symbolDefs[j].symbolName, &symbolDefs[i + prevDefcount].symbolName) == 0) {
+//                        absoluteAddress[i+ prevDefcount] = absoluteAddress[j];
+//                    }
+//                }
+
+//            }
         }
-        prevDefcount  += atoi(&defcount);
+//        prevDefcount  += atoi(&defcount);
     }
     return 0;
 } ;
@@ -164,7 +166,7 @@ int ReadInstructions(FILE *file){
 
 /* Check the relative address is valid or not*/
 int CheckReAdd(){
-    for (int i = prevDefcount - (atoi(&defcount)) ; i < prevDefcount; i ++) {
+    for (int i = prevDefcount ; i < atoi(&defcount); i ++) {
         if (atoi(&symbolDefs[i].symbolAddress) > atoi(&numInstructions[numModule-1])) {
             
             printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", numModule, &symbolDefs[i].symbolName, atoi(&symbolDefs[i].symbolAddress), (atoi(&numInstructions[numModule-1]) -1));
@@ -172,6 +174,23 @@ int CheckReAdd(){
 
         }
     }
+    return 0;
+};
+
+/* Absolute Address */
+
+int CalculateAbAddress(){
+    for (int i = 0; i < idefcount; i ++) {
+        absoluteAddress[i+ prevDefcount] = baseAddress + atoi(&symbolDefs[i + prevDefcount].symbolAddress);
+//        for (int j = 0; j < i + prevDefcount; j++)
+//            {
+//        
+//                if (strcmp(&symbolDefs[j].symbolName, &symbolDefs[i + prevDefcount].symbolName) == 0) {
+//                    absoluteAddress[i+ prevDefcount] = absoluteAddress[j];
+//                }
+//            }
+    }
+    prevDefcount  += atoi(&defcount);
     return 0;
 };
 
