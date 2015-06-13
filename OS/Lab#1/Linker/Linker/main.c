@@ -48,7 +48,7 @@ int defCount = 0;
 int declareCount = 0;
 int prevTotalDefcount = 0;
 int prevTotalDeclareCount = 0;
-
+int totalLengthModule = 0;
 
 
 /* define symbol table */
@@ -86,7 +86,7 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-15", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -161,7 +161,12 @@ int main() {
                             if (operationNum == -1) {
                                 operationNum = atoi(token);
                                 lengthModule = operationNum;
+                                totalLengthModule += lengthModule;
                                 baseAddress += operationNum;
+                                if (totalLengthModule > 512) {
+                                    printf("Parse Error line %i: TO_MANY_INSTR", lineNum);
+                                    exit(0);
+                                }
                                 if (operationNum == 0) {
                                     listType = 0;
                                     operationNum = -1;
