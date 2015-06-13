@@ -86,7 +86,7 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-2", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -114,6 +114,14 @@ int main() {
                             } else {
                                 if (middleState) {
                                     strcpy(&symbolDefs[i].symbolAddress, token);
+                                    for (int t =0; t < 4; t++) {
+                                        
+                                        if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= NULL)) {
+                                            printf("Parse Error line %i: NUM_EXPECTED", lineNum);
+                                            exit(0);
+                                        }
+                                    }
+                                    
                                     printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
                                     operationNum-- ;
                                     middleState = false;
