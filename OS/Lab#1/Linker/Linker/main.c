@@ -25,7 +25,7 @@ int prevDeclareCount;
 int inumIns;
 char *defcount;
 char *declareCount;
-char numInstructions[10][3];
+
 //int inumIns[];
 int NumIns[512];
 char tempIns[10];
@@ -42,7 +42,9 @@ int lineNum = 0;
 int listType = 0;
 int operationNum = -1;
 bool middleState = false;
-
+int moduleNumber = 0;
+int numInstructions[10][3];
+char *tempToken;
 /* define symbol table */
 struct symbolDef
 {
@@ -92,7 +94,7 @@ int main() {
                         if (listType == 0) {
                             if (operationNum == -1) {
                                 operationNum = atoi(token);
-                                printf("OperationNum is %i\n", operationNum);
+//                                printf("OperationNum is %i\n", operationNum);
                                 if (operationNum == 0) {
                                     listType = 1;
                                     operationNum = -1;
@@ -102,7 +104,7 @@ int main() {
                             } else {
                                 if (middleState) {
                                     strcpy(&symbolDefs[i].symbolAddress, token);
-                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
+//                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
                                     operationNum-- ;
                                     middleState = false;
                                     i++;
@@ -113,7 +115,7 @@ int main() {
                                     }
                                 } else {
                                     strcpy(&symbolDefs[i].symbolName, token);
-                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
+//                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
                                     middleState = true;
                                 }
                             }
@@ -128,7 +130,7 @@ int main() {
 
                             } else {
                                 strcpy(&symbolLists[j].symbolDeclare, token);
-                                printf("SymbolList[%i] is %s ", j, &symbolLists[j].symbolDeclare);
+//                                printf("SymbolList[%i] is %s ", j, &symbolLists[j].symbolDeclare);
                                 operationNum--;
                                 j++;
                                 if (operationNum == 0) {
@@ -139,7 +141,10 @@ int main() {
                             }
                         } else if (listType == 2) {
                             if (operationNum == -1) {
+                                tempToken = token;
+//                                printf("tempToken is %s", tempToken);
                                 operationNum = atoi(token);
+//                                printf("operationNumber is %i",  operationNum);
                                 if (operationNum == 0) {
                                     listType = 0;
                                     operationNum = -1;
@@ -148,7 +153,7 @@ int main() {
                             } else {
                                 if (middleState) {
                                     strcpy(&programTexts[k].instruction, token);
-                                    printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
+//                                    printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
                                     operationNum--;
                                     k++;
                                     middleState = false;
@@ -156,11 +161,15 @@ int main() {
                                         listType = 0;
                                         operationNum = -1;
                                         middleState = false;
+                                        moduleNumber++;
+                                        
+                                        strcpy(&numInstructions[moduleNumber - 1], tempToken);
+                                        printf("Module %i has %s ins\n", moduleNumber, &numInstructions[moduleNumber - 1]);
                                     }
                                 } else {
                                     strcpy(&programTexts[k].addType, token);
-                                    printf("\n");
-                                    printf("AddType[%i] is %s ", k, &programTexts[k].addType);
+//                                    printf("\n");
+//                                    printf("AddType[%i] is %s ", k, &programTexts[k].addType);
                                     middleState = true;
                                 }
                             }
