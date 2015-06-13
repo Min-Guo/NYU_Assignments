@@ -86,7 +86,7 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -199,16 +199,20 @@ int main() {
                         }
             
                         token = strtok(NULL, " ");
+
                     }
                 } else {
                     continue;
                 }
-            }
         }
-
+        
+    }
+    if (feof(file) && (operationNum != -1)) {
+            printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+    }
         fclose(file);
         return 0;
-    }
+}
 
 int CheckReAdd(){
     for (int n = prevTotalDefcount; n < prevTotalDefcount + defCount; n ++) {
