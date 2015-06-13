@@ -78,10 +78,13 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-5", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
+            if (strcmp(line_buffer,  "\n") != 0) {
+                
+            
             lineNum ++;
             token = strtok(line_buffer, "\n");
             token = strtok(line_buffer, " ");
@@ -124,7 +127,6 @@ int main() {
                         if (operationNum == 0) {
                             listType = 2;
                             operationNum = -1;
-                            middleState = false;
                         }
 //                        printf("OperationNum is %i\n", operationNum);
                     } else {
@@ -135,6 +137,7 @@ int main() {
                             if (operationNum == 0) {
                                 listType = 2;
                                 operationNum = -1;
+                            
                             }
                     }
                 } else if (listType == 2) {
@@ -161,6 +164,7 @@ int main() {
                             }
                         } else {
                             strcpy(&programTexts[k].addType, token);
+                            printf("\n");
                             printf("AddType[%i] is %s ", k, &programTexts[k].addType);
                             middleState = true;
                         }
@@ -169,20 +173,12 @@ int main() {
             
                 token = strtok(NULL, " ");
             }
+            } else {
+                continue;
+            }
         }
     }
-//        baseAddress = 0;
-//        numModule ++;
-//        for(int i = 0; i < numModule; i++){
-//            baseAddress += NumIns[i];
-//        }
-//        ReadDefList(file);
-//        ReadUseList(file);
-//        ReadInstructions(file);
-//        CheckReAdd();
-//        CalculateAbAddress();
-//    };
-//    PrintSymbolTable();
+
     fclose(file);
     return 0;
 }
