@@ -86,7 +86,7 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-2", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-15", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -101,8 +101,11 @@ int main() {
                             if (operationNum == -1) {
                                 operationNum = atoi(token);
                                 defCount = operationNum;
+                                if (operationNum > 16) {
+                                    printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
+                                    exit(0);
 //                                printf("OperationNum is %i\n", operationNum);
-                                if (operationNum == 0) {
+                                } else if (operationNum == 0) {
                                     listType = 1;
                                     operationNum = -1;
                                     middleState = false;
@@ -131,22 +134,29 @@ int main() {
                             if (operationNum == -1) {
                                 operationNum = atoi(token);
                                 declareCount = operationNum;
-                                if (operationNum == 0) {
-                                    listType = 2;
-                                    operationNum = -1;
-                                }
-
+                                if (operationNum > 16) {
+                                    printf("Parse Error line %i: TO_MANY_USE_IN_MODULE", lineNum);
+                                    exit(0);
+                                } else if (operationNum == 0) {
+                                            listType = 2;
+                                            operationNum = -1;
+                                        }
                             } else {
                                 strcpy(&symbolLists[prevTotalDeclareCount + j].symbolDeclare, token);
-                                printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
-                                operationNum--;
-                                j++;
-                                if (operationNum == 0) {
-                                    listType = 2;
-                                    operationNum = -1;
-                            
+//                                    if (!isalpha(symbolLists[prevTotalDeclareCount + j].symbolDeclare[0])) {
+//                                        printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+//                                        exit(0);
+//                                    } else{
+                                    printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
+                                    operationNum--;
+                                    j++;
+                                    if (operationNum == 0) {
+                                        listType = 2;
+                                        operationNum = -1;
+                                    }
                                 }
-                            }
+
+                            
                         } else if (listType == 2) {
                             if (operationNum == -1) {
                                 operationNum = atoi(token);
