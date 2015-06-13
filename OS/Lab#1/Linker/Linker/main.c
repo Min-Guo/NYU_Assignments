@@ -86,7 +86,7 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-2", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-18", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -151,10 +151,10 @@ int main() {
                                         }
                             } else {
                                 strcpy(&symbolLists[prevTotalDeclareCount + j].symbolDeclare, token);
-//                                    if (!isalpha(symbolLists[prevTotalDeclareCount + j].symbolDeclare[0])) {
-//                                        printf("Parse Error line %i: SYM_EXPECTED", lineNum);
-//                                        exit(0);
-//                                    } else{
+                                if (!isalpha(symbolLists[prevTotalDeclareCount + j].symbolDeclare[0])) {
+                                        printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+                                        exit(0);
+                                } else{
                                     printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
                                     operationNum--;
                                     j++;
@@ -163,6 +163,7 @@ int main() {
                                         operationNum = -1;
                                     }
                                 }
+                            }
 
                             
                         } else if (listType == 2) {
