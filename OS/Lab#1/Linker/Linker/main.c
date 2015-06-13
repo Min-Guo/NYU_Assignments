@@ -64,7 +64,7 @@ struct module modules[10];
 
 int main() {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-14", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
 //    while (!feof(file)) {
 //        baseAddress = 0;
@@ -88,6 +88,7 @@ int ReadDefList(FILE *file) {
     fgets(line_buffer, 512, file);
     lineNum ++;
     printf("%s", &line_buffer);
+    token = strtok(line_buffer, "\n");
     token = strtok(line_buffer, " ");
     idefcount = atoi(token);
     
@@ -98,57 +99,29 @@ int ReadDefList(FILE *file) {
     else {
         for (int i = 0; i < idefcount; i ++) {
             token = strtok(NULL, " ");
-            strcpy(&symbolDefs[i + prevDefcount].symbolName, token);
-            printf("symbolname is %s\n", &symbolDefs[i + prevDefcount].symbolName);
-            token = strtok(NULL, " ");
-            strcpy(&symbolDefs[i + prevDefcount].symbolAddress, token);
-            printf("symbolAdd is %s", &symbolDefs[i + prevDefcount].symbolAddress);
-            for (int j =0; j < 4; j++) {
-                if (!isdigit(symbolDefs[i + prevDefcount].symbolAddress[j]) && (symbolDefs[i + prevDefcount].symbolAddress[j]!= NULL)) {
-                    printf("Parse Error line %i: NUM_EXPECTED", lineNum);
-                    exit(0);
+            if (token != NULL)
+            {
+//                token = strtok(NULL, " ");
+                strcpy(&symbolDefs[i + prevDefcount].symbolName, token);
+                printf("symbolname is %s\n", &symbolDefs[i + prevDefcount].symbolName);
+                token = strtok(NULL, " ");
+                strcpy(&symbolDefs[i + prevDefcount].symbolAddress, token);
+                printf("symbolAdd is %s", &symbolDefs[i + prevDefcount].symbolAddress);
+                for (int j =0; j < 4; j++) {
+                    if (!isdigit(symbolDefs[i + prevDefcount].symbolAddress[j]) && (symbolDefs[i + prevDefcount].symbolAddress[j]!= NULL)) {
+                        printf("Parse Error line %i: NUM_EXPECTED", lineNum);
+                        exit(0);
+                    }
                 }
+            } else {
+                printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+                exit(0);
+ 
             }
         }
     }
-//    token = strtok(NULL, " ");
-//    
-//    token = strtok(line_buffer, " ");
-//    printf("token is %s\n", token);
-//    token = strtok(NULL, " ");
-    
-//    while( token != NULL )
-//    {
-//        strcpy(&tokenBuffer[tokenNum], token);
-//        token = strtok(NULL, " ");
-//        tokenNum ++;
-//    };
-//    idefcount = atoi(&tokenBuffer[0]);
-//    if (idefcount > 16) {
-//        printf("TO_MANY_DEF_IN_MODULE");
-//        exit(0);
-//    } else {
-//        for (int i = 0; i < idefcount; i ++) {
-//            
-//        }
-//    }
-    
-//    if (idefcount > 16) {
-//        printf("TO_MANY_DEF_IN_MODULE");
-//        exit(0);
-//    } else {
-    
-//    /* read definiton number */
+
 //
-//    if ((scanValue = fscanf(file, "%s", &defcount))> 0){
-//       
-//        idefcount = atoi(&defcount);
-//        if (idefcount > 16) {
-//            printf("TO_MANY_DEF_IN_MODULE");
-//            exit(0);
-//        } else {
-//    /* read symbol defintion */
-//    
 //            for (int i = 0; i < idefcount; i ++) {
 //                if ((scanValue = fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolName))> 0) {
 //                    fscanf(file, "%s", &symbolDefs[i + prevDefcount].symbolAddress);
