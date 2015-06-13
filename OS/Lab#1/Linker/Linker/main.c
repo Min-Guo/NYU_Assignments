@@ -84,14 +84,22 @@ int main() {
                         printf("OperationNum is %i\n", operationNum);
                     } else {
                         if (middleState) {
-                            strcpy(&symbolDefs[operationNum].symbolAddress, token);
+                            strcpy(&symbolDefs[operationNum-1].symbolAddress, token);
+                            printf("Symbol[%i]Address is % s\n",operationNum -1,  &symbolDefs[operationNum-1].symbolAddress);
                             operationNum-- ;
+                            middleState = true;
                             if (operationNum == 0) {
                                 listType = 1;
                                 operationNum = -1;
                             }
+                        } else {
+                            strcpy(&symbolDefs[operationNum-1].symbolName, token);
+                            printf("Symbol[%i]Name is % s\n",operationNum -1,  &symbolDefs[operationNum-1].symbolName);
+                            middleState = true;
                         }
                     }
+                } else if (listType == 1){
+                
                 }
             
                 token = strtok(NULL, " ");
