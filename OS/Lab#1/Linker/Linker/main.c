@@ -19,7 +19,7 @@ int numModule = 0;
 int scanValue;
 int idefcount;
 int m;
-int prevDefcount;
+
 int ideclareCount;
 int prevDeclareCount;
 int inumIns;
@@ -31,7 +31,7 @@ int NumIns[512];
 char tempIns[10];
 char tempInsAdds[4];
 //char symbolDeclare[16][10];
-int baseAddress;
+int baseAddress = 0;
 int absoluteAddress[10];
 int prevNumIns = 0;
 
@@ -45,6 +45,12 @@ bool middleState = false;
 int moduleNumber = 0;
 int numInstructions[10][3];
 char *tempToken;
+int lengthModule = 0;
+int defCount = 0;
+int prevTotalDefcount = 0;
+
+
+
 /* define symbol table */
 struct symbolDef
 {
@@ -80,7 +86,7 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -94,6 +100,7 @@ int main() {
                         if (listType == 0) {
                             if (operationNum == -1) {
                                 operationNum = atoi(token);
+                                defCount = operationNum;
 //                                printf("OperationNum is %i\n", operationNum);
                                 if (operationNum == 0) {
                                     listType = 1;
@@ -104,7 +111,7 @@ int main() {
                             } else {
                                 if (middleState) {
                                     strcpy(&symbolDefs[i].symbolAddress, token);
-//                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
+                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
                                     operationNum-- ;
                                     middleState = false;
                                     i++;
@@ -115,7 +122,7 @@ int main() {
                                     }
                                 } else {
                                     strcpy(&symbolDefs[i].symbolName, token);
-//                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
+                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
                                     middleState = true;
                                 }
                             }
@@ -130,7 +137,7 @@ int main() {
 
                             } else {
                                 strcpy(&symbolLists[j].symbolDeclare, token);
-//                                printf("SymbolList[%i] is %s ", j, &symbolLists[j].symbolDeclare);
+                                printf("SymbolList[%i] is %s ", j, &symbolLists[j].symbolDeclare);
                                 operationNum--;
                                 j++;
                                 if (operationNum == 0) {
@@ -141,10 +148,9 @@ int main() {
                             }
                         } else if (listType == 2) {
                             if (operationNum == -1) {
-                                tempToken = token;
-//                                printf("tempToken is %s", tempToken);
                                 operationNum = atoi(token);
-//                                printf("operationNumber is %i",  operationNum);
+                                lengthModule = operationNum;
+                                baseAddress += operationNum;
                                 if (operationNum == 0) {
                                     listType = 0;
                                     operationNum = -1;
@@ -153,7 +159,7 @@ int main() {
                             } else {
                                 if (middleState) {
                                     strcpy(&programTexts[k].instruction, token);
-//                                    printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
+                                    printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
                                     operationNum--;
                                     k++;
                                     middleState = false;
@@ -162,14 +168,14 @@ int main() {
                                         operationNum = -1;
                                         middleState = false;
                                         moduleNumber++;
+                                        CheckReAdd();
+                                        prevTotalDefcount += defCount;
                                         
-                                        strcpy(&numInstructions[moduleNumber - 1], tempToken);
-                                        printf("Module %i has %s ins\n", moduleNumber, &numInstructions[moduleNumber - 1]);
                                     }
                                 } else {
                                     strcpy(&programTexts[k].addType, token);
-//                                    printf("\n");
-//                                    printf("AddType[%i] is %s ", k, &programTexts[k].addType);
+                                    printf("\n");
+                                    printf("AddType[%i] is %s ", k, &programTexts[k].addType);
                                     middleState = true;
                                 }
                             }
@@ -301,18 +307,18 @@ int main() {
 //    return 0;
 //};
 //
-///* Check the relative address is valid or not*/
-//int CheckReAdd(){
-//    for (int i = prevDefcount ; i < atoi(&defcount); i ++) {
-//        if (atoi(&symbolDefs[i].symbolAddress) > atoi(&numInstructions[numModule-1])) {
-//            
-//            printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", numModule, &symbolDefs[i].symbolName, atoi(&symbolDefs[i].symbolAddress), (atoi(&numInstructions[numModule-1]) -1));
-//            strcpy(symbolDefs[i].symbolAddress, "0");
-//
-//        }
-//    }
-//    return 0;
-//};
+/* Check the relative address is valid or not*/
+int CheckReAdd(){
+    for (int n = prevTotalDefcount; n < prevTotalDefcount + defCount; n ++) {
+        if (atoi(&symbolDefs[n].symbolAddress) > lengthModule) {
+            
+            printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", moduleNumber, &symbolDefs[n].symbolName, atoi(&symbolDefs[n].symbolAddress), lengthModule - 1);
+            strcpy(symbolDefs[n].symbolAddress, "0");
+
+        }
+    }
+    return 0;
+};
 //
 ///* Absolute Address */
 //
