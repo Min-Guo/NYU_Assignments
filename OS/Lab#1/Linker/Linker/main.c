@@ -58,6 +58,14 @@ struct symbolList
 };
 struct symbolList symbolLists[256];
 
+struct programText
+{
+    char addType;
+    int instruction;
+};
+struct programText programTexts[];
+
+
 struct module
 {
     int moduleNum;
@@ -66,8 +74,11 @@ struct module
 struct module modules[10];
 
 int main() {
+    int i = 0;
+    int j = 0;
+    int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -78,29 +89,78 @@ int main() {
             {
 //                printf( " %s ", token );
                 if (listType == 0) {
-                    printf("listType is %i\n", listType);
+//                    printf("listType is %i\n", listType);
                     if (operationNum == -1) {
                         operationNum = atoi(token);
-                        printf("OperationNum is %i\n", operationNum);
+                        if (operationNum == 0) {
+                            listType = 1;
+                            operationNum = -1;
+                            middleState = false;
+                        }
+//                        printf("OperationNum is %i\n", operationNum);
                     } else {
                         if (middleState) {
-                            strcpy(&symbolDefs[operationNum-1].symbolAddress, token);
-                            printf("Symbol[%i]Address is % s\n",operationNum -1,  &symbolDefs[operationNum-1].symbolAddress);
+                            strcpy(&symbolDefs[i].symbolAddress, token);
+                            printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
                             operationNum-- ;
-                            middleState = true;
+                            middleState = false;
+                            i++;
                             if (operationNum == 0) {
                                 listType = 1;
                                 operationNum = -1;
+                                middleState = false;
                             }
                         } else {
-                            strcpy(&symbolDefs[operationNum-1].symbolName, token);
-                            printf("Symbol[%i]Name is % s\n",operationNum -1,  &symbolDefs[operationNum-1].symbolName);
+                            strcpy(&symbolDefs[i].symbolName, token);
+                            printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
                             middleState = true;
                         }
                     }
                 } else if (listType == 1){
-                
-                }
+//                    printf("listType is %i\n", listType);
+                    if (operationNum == -1) {
+                        operationNum = atoi(token);
+//                        printf("OperationNum is %i\n", operationNum);
+                    } else {
+                        if (operationNum == 0) {
+                            listType = 1;
+                            operationNum = -1;
+                            middleState = false;
+                        } else {
+                            strcpy(&symbolLists[j].symbolDeclare, token);
+                            printf("SymbolList[%i] is %s ", j, &symbolLists[j].symbolDeclare);
+                            operationNum--;
+                            j++;
+                            if (operationNum == 0) {
+                                listType = 2;
+                                operationNum = -1;
+                            }
+                        }
+                    }}
+//                } else if (listType == 2) {
+////                    printf("listType is %i\n", listType);
+//                    if (operationNum == -1) {
+//                        operationNum = atoi(token);
+////                        printf("OperationNum is %i\n", operationNum);
+//                    } else {
+//                        if (middleState) {
+//                            strcpy(&programTexts[k].instruction, token);
+//                            printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
+//                            operationNum--;
+//                            k++;
+//                            middleState = false;
+//                            if (operationNum == 0) {
+//                                listType = 0;
+//                                operationNum = -1;
+//                                middleState = false;
+//                            }
+//                        } else {
+//                            strcpy(&programTexts[k].addType, token);
+//                            printf("AddType[%i] is %s ", k, &programTexts[k].addType);
+//                            middleState = true;
+//                        }
+//                    }
+//                }
             
                 token = strtok(NULL, " ");
             }
