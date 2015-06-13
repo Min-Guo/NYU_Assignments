@@ -38,6 +38,8 @@ char *token;
 char tokenBuffer[256][2];
 int lineNum = 0;
 int listType = 0;
+int defOperationNum = -1;
+int ProOperationNum = -1;
 int operationNum = -1;
 bool middleState = false;
 int moduleNumber = 0;
@@ -86,7 +88,7 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-18", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -98,16 +100,16 @@ int main() {
                 while( token!= NULL )
                     {
                         if (listType == 0) {
-                            if (operationNum == -1) {
-                                operationNum = atoi(token);
-                                defCount = operationNum;
-                                if (operationNum > 16) {
+                            if (defOperationNum == -1) {
+                                defOperationNum = atoi(token);
+                                defCount = defOperationNum;
+                                if (defOperationNum > 16) {
                                     printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
                                     exit(0);
-//                                printf("OperationNum is %i\n", operationNum);
-                                } else if (operationNum == 0) {
+//                                printf("OperationNum is %i\n", defOperationNum);
+                                } else if (defOperationNum == 0) {
                                     listType = 1;
-                                    operationNum = -1;
+                                    defOperationNum = -1;
                                     middleState = false;
                                 }
                         
@@ -123,12 +125,12 @@ int main() {
                                     }
                                     
                                     printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
-                                    operationNum-- ;
+                                    defOperationNum-- ;
                                     middleState = false;
                                     i++;
-                                    if (operationNum == 0) {
+                                    if (defOperationNum == 0) {
                                         listType = 1;
-                                        operationNum = -1;
+                                        defOperationNum = -1;
                                         middleState = false;
                                     }
                                 } else {
@@ -167,30 +169,30 @@ int main() {
 
                             
                         } else if (listType == 2) {
-                            if (operationNum == -1) {
-                                operationNum = atoi(token);
-                                lengthModule = operationNum;
+                            if (ProOperationNum == -1) {
+                                ProOperationNum = atoi(token);
+                                lengthModule = ProOperationNum;
                                 totalLengthModule += lengthModule;
-                                baseAddress += operationNum;
+                                baseAddress += ProOperationNum;
                                 if (totalLengthModule > 512) {
                                     printf("Parse Error line %i: TO_MANY_INSTR", lineNum);
                                     exit(0);
                                 }
-                                if (operationNum == 0) {
+                                if (ProOperationNum == 0) {
                                     listType = 0;
-                                    operationNum = -1;
+                                    ProOperationNum = -1;
                                     middleState = false;
                                 }
                             } else {
                                 if (middleState) {
                                     strcpy(&programTexts[k].instruction, token);
                                     printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
-                                    operationNum--;
+                                    ProOperationNum--;
                                     k++;
                                     middleState = false;
-                                    if (operationNum == 0) {
+                                    if (ProOperationNum == 0) {
                                         listType = 0;
-                                        operationNum = -1;
+                                        ProOperationNum = -1;
                                         middleState = false;
                                         moduleNumber++;
                                         CheckReAdd();
@@ -216,8 +218,11 @@ int main() {
         }
         
     }
-    if (feof(file) && (operationNum != -1)) {
+    if (feof(file) && (defOperationNum != -1)) {
             printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+    }
+    if (feof(file) && (ProOperationNum != -1)) {
+        printf("Parse Error line %i: ADDR_EXPECTED", lineNum);
     }
         fclose(file);
         return 0;
