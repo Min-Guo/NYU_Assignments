@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 FILE *file;
 char ch;
@@ -38,6 +39,9 @@ char line_buffer[512];
 char *token;
 char tokenBuffer[256][2];
 int lineNum = 0;
+int listType = 0;
+int operationNum = -1;
+bool middleState = false;
 
 /* define symbol table */
 struct symbolDef
@@ -61,18 +65,34 @@ struct module
 };
 struct module modules[10];
 
-
 int main() {
     
     file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
+            lineNum ++;
             token = strtok(line_buffer, "\n");
             token = strtok(line_buffer, " ");
-            while( token != NULL )
+            while( token!= NULL )
             {
-                printf( " %s ", token );
+//                printf( " %s ", token );
+                if (listType == 0) {
+                    printf("listType is %i\n", listType);
+                    if (operationNum == -1) {
+                        operationNum = atoi(token);
+                        printf("OperationNum is %i\n", operationNum);
+                    } else {
+                        if (middleState) {
+                            strcpy(&symbolDefs[operationNum].symbolAddress, token);
+                            operationNum-- ;
+                            if (operationNum == 0) {
+                                listType = 1;
+                                operationNum = -1;
+                            }
+                        }
+                    }
+                }
             
                 token = strtok(NULL, " ");
             }
