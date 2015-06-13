@@ -23,8 +23,6 @@ int m;
 int ideclareCount;
 int prevDeclareCount;
 int inumIns;
-char *defcount;
-char *declareCount;
 
 //int inumIns[];
 int NumIns[512];
@@ -47,7 +45,9 @@ int numInstructions[10][3];
 char *tempToken;
 int lengthModule = 0;
 int defCount = 0;
+int declareCount = 0;
 int prevTotalDefcount = 0;
+int prevTotalDeclareCount = 0;
 
 
 
@@ -86,13 +86,13 @@ int main() {
     int j = 0;
     int k = 0;
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-2", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
-            
+            lineNum ++;
             if (strcmp(line_buffer,  "\n") != 0) {
-                lineNum ++;
+                
                 token = strtok(line_buffer, "\n");
                 token = strtok(line_buffer, " ");
                 while( token!= NULL )
@@ -130,14 +130,15 @@ int main() {
 
                             if (operationNum == -1) {
                                 operationNum = atoi(token);
+                                declareCount = operationNum;
                                 if (operationNum == 0) {
                                     listType = 2;
                                     operationNum = -1;
                                 }
 
                             } else {
-                                strcpy(&symbolLists[j].symbolDeclare, token);
-                                printf("SymbolList[%i] is %s ", j, &symbolLists[j].symbolDeclare);
+                                strcpy(&symbolLists[prevTotalDeclareCount + j].symbolDeclare, token);
+                                printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
                                 operationNum--;
                                 j++;
                                 if (operationNum == 0) {
@@ -170,6 +171,7 @@ int main() {
                                         moduleNumber++;
                                         CheckReAdd();
                                         prevTotalDefcount += defCount;
+                                        prevTotalDeclareCount += declareCount;
                                         
                                     }
                                 } else {
@@ -192,6 +194,18 @@ int main() {
         fclose(file);
         return 0;
     }
+
+int CheckReAdd(){
+    for (int n = prevTotalDefcount; n < prevTotalDefcount + defCount; n ++) {
+        if (atoi(&symbolDefs[n].symbolAddress) > lengthModule) {
+            
+            printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", moduleNumber, &symbolDefs[n].symbolName, atoi(&symbolDefs[n].symbolAddress), lengthModule - 1);
+            strcpy(symbolDefs[n].symbolAddress, "0");
+            
+        }
+    }
+    return 0;
+};
 
 //int ReadDefList(FILE *file) {
 //    int tokenNum = 0;
@@ -308,17 +322,7 @@ int main() {
 //};
 //
 /* Check the relative address is valid or not*/
-int CheckReAdd(){
-    for (int n = prevTotalDefcount; n < prevTotalDefcount + defCount; n ++) {
-        if (atoi(&symbolDefs[n].symbolAddress) > lengthModule) {
-            
-            printf("Warning: Module %i : %s to big %i (max=%i) assume zero relative.\n", moduleNumber, &symbolDefs[n].symbolName, atoi(&symbolDefs[n].symbolAddress), lengthModule - 1);
-            strcpy(symbolDefs[n].symbolAddress, "0");
 
-        }
-    }
-    return 0;
-};
 //
 ///* Absolute Address */
 //
