@@ -12,7 +12,6 @@
 #include <stdbool.h>
 
 FILE *file;
-
 int tempIns;
 int baseAddress = 0;
 char line_buffer[512];
@@ -40,6 +39,7 @@ int k_parseTwo = 0;
 int baseAdd_parseTwo = 0;
 int i_parseTwo = 0;
 int j_parseTwo = 0;
+bool foundState = false;
 /* define symbol table */
 struct symbolDef
 {
@@ -75,12 +75,12 @@ struct programText_parseTwo programTexts_parseTwo[256];
 int main() {
 
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-10", "r");
     ParseOne(file);
     fclose(file);
     
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-10", "r");
     ParseTwo(file);
 
     fclose(file);
@@ -287,6 +287,7 @@ int ParseOne(FILE* file){
 
 
 int ParseTwo(FILE* file){
+    printf("\nMemory Map\n");
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
             lineNum ++;
@@ -375,7 +376,6 @@ int ParseTwo(FILE* file){
 //                            CalculateAbAddress();
                             
                             if (totalLengthModule > 512) {
-//                                printf("Parse Error line %i: TO_MANY_INSTR", lineNum);
                                 exit(0);
                             }
                             if (ProOperationNum == 0) {
@@ -385,7 +385,6 @@ int ParseTwo(FILE* file){
                             }
                         } else {
                             if (middleState) {
-//                                strcpy(&programTexts[k].instruction, token);
                                 tempIns = atoi(token);
                                 programTexts_parseTwo[k_parseTwo].instruction = tempIns;
                                 int firstDigit;
@@ -393,32 +392,42 @@ int ParseTwo(FILE* file){
                                 firstDigit = tempIns/1000;
                                 lastThreeDigit = tempIns % 1000;
                                 if (strcmp(&programTexts_parseTwo[k_parseTwo].addType, "I") == 0) {
-                                    printf("I  is %i\n", programTexts_parseTwo[k_parseTwo].instruction);
+                                    printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                 } else if (strcmp(&programTexts_parseTwo[k_parseTwo].addType, "A") == 0){
                                     if (lastThreeDigit > 512) {
                                         programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + 0;
-                                        printf("%i  Error: Absolute address exceeds machine size; zero used\n", programTexts_parseTwo[k_parseTwo].instruction);
+                                        printf("%.3d: %i Error: Absolute address exceeds machine size; zero used\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                     } else {
                                         
-                                      printf("A is %i\n", programTexts_parseTwo[k_parseTwo].instruction);
+                                      printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                     }
                                 } else if (strcmp(&programTexts_parseTwo[k_parseTwo].addType, "E") == 0) {
                                     if (lastThreeDigit > (declareCount - 1)) {
-                                        printf("%i  Error: External address exceeds length of uselist; treated as immediate\n", programTexts_parseTwo[k_parseTwo].instruction);
+                                        printf("%.3d: %i Error: External address exceeds length of uselist; treated as immediate\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                     } else {
                                         for (int m = 0; m < i ; m++) {
                                             if (strcmp(&symbolLists[j_parseTwo - declareCount + lastThreeDigit], &symbolDefs[m].symbolName) == 0) {
                                                 programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + symbolDefs[m].symbolAbsoluteAddress;
-                                                printf("%s External %i\n", &symbolDefs[m].symbolName, programTexts_parseTwo[k_parseTwo].instruction);
+                                                printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
+                                                foundState = true;
                                             }
+                                        }
+                                        
+                                        if (foundState == false) {
+                                            programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000;
+                                            printf("%.3d: %i Error: %s is not defined; zero used\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction, &symbolLists[j_parseTwo - declareCount + lastThreeDigit].symbolDeclare);
                                         }
                                     }
                                 } else if (strcmp(&programTexts_parseTwo[k_parseTwo].addType, "R") == 0) {
-                                    programTexts_parseTwo[k_parseTwo].instruction += baseAdd_parseTwo;
-                                    printf("R is %i\n", programTexts_parseTwo[k_parseTwo].instruction);
+                                    if (lastThreeDigit > totalLengthModule) {
+                                        programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + baseAdd_parseTwo;
+                                        printf("%.3d: %i Error: Relative address exceeds module size; zero used\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
+                                    } else {
+                                        programTexts_parseTwo[k_parseTwo].instruction += baseAdd_parseTwo;
+                                        printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
+                                    }
                                 }
                                 
-//                                                                    printf("AddType is %s   Instrution is %s\n", &programTexts[k].addType,  &programTexts[k].instruction);
                                 ProOperationNum--;
                                 k_parseTwo++;
                                 middleState = false;
@@ -450,14 +459,6 @@ int ParseTwo(FILE* file){
         }
         
     }
-//    if (feof(file) && (defOperationNum != -1)) {
-////        printf("Parse Error line %i: SYM_EXPECTED", lineNum);
-//        exit(0);
-//    }
-//    if (feof(file) && (ProOperationNum != -1)) {
-//        printf("Parse Error line %i: ADDR_EXPECTED", lineNum);
-//        exit(0);
-//    }
-//    PrintSymbolTable();
+
     return 0;
 }
