@@ -75,15 +75,15 @@ struct programText_parseTwo programTexts_parseTwo[256];
 int main() {
 
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-14", "r");
     ParseOne(file);
     fclose(file);
     
     
-//    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-1", "r");
-//    ParseTwo(file);
-//
-//    fclose(file);
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-14", "r");
+    ParseTwo(file);
+
+    fclose(file);
     return 0;
 }
 
@@ -400,11 +400,11 @@ int ParseTwo(FILE* file){
                                         printf("%i  Error: Absolute address exceeds machine size; zero used\n", programTexts_parseTwo[k_parseTwo].instruction);
                                     } else {
                                         
-//                                      printf("%s\n", &programTexts[k].instruction);
+                                      printf("A is %i\n", programTexts_parseTwo[k_parseTwo].instruction);
                                     }
                                 } else if (strcmp(&programTexts_parseTwo[k_parseTwo].addType, "E") == 0) {
                                     if (lastThreeDigit > (declareCount - 1)) {
-                                        printf("Error: External address exceeds length of uselist; treated as immediate\n");
+                                        printf("%i  Error: External address exceeds length of uselist; treated as immediate\n", programTexts_parseTwo[k_parseTwo].instruction);
                                     } else {
                                         for (int m = 0; m < i_parseTwo + 1; m++) {
                                             if (strcmp(&symbolLists[j_parseTwo - declareCount + lastThreeDigit], &symbolDefs[m].symbolName) == 0) {
