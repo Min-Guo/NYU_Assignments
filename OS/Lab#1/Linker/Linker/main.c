@@ -88,7 +88,7 @@ struct module modules[10];
 int main() {
 
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-14", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
 
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
@@ -222,12 +222,15 @@ int main() {
     }
     if (feof(file) && (defOperationNum != -1)) {
             printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+        exit(0);
     }
     if (feof(file) && (ProOperationNum != -1)) {
         printf("Parse Error line %i: ADDR_EXPECTED", lineNum);
+        exit(0);
     }
-        fclose(file);
-        return 0;
+    PrintSymbolTable();
+    fclose(file);
+    return 0;
 }
 
 int CheckReAdd(){
@@ -250,30 +253,30 @@ int CheckReAdd(){
 int CalculateAbAddress(){
     for (int s = prevTotalDefcount ; s < i ; s++) {
         symbolDefs[s].symbolAbsoluteAddress = (baseAddress + atoi(&symbolDefs[s].symbolAddress));
-        printf("%s=%i \n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+//        printf("%s=%i \n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
     }
 
     return 0;
 };
-//
-///* print symbol table*/
-//
-//int PrintSymbolTable(){
-//    printf("Symbol Table\n");
-//    for(int j = 0; j < prevDefcount; j++) {
-//        for (int k = j + 1; k < prevDefcount; k++) {
-//            if(strcmp(&symbolDefs[j].symbolName, &symbolDefs[k].symbolName)== 0){
-//                strcpy(&symbolDefs[k].symbolName, &symbolDefs[k+1].symbolName);
-//                strcpy(&symbolDefs[k].symbolAddress, &symbolDefs[k+1].symbolAddress);
-//                absoluteAddress[k]= absoluteAddress[k+1];
-//                prevDefcount -= 1;
-//                printf("%s=%i Error: This variable is multiple times defined; first value used\n", &symbolDefs[j].symbolName, absoluteAddress[j]);
-//            }
-//        }
-//        printf("%s=%i\n", &symbolDefs[j].symbolName, absoluteAddress[j]);
-//    }
-//
-//    
-//    return 0;
-//};
-//
+
+/* print symbol table*/
+
+int PrintSymbolTable(){
+    printf("Symbol Table\n");
+    for(int s = 0; s < prevTotalDefcount; s++) {
+        for (int n = s + 1; n < prevTotalDefcount; n++) {
+            if(strcmp(&symbolDefs[s].symbolName, &symbolDefs[n].symbolName)== 0){
+                strcpy(&symbolDefs[n].symbolName, &symbolDefs[n+1].symbolName);
+                strcpy(&symbolDefs[n].symbolAddress, &symbolDefs[n+1].symbolAddress);
+                symbolDefs[n].symbolAbsoluteAddress= symbolDefs[n + 1].symbolAbsoluteAddress;
+                prevTotalDefcount -= 1;
+                printf("%s=%i Error: This variable is multiple times defined; first value used\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+            }
+        }
+        printf("%s=%i\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+    }
+
+    
+    return 0;
+};
+
