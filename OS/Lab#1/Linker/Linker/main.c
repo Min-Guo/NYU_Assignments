@@ -75,12 +75,12 @@ struct programText_parseTwo programTexts_parseTwo[256];
 int main() {
 
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-14", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
     ParseOne(file);
     fclose(file);
     
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-14", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
     ParseTwo(file);
 
     fclose(file);
@@ -406,16 +406,16 @@ int ParseTwo(FILE* file){
                                     if (lastThreeDigit > (declareCount - 1)) {
                                         printf("%i  Error: External address exceeds length of uselist; treated as immediate\n", programTexts_parseTwo[k_parseTwo].instruction);
                                     } else {
-                                        for (int m = 0; m < i_parseTwo + 1; m++) {
+                                        for (int m = 0; m < i ; m++) {
                                             if (strcmp(&symbolLists[j_parseTwo - declareCount + lastThreeDigit], &symbolDefs[m].symbolName) == 0) {
                                                 programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + symbolDefs[m].symbolAbsoluteAddress;
-                                                printf("DefName %s External %i\n", &symbolDefs[m].symbolName, programTexts_parseTwo[k_parseTwo].instruction);
+                                                printf("%s External %i\n", &symbolDefs[m].symbolName, programTexts_parseTwo[k_parseTwo].instruction);
                                             }
                                         }
                                     }
                                 } else if (strcmp(&programTexts_parseTwo[k_parseTwo].addType, "R") == 0) {
                                     programTexts_parseTwo[k_parseTwo].instruction += baseAdd_parseTwo;
-                                    printf("baseaddress is %i  ,R is %i\n", baseAdd_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
+                                    printf("R is %i\n", programTexts_parseTwo[k_parseTwo].instruction);
                                 }
                                 
 //                                                                    printf("AddType is %s   Instrution is %s\n", &programTexts[k].addType,  &programTexts[k].instruction);
