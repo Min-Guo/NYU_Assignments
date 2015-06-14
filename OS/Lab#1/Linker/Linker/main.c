@@ -88,147 +88,9 @@ struct module modules[10];
 int main() {
 
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-11", "r");
+    ParseOne(file);
 
-    while (!feof(file)) {
-        if(fgets(line_buffer, 512, file)!= NULL) {
-            lineNum ++;
-            if (strcmp(line_buffer,  "\n") != 0) {
-                
-                token = strtok(line_buffer, "\n");
-                token = strtok(line_buffer, " ");
-                while( token!= NULL )
-                    {
-                        if (listType == 0) {
-                            if (defOperationNum == -1) {
-                                defOperationNum = atoi(token);
-                                defCount = defOperationNum;
-                                if (defOperationNum > 16) {
-                                    printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
-                                    exit(0);
-//                                printf("OperationNum is %i\n", defOperationNum);
-                                } else if (defOperationNum == 0) {
-                                    listType = 1;
-                                    defOperationNum = -1;
-                                    middleState = false;
-                                }
-                        
-                            } else {
-                                if (middleState) {
-                                    strcpy(&symbolDefs[i].symbolAddress, token);
-                                    for (int t =0; t < 4; t++) {
-                                        
-                                        if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= NULL)) {
-                                            printf("Parse Error line %i: NUM_EXPECTED", lineNum);
-                                            exit(0);
-                                        }
-                                    }
-                                    
-//                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
-                                    defOperationNum-- ;
-                                    middleState = false;
-                                    i++;
-                                    if (defOperationNum == 0) {
-                                        listType = 1;
-                                        defOperationNum = -1;
-                                        middleState = false;
-//                                        CalculateAbAddress();
-                                    }
-                                } else {
-                                    strcpy(&symbolDefs[i].symbolName, token);
-//                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
-                                    middleState = true;
-                                }
-                            }
-                        } else if (listType == 1){
-
-                            if (operationNum == -1) {
-                                operationNum = atoi(token);
-                                declareCount = operationNum;
-                                if (operationNum > 16) {
-                                    printf("Parse Error line %i: TO_MANY_USE_IN_MODULE", lineNum);
-                                    exit(0);
-                                } else if (operationNum == 0) {
-                                            listType = 2;
-                                            operationNum = -1;
-                                        }
-                            } else {
-                                strcpy(&symbolLists[prevTotalDeclareCount + j].symbolDeclare, token);
-                                if (!isalpha(symbolLists[prevTotalDeclareCount + j].symbolDeclare[0])) {
-                                        printf("Parse Error line %i: SYM_EXPECTED", lineNum);
-                                        exit(0);
-                                } else{
-//                                    printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
-                                    operationNum--;
-                                    j++;
-                                    if (operationNum == 0) {
-                                        listType = 2;
-                                        operationNum = -1;
-                                    }
-                                }
-                            }
-
-                            
-                        } else if (listType == 2) {
-                            if (ProOperationNum == -1) {
-                                ProOperationNum = atoi(token);
-                                lengthModule = ProOperationNum;
-                                totalLengthModule += lengthModule;
-                                CheckReAdd();
-                                CalculateAbAddress();
-                                baseAddress += ProOperationNum;
-                                if (totalLengthModule > 512) {
-                                    printf("Parse Error line %i: TO_MANY_INSTR", lineNum);
-                                    exit(0);
-                                }
-                                if (ProOperationNum == 0) {
-                                    listType = 0;
-                                    ProOperationNum = -1;
-                                    middleState = false;
-                                }
-                            } else {
-                                if (middleState) {
-                                    strcpy(&programTexts[k].instruction, token);
-//                                    printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
-                                    ProOperationNum--;
-                                    k++;
-                                    middleState = false;
-                                    if (ProOperationNum == 0) {
-                                        listType = 0;
-                                        ProOperationNum = -1;
-                                        middleState = false;
-                                        moduleNumber++;
-                                        prevTotalDefcount += defCount;
-                                        prevTotalDeclareCount += declareCount;
-                                        
-                                    }
-                                } else {
-                                    strcpy(&programTexts[k].addType, token);
-//                                    printf("\n");
-//                                    printf("AddType[%i] is %s ", k, &programTexts[k].addType);
-                                    middleState = true;
-                                }
-                            }
-                        }
-            
-                        token = strtok(NULL, " ");
-
-                    }
-                } else {
-                    continue;
-                }
-        }
-        
-    }
-    if (feof(file) && (defOperationNum != -1)) {
-            printf("Parse Error line %i: SYM_EXPECTED", lineNum);
-        exit(0);
-    }
-    if (feof(file) && (ProOperationNum != -1)) {
-        printf("Parse Error line %i: ADDR_EXPECTED", lineNum);
-        exit(0);
-    }
-    PrintSymbolTable();
     fclose(file);
     return 0;
 }
@@ -280,3 +142,145 @@ int PrintSymbolTable(){
     return 0;
 };
 
+int ParseOne(FILE* file){
+    while (!feof(file)) {
+        if(fgets(line_buffer, 512, file)!= NULL) {
+            lineNum ++;
+            if (strcmp(line_buffer,  "\n") != 0) {
+                
+                token = strtok(line_buffer, "\n");
+                token = strtok(line_buffer, " ");
+                while( token!= NULL )
+                {
+                    if (listType == 0) {
+                        if (defOperationNum == -1) {
+                            defOperationNum = atoi(token);
+                            defCount = defOperationNum;
+                            if (defOperationNum > 16) {
+                                printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
+                                exit(0);
+                                //                                printf("OperationNum is %i\n", defOperationNum);
+                            } else if (defOperationNum == 0) {
+                                listType = 1;
+                                defOperationNum = -1;
+                                middleState = false;
+                            }
+                            
+                        } else {
+                            if (middleState) {
+                                strcpy(&symbolDefs[i].symbolAddress, token);
+                                for (int t =0; t < 4; t++) {
+                                    
+                                    if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= NULL)) {
+                                        printf("Parse Error line %i: NUM_EXPECTED", lineNum);
+                                        exit(0);
+                                    }
+                                }
+                                
+                                //                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
+                                defOperationNum-- ;
+                                middleState = false;
+                                i++;
+                                if (defOperationNum == 0) {
+                                    listType = 1;
+                                    defOperationNum = -1;
+                                    middleState = false;
+                                    //                                        CalculateAbAddress();
+                                }
+                            } else {
+                                strcpy(&symbolDefs[i].symbolName, token);
+                                //                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
+                                middleState = true;
+                            }
+                        }
+                    } else if (listType == 1){
+                        
+                        if (operationNum == -1) {
+                            operationNum = atoi(token);
+                            declareCount = operationNum;
+                            if (operationNum > 16) {
+                                printf("Parse Error line %i: TO_MANY_USE_IN_MODULE", lineNum);
+                                exit(0);
+                            } else if (operationNum == 0) {
+                                listType = 2;
+                                operationNum = -1;
+                            }
+                        } else {
+                            strcpy(&symbolLists[prevTotalDeclareCount + j].symbolDeclare, token);
+                            if (!isalpha(symbolLists[prevTotalDeclareCount + j].symbolDeclare[0])) {
+                                printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+                                exit(0);
+                            } else{
+                                //                                    printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
+                                operationNum--;
+                                j++;
+                                if (operationNum == 0) {
+                                    listType = 2;
+                                    operationNum = -1;
+                                }
+                            }
+                        }
+                        
+                        
+                    } else if (listType == 2) {
+                        if (ProOperationNum == -1) {
+                            ProOperationNum = atoi(token);
+                            lengthModule = ProOperationNum;
+                            totalLengthModule += lengthModule;
+                            CheckReAdd();
+                            CalculateAbAddress();
+                            baseAddress += ProOperationNum;
+                            if (totalLengthModule > 512) {
+                                printf("Parse Error line %i: TO_MANY_INSTR", lineNum);
+                                exit(0);
+                            }
+                            if (ProOperationNum == 0) {
+                                listType = 0;
+                                ProOperationNum = -1;
+                                middleState = false;
+                            }
+                        } else {
+                            if (middleState) {
+                                strcpy(&programTexts[k].instruction, token);
+                                //                                    printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
+                                ProOperationNum--;
+                                k++;
+                                middleState = false;
+                                if (ProOperationNum == 0) {
+                                    listType = 0;
+                                    ProOperationNum = -1;
+                                    middleState = false;
+                                    moduleNumber++;
+                                    prevTotalDefcount += defCount;
+                                    prevTotalDeclareCount += declareCount;
+                                    
+                                }
+                            } else {
+                                strcpy(&programTexts[k].addType, token);
+                                //                                    printf("\n");
+                                //                                    printf("AddType[%i] is %s ", k, &programTexts[k].addType);
+                                middleState = true;
+                            }
+                        }
+                    }
+                    
+                    token = strtok(NULL, " ");
+                    
+                }
+            } else {
+                continue;
+            }
+        }
+        
+    }
+    if (feof(file) && (defOperationNum != -1)) {
+        printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+        exit(0);
+    }
+    if (feof(file) && (ProOperationNum != -1)) {
+        printf("Parse Error line %i: ADDR_EXPECTED", lineNum);
+        exit(0);
+    }
+    PrintSymbolTable();
+    return 0;
+}
