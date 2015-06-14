@@ -40,12 +40,14 @@ int baseAdd_parseTwo = 0;
 int i_parseTwo = 0;
 int j_parseTwo = 0;
 bool foundState = false;
+bool checkUseState = false;
 /* define symbol table */
 struct symbolDef
 {
     char symbolName[16];
     char symbolAddress[4];
     int symbolAbsoluteAddress;
+    int modulePostion;
 };
 struct symbolDef symbolDefs[256] = {NULL};
 
@@ -75,15 +77,18 @@ struct programText_parseTwo programTexts_parseTwo[256];
 int main() {
 
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-9", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-7", "r");
     ParseOne(file);
     fclose(file);
     
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-9", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-7", "r");
     ParseTwo(file);
-
+    
+    printf("\n");
+    PrintWarning();
     fclose(file);
+    
     return 0;
 }
 
@@ -147,6 +152,7 @@ int ParseOne(FILE* file){
                     if (listType == 0) {
                         if (defOperationNum == -1) {
                             defOperationNum = atoi(token);
+                            moduleNumber++;
                             defCount = defOperationNum;
                             if (defOperationNum > 16) {
                                 printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
@@ -169,7 +175,7 @@ int ParseOne(FILE* file){
                                     }
                                 }
                                 
-                                //                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
+                                symbolDefs[i].modulePostion = moduleNumber;
                                 defOperationNum-- ;
                                 middleState = false;
                                 i++;
@@ -245,7 +251,7 @@ int ParseOne(FILE* file){
                                     listType = 0;
                                     ProOperationNum = -1;
                                     middleState = false;
-                                    moduleNumber++;
+                                   
                                     prevTotalDefcount += defCount;
 //                                    prevTotalDeclareCount += declareCount;
                                     
@@ -351,12 +357,6 @@ int ParseTwo(FILE* file){
                                 operationNum = -1;
                             }
                         } else {
-//                            strcpy(&symbolLists[prevTotalDeclareCount + j].symbolDeclare, token);
-//                            if (!isalpha(symbolLists[prevTotalDeclareCount + j].symbolDeclare[0])) {
-////                                printf("Parse Error line %i: SYM_EXPECTED", lineNum);
-//                                exit(0);
-//                            } else{
-                                //                                    printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
                                 operationNum--;
                                 j_parseTwo++;
                                 if (operationNum == 0) {
@@ -457,9 +457,9 @@ int ParseTwo(FILE* file){
                                     listType = 0;
                                     ProOperationNum = -1;
                                     middleState = false;
-                                    moduleNumber++;
+//                                    moduleNumber++;
                                     prevTotalDefcount += defCount;
-                                    prevTotalDeclareCount += declareCount;
+//                                    prevTotalDeclareCount += declareCount;
                                     baseAdd_parseTwo += lengthModule;
                                     
                                 }
@@ -482,3 +482,23 @@ int ParseTwo(FILE* file){
 
     return 0;
 }
+
+int PrintWarning(){
+
+    for (int s = 0; s < i; s++) {
+        
+        for (int j = 0; j <prevTotalDeclareCount; j++) {
+            if (strcmp(&symbolLists[j].symbolDeclare, &symbolDefs[s].symbolName) == 0) {
+                checkUseState = true;
+            }
+        }
+        if (checkUseState == false) {
+            printf("Warning: Module %i: %s was defined but never used\n", symbolDefs[s].modulePostion, &symbolDefs[s].symbolName);
+        } else {
+            checkUseState = false;
+        }
+    }
+    
+
+return 0;
+};
