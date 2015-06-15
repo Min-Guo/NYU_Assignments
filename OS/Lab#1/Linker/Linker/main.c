@@ -83,12 +83,12 @@ struct programText_parseTwo programTexts_parseTwo[256];
 int main() {
 
 
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-12", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
     ParseOne(file);
     fclose(file);
     
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-12", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
     ParseTwo(file);
     
     printf("\n");
@@ -153,15 +153,19 @@ int ParseOne(FILE* file){
         if(fgets(line_buffer, 512, file)!= NULL) {
             lineNum ++;
             strcpy(&getLine, &line_buffer);
+//            printf("NewLine is %s\n", getLine);
             if (strcmp(line_buffer,  "\n") != 0) {
                 
                 token = strtok(line_buffer, "\n");
                 
                 token = strtok(line_buffer, " ");
                 
+                
             
                 while( token!= NULL )
                 {
+                    removeTab();
+                    
                     if (listType == 0) {
                         if (defOperationNum == -1) {
                             defOperationNum = atoi(token);
@@ -335,8 +339,6 @@ int ParseOne(FILE* file){
                                 }
                             } else {
                                 strcpy(&programTexts[k].addType, token);
-                                //                                    printf("\n");
-                                //                                    printf("AddType[%i] is %s ", k, &programTexts[k].addType);
                                 middleState = true;
                             }
                         }
@@ -399,6 +401,8 @@ int ParseTwo(FILE* file){
                 token = strtok(line_buffer, " ");
                 while( token!= NULL )
                 {
+                    
+                    removeTab();
                     if (listType == 0) {
                         if (defOperationNum == -1) {
                             defOperationNum = atoi(token);
@@ -617,3 +621,16 @@ int useListState() {
     }
     return 0;
 };
+
+
+
+int removeTab() {
+    char *pr = token, *pw = token;
+    while (*pr) {
+        *pw = *pr++;
+        pw += (*pw != '\t');
+    }
+    *pw = '\0';
+    
+    return 0;
+}
