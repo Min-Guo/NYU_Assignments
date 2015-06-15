@@ -55,6 +55,8 @@ struct symbolDef symbolDefs[256] = {NULL};
 struct symbolList
 {
     char symbolDeclare[16];
+    int modulePosition;
+    bool usedState;
 };
 struct symbolList symbolLists[256];
 
@@ -76,17 +78,18 @@ struct programText_parseTwo programTexts_parseTwo[256];
 
 
 int main() {
-    
-    
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-13", "r");
+
+
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
     ParseOne(file);
     fclose(file);
     
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-13", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
     ParseTwo(file);
     
     printf("\n");
+    useListState();
     PrintWarning();
     fclose(file);
     
@@ -207,6 +210,7 @@ int ParseOne(FILE* file){
                         } else {
                             
                             strcpy(&symbolLists[prevTotalDeclareCount].symbolDeclare, token);
+                            symbolLists[prevTotalDeclareCount].modulePosition = moduleNumber;
                             
                             if (!isalpha(symbolLists[prevTotalDeclareCount].symbolDeclare[0])) {
                                 printf("Parse Error line %i: SYM_EXPECTED", lineNum);
@@ -421,11 +425,20 @@ int ParseTwo(FILE* file){
                                         if (lastThreeDigit > (declareCount - 1)) {
                                             printf("%.3d: %i Error: External address exceeds length of uselist; treated as immediate\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                         } else {
+                                            
+                                            if (lastThreeDigit >= 0 && lastThreeDigit < declareCount) {
+                                                for (int j = 0; j < declareCount; j++) {
+                                                    symbolLists[j_parseTwo - declareCount + j].usedState = true;
+                                                }
+                                            }
+                                            
                                             for (int m = 0; m < i ; m++) {
+                                            
                                                 if (strcmp(&symbolLists[j_parseTwo - declareCount + lastThreeDigit], &symbolDefs[m].symbolName) == 0) {
                                                     programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + symbolDefs[m].symbolAbsoluteAddress;
                                                     printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                                     foundState = true;
+//                                                    symbolLists[j_parseTwo - declareCount + lastThreeDigit].usedState = true;
                                                 }
                                             }
                                             
@@ -502,5 +515,15 @@ int PrintWarning(){
     }
     
     
+    return 0;
+};
+
+
+int useListState() {
+    for(int j = 0; j < prevTotalDeclareCount; j++) {
+        if (symbolLists[j].usedState == false) {
+            printf("Warning: Module %i: %s appeared in the uselist but was not actually used", symbolLists[j].modulePosition, &symbolLists[j].symbolDeclare);
+        }
+    }
     return 0;
 };
