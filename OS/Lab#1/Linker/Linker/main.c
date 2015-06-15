@@ -12,6 +12,7 @@
 #include <stdbool.h>
 
 FILE *file;
+char getLine[512];
 int tempIns;
 int baseAddress = 0;
 char line_buffer[512];
@@ -40,6 +41,7 @@ int baseAdd_parseTwo = 0;
 int i_parseTwo = 0;
 int j_parseTwo = 0;
 bool foundState = false;
+int offset = 0;
 //bool checkUseState = false;
 /* define symbol table */
 struct symbolDef
@@ -80,12 +82,12 @@ struct programText_parseTwo programTexts_parseTwo[256];
 int main() {
 
 
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
     ParseOne(file);
     fclose(file);
     
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
     ParseTwo(file);
     
     printf("\n");
@@ -148,10 +150,14 @@ int ParseOne(FILE* file){
     while (!feof(file)) {
         if(fgets(line_buffer, 512, file)!= NULL) {
             lineNum ++;
+            strcpy(&getLine, &line_buffer);
             if (strcmp(line_buffer,  "\n") != 0) {
                 
                 token = strtok(line_buffer, "\n");
+                
                 token = strtok(line_buffer, " ");
+                
+            
                 while( token!= NULL )
                 {
                     if (listType == 0) {
@@ -160,7 +166,20 @@ int ParseOne(FILE* file){
                             moduleNumber++;
                             defCount = defOperationNum;
                             if (defOperationNum > 16) {
-                                printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
+                                
+                                int lenString = strlen(getLine);
+                                for (int a = 0; a < lenString; a++) {
+                                    if (getLine[a] == token[0]) {
+                                        for (int b = 0; b < strlen(token); b++) {
+                                            if (getLine[a + b] == token[b]) {
+                                                offset = a + 1;
+                                                goto printState;
+                                            }
+                                        }
+                                    }
+                                }
+                            printState:
+                                printf("Parse Error line %i offset %i: TO_MANY_DEF_IN_MODULE", lineNum, offset);
                                 exit(0);
                                 //                                printf("OperationNum is %i\n", defOperationNum);
                             } else if (defOperationNum == 0) {
@@ -172,10 +191,24 @@ int ParseOne(FILE* file){
                         } else {
                             if (middleState) {
                                 strcpy(&symbolDefs[i].symbolAddress, token);
+                                
+                                
                                 for (int t =0; t < 4; t++) {
                                     
                                     if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= NULL)) {
-                                        printf("Parse Error line %i: NUM_EXPECTED", lineNum);
+                                        int lenString = strlen(getLine);
+                                        for (int a = 0; a < lenString; a++) {
+                                            if (getLine[a] == token[0]) {
+                                                for (int b = 0; b < strlen(token); b++) {
+                                                    if (getLine[a + b] == token[b]) {
+                                                        offset = a + 1;
+                                                        goto printState1;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    printState1:
+                                        printf("Parse Error line %i offset %i: NUM_EXPECTED", lineNum, offset);
                                         exit(0);
                                     }
                                 }
@@ -201,7 +234,19 @@ int ParseOne(FILE* file){
                             operationNum = atoi(token);
                             declareCount = operationNum;
                             if (operationNum > 16) {
-                                printf("Parse Error line %i: TO_MANY_USE_IN_MODULE", lineNum);
+                                int lenString = strlen(getLine);
+                                for (int a = 0; a < lenString; a++) {
+                                    if (getLine[a] == token[0]) {
+                                        for (int b = 0; b < strlen(token); b++) {
+                                            if (getLine[a + b] == token[b]) {
+                                                offset = a + 1;
+                                                goto printState2;
+                                            }
+                                        }
+                                    }
+                                }
+                            printState2:
+                                printf("Parse Error line %i offset %i: TO_MANY_USE_IN_MODULE", lineNum, offset);
                                 exit(0);
                             } else if (operationNum == 0) {
                                 listType = 2;
@@ -213,13 +258,24 @@ int ParseOne(FILE* file){
                             symbolLists[prevTotalDeclareCount].modulePosition = moduleNumber;
                             
                             if (!isalpha(symbolLists[prevTotalDeclareCount].symbolDeclare[0])) {
-                                printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+                                int lenString = strlen(getLine);
+                                for (int a = 0; a < lenString; a++) {
+                                    if (getLine[a] == token[0]) {
+                                        for (int b = 0; b < strlen(token); b++) {
+                                            if (getLine[a + b] == token[b]) {
+                                                offset = a + 1;
+                                                goto printState3;
+                                            }
+                                        }
+                                    }
+                                }
+                            printState3:
+                                printf("Parse Error line %i offset %i: SYM_EXPECTED", lineNum, offset);
                                 exit(0);
                             } else{
-                                //                                    printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
+                                
                                 operationNum--;
                                 prevTotalDeclareCount++;
-                                //                                j++;
                                 if (operationNum == 0) {
                                     listType = 2;
                                     operationNum = -1;
@@ -237,7 +293,20 @@ int ParseOne(FILE* file){
                             CalculateAbAddress();
                             baseAddress += ProOperationNum;
                             if (totalLengthModule > 512) {
-                                printf("Parse Error line %i: TO_MANY_INSTR", lineNum);
+                                int lenString = strlen(getLine);
+                                for (int a = 0; a < lenString; a++) {
+                                    if (getLine[a] == token[0]) {
+                                        for (int b = 0; b < strlen(token); b++) {
+                                            if (getLine[a + b] == token[b]) {
+                                                offset = a + 1;
+                                                goto printState4;
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                            printState4:
+                                printf("Parse Error line %i offset %i: TO_MANY_INSTR", lineNum, offset);
                                 exit(0);
                             }
                             if (ProOperationNum == 0) {
