@@ -40,7 +40,7 @@ int baseAdd_parseTwo = 0;
 int i_parseTwo = 0;
 int j_parseTwo = 0;
 bool foundState = false;
-bool checkUseState = false;
+//bool checkUseState = false;
 /* define symbol table */
 struct symbolDef
 {
@@ -48,6 +48,7 @@ struct symbolDef
     char symbolAddress[4];
     int symbolAbsoluteAddress;
     int modulePostion;
+    bool checkUseState;
 };
 struct symbolDef symbolDefs[256] = {NULL};
 
@@ -75,14 +76,14 @@ struct programText_parseTwo programTexts_parseTwo[256];
 
 
 int main() {
-
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-7", "r");
+    
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-13", "r");
     ParseOne(file);
     fclose(file);
     
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-7", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-13", "r");
     ParseTwo(file);
     
     printf("\n");
@@ -112,9 +113,9 @@ int CheckReAdd(){
 int CalculateAbAddress(){
     for (int s = prevTotalDefcount ; s < i ; s++) {
         symbolDefs[s].symbolAbsoluteAddress = (baseAddress + atoi(&symbolDefs[s].symbolAddress));
-//        printf("%s=%i \n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+        //        printf("%s=%i \n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
     }
-
+    
     return 0;
 };
 
@@ -128,13 +129,14 @@ int PrintSymbolTable(){
                 strcpy(&symbolDefs[n].symbolName, &symbolDefs[n+1].symbolName);
                 strcpy(&symbolDefs[n].symbolAddress, &symbolDefs[n+1].symbolAddress);
                 symbolDefs[n].symbolAbsoluteAddress= symbolDefs[n + 1].symbolAbsoluteAddress;
+                i -= 1;
                 prevTotalDefcount -= 1;
                 printf("%s=%i Error: This variable is multiple times defined; first value used\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
             }
         }
         printf("%s=%i\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
     }
-
+    
     
     return 0;
 };
@@ -205,15 +207,15 @@ int ParseOne(FILE* file){
                         } else {
                             
                             strcpy(&symbolLists[prevTotalDeclareCount].symbolDeclare, token);
-                           
+                            
                             if (!isalpha(symbolLists[prevTotalDeclareCount].symbolDeclare[0])) {
                                 printf("Parse Error line %i: SYM_EXPECTED", lineNum);
                                 exit(0);
                             } else{
                                 //                                    printf("SymbolList[%i] is %s ", j, &symbolLists[prevTotalDeclareCount + j].symbolDeclare);
                                 operationNum--;
-                                 prevTotalDeclareCount++;
-//                                j++;
+                                prevTotalDeclareCount++;
+                                //                                j++;
                                 if (operationNum == 0) {
                                     listType = 2;
                                     operationNum = -1;
@@ -251,9 +253,9 @@ int ParseOne(FILE* file){
                                     listType = 0;
                                     ProOperationNum = -1;
                                     middleState = false;
-                                   
+                                    
                                     prevTotalDefcount += defCount;
-//                                    prevTotalDeclareCount += declareCount;
+                                    //                                    prevTotalDeclareCount += declareCount;
                                     
                                 }
                             } else {
@@ -308,7 +310,7 @@ int ParseTwo(FILE* file){
                             defOperationNum = atoi(token);
                             defCount = defOperationNum;
                             if (defOperationNum > 16) {
-//                                printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
+                                //                                printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
                                 exit(0);
                                 //                                printf("OperationNum is %i\n", defOperationNum);
                             } else if (defOperationNum == 0) {
@@ -319,14 +321,14 @@ int ParseTwo(FILE* file){
                             
                         } else {
                             if (middleState) {
-//                                strcpy(&symbolDefs[i].symbolAddress, token);
-//                                for (int t =0; t < 4; t++) {
-//                                    
-//                                    if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= NULL)) {
-////                                        printf("Parse Error line %i: NUM_EXPECTED", lineNum);
-//                                        exit(0);
-//                                    }
-//                                }
+                                //                                strcpy(&symbolDefs[i].symbolAddress, token);
+                                //                                for (int t =0; t < 4; t++) {
+                                //
+                                //                                    if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= NULL)) {
+                                ////                                        printf("Parse Error line %i: NUM_EXPECTED", lineNum);
+                                //                                        exit(0);
+                                //                                    }
+                                //                                }
                                 
                                 //                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
                                 defOperationNum-- ;
@@ -339,8 +341,8 @@ int ParseTwo(FILE* file){
                                     //                                        CalculateAbAddress();
                                 }
                             } else {
-//                                strcpy(&symbolDefs[i].symbolName, token);
-//                                                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
+                                //                                strcpy(&symbolDefs[i].symbolName, token);
+                                //                                                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
                                 middleState = true;
                             }
                         }
@@ -350,20 +352,20 @@ int ParseTwo(FILE* file){
                             operationNum = atoi(token);
                             declareCount = operationNum;
                             if (operationNum > 16) {
-//                                printf("Parse Error line %i: TO_MANY_USE_IN_MODULE", lineNum);
+                                //                                printf("Parse Error line %i: TO_MANY_USE_IN_MODULE", lineNum);
                                 exit(0);
                             } else if (operationNum == 0) {
                                 listType = 2;
                                 operationNum = -1;
                             }
                         } else {
-                                operationNum--;
-                                j_parseTwo++;
-                                if (operationNum == 0) {
-                                    listType = 2;
-                                    operationNum = -1;
-                                }
-//                            }
+                            operationNum--;
+                            j_parseTwo++;
+                            if (operationNum == 0) {
+                                listType = 2;
+                                operationNum = -1;
+                            }
+                            //                            }
                         }
                         
                         
@@ -371,9 +373,9 @@ int ParseTwo(FILE* file){
                         if (ProOperationNum == -1) {
                             ProOperationNum = atoi(token);
                             lengthModule = ProOperationNum;
-//                            totalLengthModule += lengthModule;
-//                            CheckReAdd();
-//                            CalculateAbAddress();
+                            //                            totalLengthModule += lengthModule;
+                            //                            CheckReAdd();
+                            //                            CalculateAbAddress();
                             
                             if (totalLengthModule > 512) {
                                 exit(0);
@@ -407,7 +409,7 @@ int ParseTwo(FILE* file){
                                             programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + 0;
                                             printf("%.3d: %i Error: Absolute address exceeds machine size; zero used\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                         } else {
-                                        
+                                            
                                             printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                         }
                                     }
@@ -426,8 +428,8 @@ int ParseTwo(FILE* file){
                                                     foundState = true;
                                                 }
                                             }
-            
-                                        
+                                            
+                                            
                                             if (foundState == false) {
                                                 programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000;
                                                 printf("%.3d: %i Error: %s is not defined; zero used\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction, &symbolLists[j_parseTwo - declareCount + lastThreeDigit].symbolDeclare);
@@ -439,7 +441,7 @@ int ParseTwo(FILE* file){
                                         programTexts_parseTwo[k_parseTwo].instruction = 9999;
                                         printf("%.3d: %i Error: Illegal opcode; treated as 9999\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                     } else {
-                                    
+                                        
                                         if (lastThreeDigit > totalLengthModule) {
                                             programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + baseAdd_parseTwo;
                                             printf("%.3d: %i Error: Relative address exceeds module size; zero used\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
@@ -457,9 +459,9 @@ int ParseTwo(FILE* file){
                                     listType = 0;
                                     ProOperationNum = -1;
                                     middleState = false;
-//                                    moduleNumber++;
+                                    //                                    moduleNumber++;
                                     prevTotalDefcount += defCount;
-//                                    prevTotalDeclareCount += declareCount;
+                                    //                                    prevTotalDeclareCount += declareCount;
                                     baseAdd_parseTwo += lengthModule;
                                     
                                 }
@@ -479,26 +481,26 @@ int ParseTwo(FILE* file){
         }
         
     }
-
+    
     return 0;
 }
 
 int PrintWarning(){
-
+    
     for (int s = 0; s < i; s++) {
         
         for (int j = 0; j <prevTotalDeclareCount; j++) {
             if (strcmp(&symbolLists[j].symbolDeclare, &symbolDefs[s].symbolName) == 0) {
-                checkUseState = true;
+                 symbolDefs[s].checkUseState = true;
             }
         }
-        if (checkUseState == false) {
+        if (symbolDefs[s].checkUseState == false) {
             printf("Warning: Module %i: %s was defined but never used\n", symbolDefs[s].modulePostion, &symbolDefs[s].symbolName);
         } else {
-            checkUseState = false;
+            symbolDefs[s].checkUseState = false;
         }
     }
     
-
-return 0;
+    
+    return 0;
 };
