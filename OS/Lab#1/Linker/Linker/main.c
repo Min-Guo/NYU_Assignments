@@ -42,6 +42,7 @@ int i_parseTwo = 0;
 int j_parseTwo = 0;
 bool foundState = false;
 int offset = 0;
+char prevLine[512];
 //bool checkUseState = false;
 /* define symbol table */
 struct symbolDef
@@ -82,12 +83,12 @@ struct programText_parseTwo programTexts_parseTwo[256];
 int main() {
 
 
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-12", "r");
     ParseOne(file);
     fclose(file);
     
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-3", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-12", "r");
     ParseTwo(file);
     
     printf("\n");
@@ -148,6 +149,7 @@ int PrintSymbolTable(){
 
 int ParseOne(FILE* file){
     while (!feof(file)) {
+        
         if(fgets(line_buffer, 512, file)!= NULL) {
             lineNum ++;
             strcpy(&getLine, &line_buffer);
@@ -347,14 +349,33 @@ int ParseOne(FILE* file){
                 continue;
             }
         }
-        
+        strcpy(&prevLine, &getLine);
     }
+    
     if (feof(file) && (defOperationNum != -1)) {
-        printf("Parse Error line %i: SYM_EXPECTED", lineNum);
+        int lenString = strlen(prevLine);
+        for (int a = 0; a < lenString; a++) {
+            if (prevLine[a] == '\n') {
+                offset = a + 1;
+                goto printState5;
+            }
+        }
+        
+    printState5:
+        printf("Parse Error line %i offset %i: SYM_EXPECTED", lineNum, offset);
         exit(0);
     }
     if (feof(file) && (ProOperationNum != -1)) {
-        printf("Parse Error line %i: ADDR_EXPECTED", lineNum);
+        
+        int lenString = strlen(prevLine);
+        for (int a = 0; a < lenString; a++) {
+            if (prevLine[a] == '\n') {
+                offset = a + 1;
+                goto printState6;
+            }
+        }
+    printState6:
+        printf("Parse Error line %i offset %i: ADDR_EXPECTED", lineNum, offset);
         exit(0);
     }
     PrintSymbolTable();
