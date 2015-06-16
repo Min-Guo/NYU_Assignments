@@ -52,6 +52,7 @@ struct symbolDef
     int symbolAbsoluteAddress;
     int modulePostion;
     bool checkUseState;
+    bool printState;
 };
 struct symbolDef symbolDefs[256] = {NULL};
 
@@ -138,9 +139,13 @@ int PrintSymbolTable(){
                 i -= 1;
                 prevTotalDefcount -= 1;
                 printf("%s=%i Error: This variable is multiple times defined; first value used\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+                symbolDefs[s].printState = true;
             }
         }
-        printf("%s=%i\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+        if (symbolDefs[s].printState == false) {
+            printf("%s=%i\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+        }
+        
     }
     
     
@@ -496,7 +501,7 @@ int ParseTwo(FILE* file){
                                         programTexts_parseTwo[k_parseTwo].instruction = 9999;
                                         printf("%.3d: %i Error: Illegal immediate value; treated as 9999\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                     } else {
-                                        printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
+                                        printf("%.3d: %.4d\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                     }
                                 } else if (strcmp(&programTexts_parseTwo[k_parseTwo].addType, "A") == 0){
                                     if (tempIns > 9999) {
@@ -508,7 +513,7 @@ int ParseTwo(FILE* file){
                                             printf("%.3d: %i Error: Absolute address exceeds machine size; zero used\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                         } else {
                                             
-                                            printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
+                                            printf("%.3d: %.4d\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                         }
                                     }
                                 } else if (strcmp(&programTexts_parseTwo[k_parseTwo].addType, "E") == 0) {
@@ -517,7 +522,7 @@ int ParseTwo(FILE* file){
                                         printf("%.3d: %i Error: Illegal opcode; treated as 9999\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                     } else {
                                         if (lastThreeDigit > (declareCount - 1)) {
-                                            printf("%.3d: %i Error: External address exceeds length of uselist; treated as immediate\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
+                                            printf("%.3d: %.4d Error: External address exceeds length of uselist; treated as immediate\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                         } else {
                                             
                                             if (lastThreeDigit >= 0 && lastThreeDigit < declareCount) {
@@ -530,7 +535,7 @@ int ParseTwo(FILE* file){
                                             
                                                 if (strcmp(&symbolLists[j_parseTwo - declareCount + lastThreeDigit], &symbolDefs[m].symbolName) == 0) {
                                                     programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + symbolDefs[m].symbolAbsoluteAddress;
-                                                    printf("%.3d: %i\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
+                                                    printf("%.3d: %.4d\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                                     foundState = true;
 //                                                    symbolLists[j_parseTwo - declareCount + lastThreeDigit].usedState = true;
                                                 }
