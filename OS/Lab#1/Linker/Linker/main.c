@@ -115,7 +115,7 @@ int removeTab() {
 
 int CalculateAbAddress(){
     for (int s = prevTotalDefcount ; s < i ; s++) {
-        symbolDefs[s].symbolAbsoluteAddress = (baseAddress + atoi(&symbolDefs[s].symbolAddress));
+        symbolDefs[s].symbolAbsoluteAddress = (baseAddress + atoi(symbolDefs[s].symbolAddress));
     }
     
     return 0;
@@ -127,18 +127,18 @@ int PrintSymbolTable(){
     printf("Symbol Table\n");
     for(int s = 0; s < prevTotalDefcount; s++) {
         for (int n = s + 1; n < prevTotalDefcount; n++) {
-            if(strcmp(&symbolDefs[s].symbolName, &symbolDefs[n].symbolName)== 0){
-                strcpy(&symbolDefs[n].symbolName, &symbolDefs[n+1].symbolName);
-                strcpy(&symbolDefs[n].symbolAddress, &symbolDefs[n+1].symbolAddress);
+            if(strcmp(symbolDefs[s].symbolName, symbolDefs[n].symbolName)== 0){
+                strcpy(symbolDefs[n].symbolName, symbolDefs[n+1].symbolName);
+                strcpy(symbolDefs[n].symbolAddress, symbolDefs[n+1].symbolAddress);
                 symbolDefs[n].symbolAbsoluteAddress= symbolDefs[n + 1].symbolAbsoluteAddress;
                 i -= 1;
                 prevTotalDefcount -= 1;
-                printf("%s=%d Error: This variable is multiple times defined; first value used\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+                printf("%s=%d Error: This variable is multiple times defined; first value used\n", symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
                 symbolDefs[s].printState = true;
             }
         }
         if (symbolDefs[s].printState == false) {
-            printf("%s=%d\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress); /* check whether the symbol is printed or not, the symbol that multiple times defined has been printed above */
+            printf("%s=%d\n", symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress); /* check whether the symbol is printed or not, the symbol that multiple times defined has been printed above */
         }
         
     }
@@ -196,7 +196,7 @@ int ParseOne(FILE* file){
                                 
                                 for (int t =0; t < 4; t++) {
                                     
-                                    if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= NULL)) {
+                                    if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= '\0')) {
                                         double lenString = strlen(getLine);
                                         for (int a = 0; a < lenString; a++) {
                                             if (getLine[a] == token[0]) {
@@ -499,7 +499,7 @@ int ParseTwo(FILE* file){
                                             
                                             for (int m = 0; m < i ; m++) {
                                             
-                                                if (strcmp(&symbolLists[j_parseTwo - declareCount + lastThreeDigit], &symbolDefs[m].symbolName) == 0) {
+                                                if (strcmp(symbolLists[j_parseTwo - declareCount + lastThreeDigit].symbolDeclare, symbolDefs[m].symbolName) == 0) {
                                                     programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + symbolDefs[m].symbolAbsoluteAddress;
                                                     printf("%.3d: %.4d\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                                     foundState = true;
@@ -565,7 +565,7 @@ int PrintWarning(){
     for (int s = 0; s < i; s++) {
         
         for (int j = 0; j <prevTotalDeclareCount; j++) {
-            if (strcmp(&symbolLists[j].symbolDeclare, &symbolDefs[s].symbolName) == 0) {
+            if (strcmp(symbolLists[j].symbolDeclare, symbolDefs[s].symbolName) == 0) {
                  symbolDefs[s].checkUseState = true;
             }
         }
@@ -595,12 +595,12 @@ int useListState() {
 
 int main(int argc, char *argv[]) {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
-//    file = fopen(argv[1], "r");
+
+    file = fopen(argv[1], "r");
     ParseOne(file);/* Print symbol table and check error*/
     fclose(file);
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
-//    file = fopen(argv[1], "r");
+
+    file = fopen(argv[1], "r");
     ParseTwo(file);/* Print Memory Map*/
     printf("\n");
     useListState();
