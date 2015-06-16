@@ -82,13 +82,13 @@ struct programText_parseTwo programTexts_parseTwo[256];
 
 
 
-int main() {
+int main(int argc, char *argv[]) {
 
 
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-2", "r");
+    file = fopen(argv[1], "r");
     ParseOne(file);/* Print symbol table and check error*/
     fclose(file);
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-2", "r");
+    file = fopen(argv[1], "r");
     ParseTwo(file);/* Print Memory Map*/
     printf("\n");
     useListState();
