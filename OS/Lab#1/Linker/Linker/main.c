@@ -34,7 +34,6 @@ int prevTotalDefcount = 0;
 int prevTotalDeclareCount = 0;
 int totalLengthModule = 0;
 int i = 0;
-//int j = 0;
 int k = 0;
 int k_parseTwo = 0;
 int baseAdd_parseTwo = 0;
@@ -43,7 +42,9 @@ int j_parseTwo = 0;
 bool foundState = false;
 int offset = 0;
 char prevLine[512];
-//bool checkUseState = false;
+
+
+
 /* define symbol table */
 struct symbolDef
 {
@@ -84,14 +85,11 @@ struct programText_parseTwo programTexts_parseTwo[256];
 int main() {
 
 
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
-    ParseOne(file);
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-2", "r");
+    ParseOne(file);/* Print symbol table and check error*/
     fclose(file);
-    
-    
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-19", "r");
-    ParseTwo(file);
-    
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#1/labsamples/input-2", "r");
+    ParseTwo(file);/* Print Memory Map*/
     printf("\n");
     useListState();
     PrintWarning();
@@ -100,6 +98,7 @@ int main() {
     return 0;
 }
 
+/* Check whether the relative address exceed the length of module or not */
 int CheckReAdd(){
     for (int n = prevTotalDefcount; n < prevTotalDefcount + defCount; n ++) {
         if (atoi(&symbolDefs[n].symbolAddress) > lengthModule) {
@@ -114,13 +113,12 @@ int CheckReAdd(){
 
 
 
-//
-///* Absolute Address */
-//
+
+/* Absolute Address */
+
 int CalculateAbAddress(){
     for (int s = prevTotalDefcount ; s < i ; s++) {
         symbolDefs[s].symbolAbsoluteAddress = (baseAddress + atoi(&symbolDefs[s].symbolAddress));
-        //        printf("%s=%i \n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
     }
     
     return 0;
@@ -143,14 +141,14 @@ int PrintSymbolTable(){
             }
         }
         if (symbolDefs[s].printState == false) {
-            printf("%s=%i\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress);
+            printf("%s=%i\n", &symbolDefs[s].symbolName, symbolDefs[s].symbolAbsoluteAddress); /* check whether the symbol is printed or not, the symbol that multiple times defined has been printed above */
         }
         
     }
     
-    
     return 0;
 };
+
 
 int ParseOne(FILE* file){
     while (!feof(file)) {
@@ -158,26 +156,22 @@ int ParseOne(FILE* file){
         if(fgets(line_buffer, 512, file)!= NULL) {
             lineNum ++;
             strcpy(&getLine, &line_buffer);
-//            printf("NewLine is %s\n", getLine);
             if (strcmp(line_buffer,  "\n") != 0) {
-                
                 token = strtok(line_buffer, "\n");
+                token = strtok(line_buffer, " "); /* get the string space by space*/
                 
-                token = strtok(line_buffer, " ");
-                
-                
-            
                 while( token!= NULL )
                 {
-                    removeTab();
+                    removeTab();/* remove '\t' from the token*/
                     
+                    /* listType = 0 means reading the define list*/
                     if (listType == 0) {
                         if (defOperationNum == -1) {
                             defOperationNum = atoi(token);
                             moduleNumber++;
                             defCount = defOperationNum;
                             if (defOperationNum > 16) {
-                                
+                                /* Caculate the offset number*/
                                 int lenString = strlen(getLine);
                                 for (int a = 0; a < lenString; a++) {
                                     if (getLine[a] == token[0]) {
@@ -192,15 +186,14 @@ int ParseOne(FILE* file){
                             printState:
                                 printf("Parse Error line %i offset %i: TO_MANY_DEF_IN_MODULE", lineNum, offset);
                                 exit(0);
-                                //                                printf("OperationNum is %i\n", defOperationNum);
                             } else if (defOperationNum == 0) {
                                 listType = 1;
-                                defOperationNum = -1;
+                                defOperationNum = -1;   /* finish reading the define list, and reset the variables*/
                                 middleState = false;
                             }
                             
                         } else {
-                            if (middleState) {
+                            if (middleState) {  /* whether it is time to check the address*/
                                 strcpy(&symbolDefs[i].symbolAddress, token);
                                 
                                 
@@ -229,18 +222,16 @@ int ParseOne(FILE* file){
                                 middleState = false;
                                 i++;
                                 if (defOperationNum == 0) {
-                                    listType = 1;
+                                    listType = 1;           /* finish reading the define list, and reset the variables*/
                                     defOperationNum = -1;
                                     middleState = false;
-                                    //                                        CalculateAbAddress();
                                 }
                             } else {
                                 strcpy(&symbolDefs[i].symbolName, token);
-                                //                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
                                 middleState = true;
                             }
                         }
-                    } else if (listType == 1){
+                    } else if (listType == 1){      /* listType = 1 means reading the use list*/
                         if (operationNum == -1) {
                             operationNum = atoi(token);
                             declareCount = operationNum;
@@ -295,7 +286,7 @@ int ParseOne(FILE* file){
                         }
                         
                         
-                    } else if (listType == 2) {
+                    } else if (listType == 2) {         /* listType = 2 means reading the program text list*/
                         if (ProOperationNum == -1) {
                             ProOperationNum = atoi(token);
                             lengthModule = ProOperationNum;
@@ -321,7 +312,7 @@ int ParseOne(FILE* file){
                                 exit(0);
                             }
                             if (ProOperationNum == 0) {
-                                listType = 0;
+                                listType = 0;               /* Finish reading the module and continue to read the next*/
                                 ProOperationNum = -1;
                                 middleState = false;
                             }
@@ -329,7 +320,6 @@ int ParseOne(FILE* file){
                             if (middleState) {
                                 
                                 strcpy(&programTexts[k].instruction, token);
-                                //                                    printf("Instrution[%i] is %s\n", k, &programTexts[k].instruction);
                                 ProOperationNum--;
                                 k++;
                                 middleState = false;
@@ -339,7 +329,6 @@ int ParseOne(FILE* file){
                                     middleState = false;
                                     
                                     prevTotalDefcount += defCount;
-                                    //                                    prevTotalDeclareCount += declareCount;
                                     
                                 }
                             } else {
@@ -359,7 +348,7 @@ int ParseOne(FILE* file){
         strcpy(&prevLine, &getLine);
     }
     
-    if (feof(file) && (defOperationNum != -1)) {
+    if (feof(file) && (defOperationNum != -1)) {            /* check the error "SYM_EXPECTED" and "ADDR_EXPECTED" if reaching the end of file*/
         int lenString = strlen(prevLine);
         for (int a = 0; a < lenString; a++) {
             if (prevLine[a] == '\n') {
@@ -393,7 +382,7 @@ int ParseOne(FILE* file){
 
 
 
-
+/* The defineList and uselist is the same as parse one, the programtext is differet to check the error*/
 
 int ParseTwo(FILE* file){
     printf("\nMemory Map\n");
@@ -413,9 +402,7 @@ int ParseTwo(FILE* file){
                             defOperationNum = atoi(token);
                             defCount = defOperationNum;
                             if (defOperationNum > 16) {
-                                //                                printf("Parse Error line %i: TO_MANY_DEF_IN_MODULE", lineNum);
                                 exit(0);
-                                //                                printf("OperationNum is %i\n", defOperationNum);
                             } else if (defOperationNum == 0) {
                                 listType = 1;
                                 defOperationNum = -1;
@@ -424,16 +411,6 @@ int ParseTwo(FILE* file){
                             
                         } else {
                             if (middleState) {
-                                //                                strcpy(&symbolDefs[i].symbolAddress, token);
-                                //                                for (int t =0; t < 4; t++) {
-                                //
-                                //                                    if (!isdigit(symbolDefs[i].symbolAddress[t]) && (symbolDefs[i].symbolAddress[t]!= NULL)) {
-                                ////                                        printf("Parse Error line %i: NUM_EXPECTED", lineNum);
-                                //                                        exit(0);
-                                //                                    }
-                                //                                }
-                                
-                                //                                    printf("Symbol[%i]Address is % s\n", i,  &symbolDefs[i].symbolAddress);
                                 defOperationNum-- ;
                                 middleState = false;
                                 i_parseTwo++;
@@ -441,11 +418,8 @@ int ParseTwo(FILE* file){
                                     listType = 1;
                                     defOperationNum = -1;
                                     middleState = false;
-                                    //                                        CalculateAbAddress();
                                 }
                             } else {
-                                //                                strcpy(&symbolDefs[i].symbolName, token);
-                                //                                                                    printf("Symbol[%i]Name is %s ", i,  &symbolDefs[i].symbolName);
                                 middleState = true;
                             }
                         }
@@ -455,7 +429,6 @@ int ParseTwo(FILE* file){
                             operationNum = atoi(token);
                             declareCount = operationNum;
                             if (operationNum > 16) {
-                                //                                printf("Parse Error line %i: TO_MANY_USE_IN_MODULE", lineNum);
                                 exit(0);
                             } else if (operationNum == 0) {
                                 listType = 2;
@@ -476,10 +449,6 @@ int ParseTwo(FILE* file){
                         if (ProOperationNum == -1) {
                             ProOperationNum = atoi(token);
                             lengthModule = ProOperationNum;
-                            //                            totalLengthModule += lengthModule;
-                            //                            CheckReAdd();
-                            //                            CalculateAbAddress();
-                            
                             if (totalLengthModule > 512) {
                                 exit(0);
                             }
@@ -537,7 +506,6 @@ int ParseTwo(FILE* file){
                                                     programTexts_parseTwo[k_parseTwo].instruction = firstDigit * 1000 + symbolDefs[m].symbolAbsoluteAddress;
                                                     printf("%.3d: %.4d\n", k_parseTwo, programTexts_parseTwo[k_parseTwo].instruction);
                                                     foundState = true;
-//                                                    symbolLists[j_parseTwo - declareCount + lastThreeDigit].usedState = true;
                                                 }
                                             }
                                             
@@ -571,9 +539,7 @@ int ParseTwo(FILE* file){
                                     listType = 0;
                                     ProOperationNum = -1;
                                     middleState = false;
-                                    //                                    moduleNumber++;
                                     prevTotalDefcount += defCount;
-                                    //                                    prevTotalDeclareCount += declareCount;
                                     baseAdd_parseTwo += lengthModule;
                                     
                                 }
@@ -617,7 +583,7 @@ int PrintWarning(){
     return 0;
 };
 
-
+/*check whether the symbol in uselist is used or not*/
 int useListState() {
     for(int j = 0; j < prevTotalDeclareCount; j++) {
         if (symbolLists[j].usedState == false) {
@@ -628,14 +594,14 @@ int useListState() {
 };
 
 
-
+/* remove '\t' in the token*/
 int removeTab() {
-    char *pr = token, *pw = token;
-    while (*pr) {
-        *pw = *pr++;
-        pw += (*pw != '\t');
+    char *pointerread = token, *pointerwrite = token;
+    while (*pointerread) {
+        *pointerwrite = *pointerread++;
+        pointerwrite += (*pointerwrite != '\t');
     }
-    *pw = '\0';
+    *pointerwrite = '\0';
     
     return 0;
 }
