@@ -181,7 +181,7 @@ int ParseOne(FILE* file){
                                     }
                                 }
                             printState:
-                                printf("Parse Error line %i offset %i: TO_MANY_DEF_IN_MODULE", lineNum, offset);
+                                printf("Parse Error line %i offset %i: TO_MANY_DEF_IN_MODULE\n", lineNum, offset);
                                 exit(0);
                             } else if (defOperationNum == 0) {
                                 listType = 1;
@@ -209,7 +209,7 @@ int ParseOne(FILE* file){
                                             }
                                         }
                                     printState1:
-                                        printf("Parse Error line %i offset %i: NUM_EXPECTED", lineNum, offset);
+                                        printf("Parse Error line %i offset %i: NUM_EXPECTED\n", lineNum, offset);
                                         exit(0);
                                     }
                                 }
@@ -245,7 +245,7 @@ int ParseOne(FILE* file){
                                     }
                                 }
                             printState2:
-                                printf("Parse Error line %i offset %i: TO_MANY_USE_IN_MODULE", lineNum, offset);
+                                printf("Parse Error line %i offset %i: TO_MANY_USE_IN_MODULE\n", lineNum, offset);
                                 exit(0);
                             } else if (operationNum == 0) {
                                 listType = 2;
@@ -269,7 +269,7 @@ int ParseOne(FILE* file){
                                     }
                                 }
                             printState3:
-                                printf("Parse Error line %i offset %i: SYM_EXPECTED", lineNum, offset);
+                                printf("Parse Error line %i offset %i: SYM_EXPECTED\n", lineNum, offset);
                                 exit(0);
                             } else{
                                 
@@ -305,7 +305,7 @@ int ParseOne(FILE* file){
                                 }
                                 
                             printState4:
-                                printf("Parse Error line %i offset %i: TO_MANY_INSTR", lineNum, offset);
+                                printf("Parse Error line %i offset %i: TO_MANY_INSTR\n", lineNum, offset);
                                 exit(0);
                             }
                             if (ProOperationNum == 0) {
@@ -355,7 +355,7 @@ int ParseOne(FILE* file){
         }
         
     printState5:
-        printf("Parse Error line %i offset %i: SYM_EXPECTED", lineNum, offset);
+        printf("Parse Error line %i offset %i: SYM_EXPECTED\n", lineNum, offset);
         exit(0);
     }
     if (feof(file) && (ProOperationNum != -1)) {
@@ -368,7 +368,7 @@ int ParseOne(FILE* file){
             }
         }
     printState6:
-        printf("Parse Error line %i offset %i: ADDR_EXPECTED", lineNum, offset);
+        printf("Parse Error line %i offset %i: ADDR_EXPECTED\n", lineNum, offset);
         exit(0);
     }
     PrintSymbolTable();
@@ -584,7 +584,7 @@ int PrintWarning(){
 int useListState() {
     for(int j = 0; j < prevTotalDeclareCount; j++) {
         if (symbolLists[j].usedState == false) {
-            printf("Warning: Module %d: %s appeared in the uselist but was not actually used", symbolLists[j].modulePosition, symbolLists[j].symbolDeclare);
+            printf("Warning: Module %d: %s appeared in the uselist but was not actually used\n", symbolLists[j].modulePosition, symbolLists[j].symbolDeclare);
         }
     }
     return 0;
