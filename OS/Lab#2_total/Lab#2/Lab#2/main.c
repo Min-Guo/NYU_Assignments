@@ -13,27 +13,33 @@
 
 
 
+
 FILE *file;
 char line_buffer[512];
 char *token;
 int i = 0;
 
 struct inputInformation{
-    int AT;
-    bool atRead;
-    int TC;
+    int AT; /* arriving time*/
+    bool atRead; /* if AT has been read from input file, it is true*/
+    int TC; /* Total CPU time */
     bool tcRead;
-    int CB;
+    int CB; /* CPU burst*/
     bool cbRead;
-    int IO;
+    int IO; /* IO burst*/
     bool ioRead;
 };
-struct inputInformation inputInformations[512];
+struct inputInformation inputInformations[512]; /* Struct to store 4 parameters */
+
+
+class CompareAT {
+
+};
 
 int parse(FILE *file){
     while (!feof(file)) {
         if (fgets(line_buffer, 512, file)!= NULL) {
-            if (strcmp(line_buffer, "\n") != 0) {
+            if (strcmp(line_buffer, "\n") != 0) {   /* read input file line by line */
                 token = strtok(line_buffer, "\n");
                 token = strtok(line_buffer, " ");
                 
