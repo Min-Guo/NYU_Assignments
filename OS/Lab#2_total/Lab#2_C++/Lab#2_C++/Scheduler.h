@@ -6,13 +6,14 @@
 
 
 struct Process{
-    int AT; /* arriving time*/
+    int ID;
+    double AT; /* arriving time*/
     bool atRead; /* if AT has been read from input file, it is true*/
-    int TC; /* Total CPU time */
+    double TC; /* Total CPU time */
     bool tcRead;
-    int CB; /* CPU burst*/
+    double CB; /* CPU burst*/
     bool cbRead;
-    int IO; /* IO burst*/
+    double IO; /* IO burst*/
     bool ioRead;
 }; 
 
@@ -28,10 +29,15 @@ public:
 
 class Scheduler{
 private:
-    std::priority_queue<Process, std::vector<Process>, CompareAT> pq;
+    std::priority_queue<Process, std::vector<Process>, CompareAT> event_queue;
+    std::priority_queue<Process, std::vector<Process>, CompareAT> ready_queue;
 public:
-    void put_event(Process process);
-    Process get_event();
+    void put_eventqueue(Process process);
+    Process get_eventqueue();
+    void put_readyqueue(Process process);
+    Process get_readyqueue();
+    bool bothEmpty();
+    bool isReady(double time);
 };
 
 

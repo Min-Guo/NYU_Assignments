@@ -43,3 +43,100 @@ int main() {
     
     return 0;
 }
+
+
+
+
+#ifndef SCHEDULER_H
+#define SCHEDULER_H
+#include <queue>
+#include <vector>
+
+
+
+struct Process{
+    //    double ID;
+    double AT; /* arriving time*/
+    bool atRead; /* if AT has been read from input file, it is true*/
+    double TC; /* Total CPU time */
+    bool tcRead;
+    double CB; /* CPU burst*/
+    bool cbRead;
+    double IO; /* IO burst*/
+    bool ioRead;
+};
+
+
+class CompareAT {
+public:
+    bool operator()(Process& process1, Process& process2)
+    {
+        if (process1.AT > process2.AT) return true;
+        return false;
+    }
+};
+
+class Scheduler{
+private:
+    std::priority_queue<Process, std::vector<Process>, CompareAT> event_queue;
+    std::priority_queue<Process, std::vector<Process>, CompareAT> ready_queue;
+public:
+    void put_eventqueue(Process process);
+    Process get_eventqueue();
+    void put_readyqueue(Process process);
+    Process get_readyqueue();
+    bool bothEmpty();
+    bool isReady(double time);
+};
+
+
+#endif
+
+
+
+
+//
+//  Scheduler.cpp
+//  Lab#2_C++
+//
+//  Created by Min Guo on 6/21/15.
+//  Copyright (c) 2015 Min Guo. All rights reserved.
+//
+
+#include <stdio.h>
+#include "Scheduler.h"
+
+
+
+
+void Scheduler::put_eventqueue(Process process){
+    event_queue.push(process);
+}
+
+Process Scheduler::get_eventqueue(){
+    Process process = event_queue.top();
+    event_queue.pop();
+    return process;
+}
+
+
+void Scheduler::put_readyqueue(Process process){
+    ready_queue.push(process);
+}
+
+Process Scheduler::get_readyqueue(){
+    Process process = ready_queue.top();
+    ready_queue.pop();
+    return process;
+}
+
+bool Scheduler::bothEmpty() {
+    if (event_queue.empty() && ready_queue.empty()) return true;
+    return false;
+}
+
+
+bool Scheduler::isReady(double time) {
+    if (event_queue.top().AT == time) return true;
+    return false;
+}

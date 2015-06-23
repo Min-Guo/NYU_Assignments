@@ -21,6 +21,7 @@
 FILE *file;
 char line_buffer[512];
 char *token;
+int runningTime = 0;
 
 
 
@@ -29,8 +30,7 @@ char *token;
 
 
 
-
-int parse(FILE *file, Scheduler * scheduler){
+int parse(FILE *file, Scheduler* scheduler){
 
     
     while (!feof(file)) {
@@ -58,7 +58,7 @@ int parse(FILE *file, Scheduler * scheduler){
                     
                 }
                 
-                scheduler->put_event(process);
+                scheduler->put_eventqueue(process);
    
                 
             }
@@ -71,6 +71,7 @@ int parse(FILE *file, Scheduler * scheduler){
 
 
 
+
 int main(int argc, const char * argv[]) {
     Scheduler scheduler;
 
@@ -78,7 +79,13 @@ int main(int argc, const char * argv[]) {
     parse(file, &scheduler);
     fclose(file);
     
-    std::cout << "myqueue contains:" << scheduler.get_event().AT;
+
+    while (scheduler.bothEmpty() == false) {
+        if (scheduler.isReady(runningTime)== true) {
+            scheduler.put_readyqueue(scheduler.get_eventqueue());
+            std::cout << "readyqueue is:" << scheduler.get_readyqueue().AT << " " << scheduler.get_readyqueue().TC << " " << scheduler.get_readyqueue().CB << " " << scheduler.get_readyqueue().IO << "\n";
+        }
+    }
 
     
     return 0;
