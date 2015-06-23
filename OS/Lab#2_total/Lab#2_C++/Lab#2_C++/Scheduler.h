@@ -38,6 +38,9 @@ public:
     Process get_readyqueue();
     bool bothEmpty();
     bool isReady(double time);
+    bool readyEmpty();
+    bool eventEmpty();
+    Process checkFirstEvent();
 };
 
 

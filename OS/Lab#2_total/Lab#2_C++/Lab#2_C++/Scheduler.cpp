@@ -16,6 +16,11 @@ void Scheduler::put_eventqueue(Process process){
     event_queue.push(process);
 }
 
+Process Scheduler::checkFirstEvent(){
+    Process process = event_queue.top();
+    return process;
+}
+
 Process Scheduler::get_eventqueue(){
     Process process = event_queue.top();
     event_queue.pop();
@@ -34,12 +39,22 @@ Process Scheduler::get_readyqueue(){
 }
 
 bool Scheduler::bothEmpty() {
-    if (event_queue.empty() && ready_queue.empty()) return true;
-    return false;
+    if (!event_queue.empty() || !ready_queue.empty()) return false;
+    return true;
 }
 
 
 bool Scheduler::isReady(double time) {
     if (event_queue.top().AT == time) return true;
+    return false;
+}
+
+bool Scheduler::readyEmpty(){
+    if (ready_queue.empty()) return true;
+    return false;
+}
+
+bool Scheduler::eventEmpty(){
+    if (event_queue.empty()) return true;
     return false;
 }
