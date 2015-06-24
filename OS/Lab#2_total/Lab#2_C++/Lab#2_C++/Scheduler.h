@@ -15,6 +15,7 @@ struct Process{
     bool cbRead;
     double IO; /* IO burst*/
     bool ioRead;
+    double remainTime;
 }; 
 
 

@@ -26,7 +26,7 @@ Process runningProcess;
 Process previousProcess;
 int tempID = 0;
 Process* tempProcess;
-
+double quantum = 0;
 
 
 
@@ -50,6 +50,7 @@ int parse(FILE *file, Scheduler* scheduler){
                         process.atRead = true;
                     } else if (process.tcRead == false){
                         process.TC = atoi(token);
+                        process.remainTime = atoi(token);
                         process.tcRead = true;
                     } else if (process.cbRead == false){
                         process.CB = atoi(token);
@@ -86,52 +87,52 @@ int main(int argc, const char * argv[]) {
 
     while (scheduler.bothEmpty() == false) {
         
-        while (scheduler.isReady(runningTime)== true) {
-            scheduler.put_readyqueue(scheduler.get_eventqueue());
+        while (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
+           scheduler.put_readyqueue(scheduler.get_eventqueue());
         }
         
         if (runningProcess.ID == 0) {
             if (scheduler.readyEmpty() == true) {
                 runningTime ++;
+                std::cout<<"Running time:" << runningTime << "\n";
             } else {
-                runningProcess.ID = scheduler.get_readyqueue().ID;
-                runningProcess.AT = scheduler.get_readyqueue().AT;
-                runningProcess.TC = scheduler.get_readyqueue().TC;
-                runningProcess.CB = scheduler.get_readyqueue().CB;
-                runningProcess.IO = scheduler.get_readyqueue().IO;
-                std::cout<< "Process" << runningProcess.ID << "\n";
-                for (int i = 1; i < runningProcess.CB + 1; i++) {
+                runningProcess = scheduler.get_readyqueue();
+                if (runningProcess.CB < runningProcess.remainTime) {
+                    quantum = runningProcess.CB;
+                } else {
+                    quantum = runningProcess.remainTime;
+                }
+                for (int i = 1; i < quantum + 1; i++) {
                     runningTime ++;
-                    if (scheduler.isReady(runningTime)== true) {
+                    if (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
                         scheduler.put_readyqueue(scheduler.get_eventqueue());
                     }
                     std::cout<< "Running time:" << runningTime << "   Running Process:" << runningProcess.ID << "\n";
                 }
+                runningProcess.remainTime -= quantum;
                 previousProcess.IO = runningProcess.IO;
                 runningProcess.AT = runningProcess.AT + runningProcess.CB + runningProcess.IO;
-                scheduler.put_eventqueue(runningProcess);
+                if (runningProcess.remainTime != 0) {
+                    scheduler.put_eventqueue(runningProcess);
+                }
+                
                 runningProcess.ID = 0;
             
             
                 for (int i = 1; i < previousProcess.IO + 1; i++) {
                     runningTime ++;
-                    if (scheduler.isReady(runningTime)== true) {
+                    
+                      
+                    while (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
                         scheduler.put_readyqueue(scheduler.get_eventqueue());
                     }
                     std::cout << "Block time:" << runningTime << "   Blocked State" << "\n";
+                    
                 }
             }
         }
         
-//        if (runningID != 0) {
-//            runningTime++;
-//            if (scheduler.isReady(runningTime)== true) {
-//                scheduler.put_readyqueue(scheduler.get_eventqueue());
-//            }
-//            
-//        }
-//        
-       
+   
         
     }
 
