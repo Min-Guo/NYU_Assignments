@@ -20,6 +20,7 @@
 
 FILE *file;
 char line_buffer[512];
+char line_secondbuffer[40001];
 char *token;
 int runningTime = 0;
 Process runningProcess;
@@ -27,7 +28,9 @@ Process previousProcess;
 int tempID = 0;
 Process* tempProcess;
 double quantum = 0;
-
+int currentTime = 0;
+int randvals[40000];
+char* numtoken;
 
 
 
@@ -73,12 +76,27 @@ int parse(FILE *file, Scheduler* scheduler){
     return 0;
 };
 
-
+int readRandNum(FILE* file) {
+    int i = 0;
+    while (!feof(file)) {
+        if (fgets(line_secondbuffer, 40001, file)!= NULL){
+            numtoken = strtok(line_secondbuffer, "\n");
+            randvals[i] = atoi(numtoken);
+//            printf("%i  %i\n",i, randvals[i]);
+            i++;
+        }
+    }
+    return 0;
+}
 
 
 
 
 int main(int argc, const char * argv[]) {
+    
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/rfile", "r");
+    readRandNum(file);
+    fclose(file);
     Scheduler scheduler;
     file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input0", "r");
     parse(file, &scheduler);
@@ -93,8 +111,10 @@ int main(int argc, const char * argv[]) {
         
         if (runningProcess.ID == 0) {
             if (scheduler.readyEmpty() == true) {
-                runningTime ++;
+                
+                
                 std::cout<<"Running time:" << runningTime << "\n";
+                runningTime ++;
             } else {
                 runningProcess = scheduler.get_readyqueue();
                 if (runningProcess.CB < runningProcess.remainTime) {
@@ -102,13 +122,14 @@ int main(int argc, const char * argv[]) {
                 } else {
                     quantum = runningProcess.remainTime;
                 }
-                for (int i = 1; i < quantum + 1; i++) {
-                    runningTime ++;
-                    if (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
+                for (int i = 0; i < quantum + 1; i++) {
+                    currentTime = runningTime + i;
+                    if (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
                         scheduler.put_readyqueue(scheduler.get_eventqueue());
                     }
-                    std::cout<< "Running time:" << runningTime << "   Running Process:" << runningProcess.ID << "\n";
+                    std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
                 }
+                runningTime = currentTime;
                 runningProcess.remainTime -= quantum;
                 previousProcess.IO = runningProcess.IO;
                 runningProcess.AT = runningProcess.AT + runningProcess.CB + runningProcess.IO;
@@ -119,16 +140,15 @@ int main(int argc, const char * argv[]) {
                 runningProcess.ID = 0;
             
             
-                for (int i = 1; i < previousProcess.IO + 1; i++) {
-                    runningTime ++;
-                    
-                      
-                    while (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
+                for (int i = 0; i < previousProcess.IO + 1; i++) {
+                    currentTime = runningTime + i;
+                    while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
                         scheduler.put_readyqueue(scheduler.get_eventqueue());
                     }
-                    std::cout << "Block time:" << runningTime << "   Blocked State" << "\n";
+                    std::cout << "Block time:" << currentTime << "   Blocked State" << "\n";
                     
                 }
+                runningTime = currentTime;
             }
         }
         
