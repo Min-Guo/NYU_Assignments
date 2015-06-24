@@ -31,7 +31,7 @@ double quantum = 0;
 int currentTime = 0;
 int randvals[40000];
 char* numtoken;
-
+int ofs;
 
 
 
@@ -89,7 +89,9 @@ int readRandNum(FILE* file) {
     return 0;
 }
 
-
+int myrandom(int burst){
+    return 1 + (randvals[ofs]% burst);
+}
 
 
 int main(int argc, const char * argv[]) {
@@ -102,7 +104,7 @@ int main(int argc, const char * argv[]) {
     parse(file, &scheduler);
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
-
+    ofs = tempID;
     while (scheduler.bothEmpty() == false) {
         
         while (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
@@ -117,9 +119,9 @@ int main(int argc, const char * argv[]) {
                 runningTime ++;
             } else {
                 runningProcess = scheduler.get_readyqueue();
-                if (runningProcess.CB < runningProcess.remainTime) {
-                    quantum = runningProcess.CB;
-                } else {
+                ofs++;
+                quantum = myrandom(runningProcess.CB);
+                if (quantum > runningProcess.remainTime) {
                     quantum = runningProcess.remainTime;
                 }
                 for (int i = 0; i < quantum + 1; i++) {
@@ -139,8 +141,9 @@ int main(int argc, const char * argv[]) {
                 
                 runningProcess.ID = 0;
             
-            
-                for (int i = 0; i < previousProcess.IO + 1; i++) {
+                ofs++;
+                quantum = myrandom(previousProcess.IO);
+                for (int i = 0; i < quantum + 1; i++) {
                     currentTime = runningTime + i;
                     while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
                         scheduler.put_readyqueue(scheduler.get_eventqueue());
