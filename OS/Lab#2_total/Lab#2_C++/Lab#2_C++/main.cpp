@@ -27,7 +27,8 @@ Process runningProcess;
 Process previousProcess;
 int tempID = 0;
 Process* tempProcess;
-double quantum = 0;
+double cpuQuantum = 0;
+double ioQuantum = 0;
 int currentTime = 0;
 int randvals[40000];
 char* numtoken;
@@ -90,9 +91,8 @@ int readRandNum(FILE* file) {
 }
 
 int myrandom(int burst){
-    return 1 + (randvals[ofs]% burst);
+    return 1 + (randvals[ofs]  % burst);
 }
-
 
 int main(int argc, const char * argv[]) {
     
@@ -113,18 +113,19 @@ int main(int argc, const char * argv[]) {
         
         if (runningProcess.ID == 0) {
             if (scheduler.readyEmpty() == true) {
-                
-                
                 std::cout<<"Running time:" << runningTime << "\n";
+                if (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
+                    scheduler.put_readyqueue(scheduler.get_eventqueue());
+                }
                 runningTime ++;
             } else {
                 runningProcess = scheduler.get_readyqueue();
                 ofs++;
-                quantum = myrandom(runningProcess.CB);
-                if (quantum > runningProcess.remainTime) {
-                    quantum = runningProcess.remainTime;
+                cpuQuantum = myrandom(runningProcess.CB);
+                if (cpuQuantum > runningProcess.remainTime) {
+                    cpuQuantum = runningProcess.remainTime;
                 }
-                for (int i = 0; i < quantum + 1; i++) {
+                for (int i = 0; i < cpuQuantum + 1; i++) {
                     currentTime = runningTime + i;
                     if (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
                         scheduler.put_readyqueue(scheduler.get_eventqueue());
@@ -132,26 +133,24 @@ int main(int argc, const char * argv[]) {
                     std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
                 }
                 runningTime = currentTime;
-                runningProcess.remainTime -= quantum;
-                previousProcess.IO = runningProcess.IO;
-                runningProcess.AT = runningProcess.AT + runningProcess.CB + runningProcess.IO;
+                runningProcess.remainTime -= cpuQuantum;
                 if (runningProcess.remainTime != 0) {
+                    previousProcess.IO = runningProcess.IO;
+                    ofs++;
+                    ioQuantum = myrandom(previousProcess.IO);
+                    runningProcess.AT = runningProcess.AT + cpuQuantum + ioQuantum;
                     scheduler.put_eventqueue(runningProcess);
-                }
-                
-                runningProcess.ID = 0;
-            
-                ofs++;
-                quantum = myrandom(previousProcess.IO);
-                for (int i = 0; i < quantum + 1; i++) {
-                    currentTime = runningTime + i;
-                    while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
-                        scheduler.put_readyqueue(scheduler.get_eventqueue());
-                    }
-                    std::cout << "Block time:" << currentTime << "   Blocked State" << "\n";
+                    for (int i = 0; i < ioQuantum + 1; i++) {
+                        currentTime = runningTime + i;
+                        while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
+                            scheduler.put_readyqueue(scheduler.get_eventqueue());
+                        }
+                        std::cout << "Block time:" << currentTime << "   Blocked State" << "\n";
                     
+                    }
+                    runningTime = currentTime;
                 }
-                runningTime = currentTime;
+                runningProcess.ID = 0;
             }
         }
         
