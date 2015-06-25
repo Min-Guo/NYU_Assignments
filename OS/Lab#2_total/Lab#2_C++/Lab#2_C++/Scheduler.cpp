@@ -45,7 +45,7 @@ bool Scheduler::bothEmpty() {
 
 
 bool Scheduler::isReady(double time) {
-    if (event_queue.top().AT == time) return true;
+    if (event_queue.top().AT <= time) return true;
     return false;
 }
 

@@ -100,7 +100,7 @@ int main(int argc, const char * argv[]) {
     readRandNum(file);
     fclose(file);
     Scheduler scheduler;
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input0", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input1", "r");
     parse(file, &scheduler);
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
@@ -114,12 +114,13 @@ int main(int argc, const char * argv[]) {
         if (runningProcess.ID == 0) {
             if (scheduler.readyEmpty() == true) {
                 std::cout<<"Running time:" << runningTime << "\n";
-                if (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
+                while (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
                     scheduler.put_readyqueue(scheduler.get_eventqueue());
                 }
                 runningTime ++;
             } else {
                 runningProcess = scheduler.get_readyqueue();
+//                printf("RunningProcess is %i", runningProcess.ID);
                 ofs++;
                 cpuQuantum = myrandom(runningProcess.CB);
                 if (cpuQuantum > runningProcess.remainTime) {
