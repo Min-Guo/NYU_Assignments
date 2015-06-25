@@ -17,7 +17,7 @@ struct Process{
     int IO; /* IO burst*/
     bool ioRead;
     double remainTime;
-};
+}; 
 
 
 class CompareAT {
@@ -26,8 +26,8 @@ public:
     {
         if (process1.AT > process2.AT) {
             return true;
-        } else if (process1.AT == process2.AT) {
-            if (process1.order > process2.order) {
+        } else if (process1.AT == process2.AT){
+            if (process1.order > process2.order){
                 return true;
             } else {
                 return false;
@@ -35,8 +35,8 @@ public:
         } else {
             return false;
         }
-        
     }
+    
 };
 
 class Scheduler{
