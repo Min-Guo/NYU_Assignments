@@ -30,7 +30,7 @@ Process* tempProcess;
 double cpuQuantum = 0;
 double ioQuantum = 0;
 int currentTime = 0;
-int randvals[40000];
+int randvals[40001];
 char* numtoken;
 int ofs;
 
