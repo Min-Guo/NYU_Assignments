@@ -139,14 +139,14 @@ int main(int argc, const char * argv[]) {
                     previousProcess.IO = runningProcess.IO;
                     ofs++;
                     ioQuantum = myrandom(previousProcess.IO);
-                    runningProcess.AT = runningProcess.AT + cpuQuantum + ioQuantum;
+                    runningProcess.AT = runningTime + ioQuantum;
                     scheduler.put_eventqueue(runningProcess);
                     if (scheduler.readyEmpty()) {
                       
                         for (int i = 0; i < ioQuantum + 1; i++) {
                             currentTime = runningTime + i;
-                            while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
-                                scheduler.put_readyqueue(scheduler.get_eventqueue());
+                            if(scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
+                                goto CpuRun;
                             }
                             std::cout << "Block time:" << currentTime << "   Blocked State" << "\n";
                     
@@ -154,7 +154,13 @@ int main(int argc, const char * argv[]) {
                         runningTime = currentTime;
                     }
                 }
+            CpuRun:
+                runningTime = currentTime;
                 runningProcess.ID = 0;
+                runningProcess.AT = 0;
+                runningProcess.TC = 0;
+                runningProcess.CB = 0;
+                runningProcess.IO = 0;
             }
         }
         
