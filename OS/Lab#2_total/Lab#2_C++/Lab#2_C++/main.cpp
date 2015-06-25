@@ -100,7 +100,7 @@ int main(int argc, const char * argv[]) {
     readRandNum(file);
     fclose(file);
     Scheduler scheduler;
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input1", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input2", "r");
     parse(file, &scheduler);
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
@@ -141,15 +141,18 @@ int main(int argc, const char * argv[]) {
                     ioQuantum = myrandom(previousProcess.IO);
                     runningProcess.AT = runningProcess.AT + cpuQuantum + ioQuantum;
                     scheduler.put_eventqueue(runningProcess);
-                    for (int i = 0; i < ioQuantum + 1; i++) {
-                        currentTime = runningTime + i;
-                        while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
-                            scheduler.put_readyqueue(scheduler.get_eventqueue());
-                        }
-                        std::cout << "Block time:" << currentTime << "   Blocked State" << "\n";
+                    if (scheduler.readyEmpty()) {
+                      
+                        for (int i = 0; i < ioQuantum + 1; i++) {
+                            currentTime = runningTime + i;
+                            while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
+                                scheduler.put_readyqueue(scheduler.get_eventqueue());
+                            }
+                            std::cout << "Block time:" << currentTime << "   Blocked State" << "\n";
                     
+                        }
+                        runningTime = currentTime;
                     }
-                    runningTime = currentTime;
                 }
                 runningProcess.ID = 0;
             }
