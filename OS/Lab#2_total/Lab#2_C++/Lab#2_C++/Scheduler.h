@@ -8,6 +8,7 @@
 struct Process{
     int ID;
     int order;
+    int tempAT;
     int AT; /* arriving time*/
     bool atRead; /* if AT has been read from input file, it is true*/
     int TC; /* Total CPU time */
@@ -17,6 +18,9 @@ struct Process{
     int IO; /* IO burst*/
     bool ioRead;
     double remainTime;
+    int FT;
+    int IT;
+    int CW;
 }; 
 
 
