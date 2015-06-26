@@ -64,10 +64,30 @@ public:
     
 };
 
+class SJF {
+public:
+    bool operator()(Process& process1, Process& process2)
+    {
+        if (process1.remainTime > process2.remainTime) {
+            return true;
+        } else if (process1.remainTime == process2.remainTime){
+            if (process1.order > process2.order){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    
+};
+
 class Scheduler{
 private:
     std::priority_queue<Process, std::vector<Process>, FCFS> event_queue;
-    std::priority_queue<Process, std::vector<Process>, LCFS> ready_queue;
+    std::priority_queue<Process, std::vector<Process>, SJF> ready_queue; /*FCFS: both eventqueue and readyqueue are assigned to FCFS*/
+                                                                            /*LCFS: eventqueue:FCFS, readyqueue:LCFS*/
 public:
     void put_eventqueue(Process process);
     Process get_eventqueue();
