@@ -87,7 +87,6 @@ int readRandNum(FILE* file) {
         if (fgets(line_secondbuffer, 40001, file)!= NULL){
             numtoken = strtok(line_secondbuffer, "\n");
             randvals[i] = atoi(numtoken);
-            //            printf("%i  %i\n",i, randvals[i]);
             i++;
         }
     }
@@ -129,10 +128,10 @@ int main(int argc, const char * argv[]) {
                 runningTime ++;
             } else {
                 runningProcess = scheduler.get_readyqueue();
-                //                printf("RunningProcess is %i", runningProcess.ID);
                 ofs++;
                 
                 cpuQuantum = myrandom(runningProcess.CB);
+                processList[runningProcess.ID].randCPU += cpuQuantum;
                 if (cpuQuantum > runningProcess.remainTime) {
                     cpuQuantum = runningProcess.remainTime;
                 }
@@ -160,6 +159,9 @@ int main(int argc, const char * argv[]) {
                     processList[runningProcess.ID].FT = runningTime;
                     printf("Process%i  finish:%i\n", runningProcess.ID, processList[runningProcess.ID].FT);
                     printf("Process%i  CW:%i\n", runningProcess.ID, processList[runningProcess.ID].CW);
+                    printf("Process%i  randcpu:%i\n", runningProcess.ID, processList[runningProcess.ID].randCPU);
+                    printf("Process%i  IT:%i\n", runningProcess.ID, processList[runningProcess.ID].IT);
+                    
                     
                 }
                 runningProcess.ID = 0;

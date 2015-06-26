@@ -21,10 +21,12 @@ struct Process{
     int FT;
     int IT;
     int CW;
+    int randCPU;
+    int randIO;
 }; 
 
 
-class CompareAT {
+class FCFS {
 public:
     bool operator()(Process& process1, Process& process2)
     {
@@ -43,10 +45,29 @@ public:
     
 };
 
+class LCFS {
+public:
+    bool operator()(Process& process1, Process& process2)
+    {
+        if (process1.AT < process2.AT) {
+            return true;
+        } else if (process1.AT == process2.AT){
+            if (process1.order < process2.order){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    
+};
+
 class Scheduler{
 private:
-    std::priority_queue<Process, std::vector<Process>, CompareAT> event_queue;
-    std::priority_queue<Process, std::vector<Process>, CompareAT> ready_queue;
+    std::priority_queue<Process, std::vector<Process>, FCFS> event_queue;
+    std::priority_queue<Process, std::vector<Process>, LCFS> ready_queue;
 public:
     void put_eventqueue(Process process);
     Process get_eventqueue();
