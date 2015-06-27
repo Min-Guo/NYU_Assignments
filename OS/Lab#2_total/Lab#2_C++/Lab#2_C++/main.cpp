@@ -130,13 +130,28 @@ int main(int argc, const char * argv[]) {
             } else {
                 runningProcess = scheduler.get_readyqueue();
                 ofs++;
-                
-                cpuBurst = myrandom(runningProcess.CB);
-                quantum = cpuBurst;
-                processList[runningProcess.ID].randCPU += quantum;
-                if (quantum > runningProcess.remainTime) {
-                    quantum = runningProcess.remainTime;
+                if (runningProcess.cpuBurstRemain == 0) {
+                    cpuBurst = myrandom(runningProcess.CB);
                 }
+                
+                quantum = cpuBurst;
+//                quantum = 2;
+                if (quantum >= cpuBurst) {
+                    quantum = cpuBurst;
+                    runningProcess.cpuBurstRemain = 0;
+                    if (quantum > runningProcess.remainTime) {
+                        quantum = runningProcess.remainTime;
+                    }
+                } else {
+                    runningProcess.cpuBurstRemain = cpuBurst - quantum;
+                    if (quantum > runningProcess.remainTime) {
+                        quantum = runningProcess.remainTime;
+                    }
+                }
+                processList[runningProcess.ID].randCPU += quantum;
+//                if (quantum > runningProcess.remainTime) {
+//                    quantum = runningProcess.remainTime;
+//                }
                 readyTime(runningProcess.ID);
                 for (int i = 0; i < quantum + 1; i++) {
                     currentTime = runningTime + i;
@@ -145,11 +160,14 @@ int main(int argc, const char * argv[]) {
                     }
 //                    std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
                 }
-                if (quantum < cpuBurst) {
-                    runningProcess.cpuBurstRemain = 0;
-                } else {
-                    runningProcess.cpuBurstRemain = cpuBurst - quantum;
-                }
+                
+//                if (quantum == cpuBurst) {
+//                    runningProcess.cpuBurstRemain = 0;
+//                } else {
+//                    runningProcess.cpuBurstRemain = cpuBurst - quantum;
+//                }
+//                
+                
                 if (runningProcess.cpuBurstRemain !=0) {
                     scheduler.put_readyqueue(runningProcess);
                 } else{

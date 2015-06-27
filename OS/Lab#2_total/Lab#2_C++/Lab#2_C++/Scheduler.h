@@ -87,7 +87,7 @@ public:
 class Scheduler{
 private:
     std::priority_queue<Process, std::vector<Process>, FCFS> event_queue;
-    std::priority_queue<Process, std::vector<Process>, LCFS> ready_queue;    /*FCFS: both eventqueue and readyqueue are assigned to FCFS*/
+    std::priority_queue<Process, std::vector<Process>, SJF> ready_queue;    /*FCFS: both eventqueue and readyqueue are assigned to FCFS*/
                                                                             /*LCFS: eventqueue:FCFS, readyqueue:LCFS*/
                                                                             /*SJF: readyqueue:SJF*/
 public:
