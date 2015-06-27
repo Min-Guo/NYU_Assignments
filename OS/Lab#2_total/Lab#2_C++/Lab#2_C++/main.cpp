@@ -109,7 +109,7 @@ int main(int argc, const char * argv[]) {
     readRandNum(file);
     fclose(file);
     Scheduler scheduler;
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input6", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input0", "r");
     parse(file, &scheduler);
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
@@ -137,7 +137,7 @@ int main(int argc, const char * argv[]) {
                 }
                 
 //                quantum = runningProcess.cpuBurstRemain;
-                                quantum = 2;
+                                quantum = 5;
                 if (quantum >= runningProcess.cpuBurstRemain) {
                     quantum = runningProcess.cpuBurstRemain;
                     runningProcess.cpuBurstRemain = 0;
@@ -189,12 +189,6 @@ int main(int argc, const char * argv[]) {
                         
                         
                     }
-//                    runningProcess.ID = 0;
-//                    runningProcess.AT = 0;
-//                    runningProcess.TC = 0;
-//                    runningProcess.CB = 0;
-//                    runningProcess.IO = 0;
-//                    runningProcess.order = 0;
                 }
                 runningProcess.ID = 0;
                 runningProcess.AT = 0;
