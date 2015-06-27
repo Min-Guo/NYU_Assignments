@@ -27,12 +27,13 @@ Process runningProcess;
 Process previousProcess;
 int tempID = 0;
 Process processList[512];
-int cpuQuantum = 0;
-double ioQuantum = 0;
+int cpuBurst = 0;
+int ioQuantum = 0;
 int currentTime = 0;
 int randvals[40001];
 char* numtoken;
 int ofs;
+int quantum = 0;
 
 
 
@@ -130,46 +131,55 @@ int main(int argc, const char * argv[]) {
                 runningProcess = scheduler.get_readyqueue();
                 ofs++;
                 
-                cpuQuantum = myrandom(runningProcess.CB);
-                processList[runningProcess.ID].randCPU += cpuQuantum;
-                if (cpuQuantum > runningProcess.remainTime) {
-                    cpuQuantum = runningProcess.remainTime;
+                cpuBurst = myrandom(runningProcess.CB);
+                quantum = cpuBurst;
+                processList[runningProcess.ID].randCPU += quantum;
+                if (quantum > runningProcess.remainTime) {
+                    quantum = runningProcess.remainTime;
                 }
                 readyTime(runningProcess.ID);
-                for (int i = 0; i < cpuQuantum + 1; i++) {
+                for (int i = 0; i < quantum + 1; i++) {
                     currentTime = runningTime + i;
                     while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
                         scheduler.put_readyqueue(scheduler.get_eventqueue());
                     }
 //                    std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
                 }
-                
-                runningTime = currentTime;
-                runningProcess.order = runningTime;
-                runningProcess.remainTime -= cpuQuantum;
-                if (runningProcess.remainTime != 0) {
-                    previousProcess.IO = runningProcess.IO;
-                    ofs++;
-                    ioQuantum = myrandom(previousProcess.IO);
-                    processList[runningProcess.ID].IT += ioQuantum;
-                    runningProcess.AT = runningTime + ioQuantum;
-                    processList[runningProcess.ID].tempAT = runningProcess.AT;
-                    scheduler.put_eventqueue(runningProcess);
+                if (quantum < cpuBurst) {
+                    runningProcess.cpuBurstRemain = 0;
                 } else {
-                    processList[runningProcess.ID].FT = runningTime;
-                    printf("Process%i  finish:%i\n", runningProcess.ID, processList[runningProcess.ID].FT);
-                    printf("Process%i  CW:%i\n", runningProcess.ID, processList[runningProcess.ID].CW);
-                    printf("Process%i  randcpu:%i\n", runningProcess.ID, processList[runningProcess.ID].randCPU);
-                    printf("Process%i  IT:%i\n", runningProcess.ID, processList[runningProcess.ID].IT);
-                    
-                    
+                    runningProcess.cpuBurstRemain = cpuBurst - quantum;
                 }
-                runningProcess.ID = 0;
-                runningProcess.AT = 0;
-                runningProcess.TC = 0;
-                runningProcess.CB = 0;
-                runningProcess.IO = 0;
-                runningProcess.order = 0;
+                if (runningProcess.cpuBurstRemain !=0) {
+                    scheduler.put_readyqueue(runningProcess);
+                } else{
+                    runningTime = currentTime;
+                    runningProcess.order = runningTime;
+                    runningProcess.remainTime -= quantum;
+                    if (runningProcess.remainTime != 0) {
+                        previousProcess.IO = runningProcess.IO;
+                        ofs++;
+                        ioQuantum = myrandom(previousProcess.IO);
+                        processList[runningProcess.ID].IT += ioQuantum;
+                        runningProcess.AT = runningTime + ioQuantum;
+                        processList[runningProcess.ID].tempAT = runningProcess.AT;
+                        scheduler.put_eventqueue(runningProcess);
+                    } else {
+                        processList[runningProcess.ID].FT = runningTime;
+                        printf("Process%i  finish:%i\n", runningProcess.ID, processList[runningProcess.ID].FT);
+                        printf("Process%i  CW:%i\n", runningProcess.ID, processList[runningProcess.ID].CW);
+                        printf("Process%i  randcpu:%i\n", runningProcess.ID, processList[runningProcess.ID].randCPU);
+                        printf("Process%i  IT:%i\n", runningProcess.ID, processList[runningProcess.ID].IT);
+                    
+                    
+                    }
+                    runningProcess.ID = 0;
+                    runningProcess.AT = 0;
+                    runningProcess.TC = 0;
+                    runningProcess.CB = 0;
+                    runningProcess.IO = 0;
+                    runningProcess.order = 0;
+                }
             }
         }
         

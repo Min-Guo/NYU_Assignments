@@ -17,12 +17,13 @@ struct Process{
     bool cbRead;
     int IO; /* IO burst*/
     bool ioRead;
-    double remainTime;
+    int remainTime;
     int FT;
     int IT;
     int CW;
     int randCPU;
     int randIO;
+    int cpuBurstRemain;
 }; 
 
 
@@ -86,8 +87,9 @@ public:
 class Scheduler{
 private:
     std::priority_queue<Process, std::vector<Process>, FCFS> event_queue;
-    std::priority_queue<Process, std::vector<Process>, SJF> ready_queue; /*FCFS: both eventqueue and readyqueue are assigned to FCFS*/
+    std::priority_queue<Process, std::vector<Process>, LCFS> ready_queue;    /*FCFS: both eventqueue and readyqueue are assigned to FCFS*/
                                                                             /*LCFS: eventqueue:FCFS, readyqueue:LCFS*/
+                                                                            /*SJF: readyqueue:SJF*/
 public:
     void put_eventqueue(Process process);
     Process get_eventqueue();
