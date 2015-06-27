@@ -109,7 +109,7 @@ int main(int argc, const char * argv[]) {
     readRandNum(file);
     fclose(file);
     Scheduler scheduler;
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input0", "r");
+    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input6", "r");
     parse(file, &scheduler);
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
@@ -167,6 +167,7 @@ int main(int argc, const char * argv[]) {
                     runningProcess.order = runningTime;
                     runningProcess.remainTime -= quantum;
                     runningProcess.AT = runningTime;
+                    processList[runningProcess.ID].tempAT = runningTime;
                     scheduler.put_readyqueue(runningProcess);
                 } else{
                     runningTime = currentTime;
