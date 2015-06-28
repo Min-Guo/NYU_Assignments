@@ -52,7 +52,7 @@ int myrandom(int burst){
 }
 
 
-int parse(FILE *file, Scheduler* scheduler){
+int parse(FILE *file, Scheduler<SchedulerMethod>* scheduler){
     
     int i = 0;
     ofs = 1;
@@ -112,7 +112,7 @@ int main(int argc, const char * argv[]) {
     file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/rfile", "r");
     readRandNum(file);
     fclose(file);
-    Scheduler scheduler;
+    Scheduler<SchedulerMethod> scheduler;
     file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input6", "r");
     parse(file, &scheduler);
     fclose(file);
@@ -137,11 +137,11 @@ int main(int argc, const char * argv[]) {
                     ofs++;
                     cpuBurst = myrandom(runningProcess.CB);
                     runningProcess.cpuBurstRemain = cpuBurst;
-//                    printf("ofs:%i   cb:%i    rem:%i\n", ofs, cpuBurst, runningProcess.remainTime);
+                    //                    printf("ofs:%i   cb:%i    rem:%i\n", ofs, cpuBurst, runningProcess.remainTime);
                 }
                 
                 quantum = runningProcess.cpuBurstRemain;
-//                                quantum = 5;
+                //                                quantum = 5;
                 if (quantum >= runningProcess.cpuBurstRemain) {
                     quantum = runningProcess.cpuBurstRemain;
                     runningProcess.cpuBurstRemain = 0;
@@ -156,14 +156,14 @@ int main(int argc, const char * argv[]) {
                     }
                 }
                 processList[runningProcess.ID].randCPU += quantum;
-
+                
                 readyTime(runningProcess.ID);
                 for (int i = 0; i < quantum + 1; i++) {
                     currentTime = runningTime + i;
                     while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
                         scheduler.put_readyqueue(scheduler.get_eventqueue());
                     }
-//                                        std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
+                    //                                        std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
                 }
                 
                 if (runningProcess.cpuBurstRemain !=0) {

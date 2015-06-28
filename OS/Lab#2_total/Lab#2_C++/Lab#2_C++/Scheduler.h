@@ -25,11 +25,20 @@ struct Process{
     int randCPU;
     int randIO;
     int cpuBurstRemain;
-}; 
+};
 
-
-class FCFS {
+class SchedulerMethod{
 public:
+    virtual bool operator()(Process& process1, Process& process2);
+};
+
+
+
+
+
+class FCFS:public SchedulerMethod {
+public:
+//    bool Algorithm(){
     bool operator()(Process& process1, Process& process2)
     {
         if (process1.AT > process2.AT) {
@@ -44,10 +53,11 @@ public:
             return false;
         }
     }
+//    }
     
 };
 
-class LCFS {
+class LCFS:public SchedulerMethod {
 public:
     bool operator()(Process& process1, Process& process2)
     {
@@ -66,7 +76,7 @@ public:
     
 };
 
-class SJF {
+class SJF:public SchedulerMethod {
 public:
     bool operator()(Process& process1, Process& process2)
     {
@@ -85,12 +95,14 @@ public:
     
 };
 
+template <class SchedulerMethod>
 class Scheduler{
 private:
+    bool queueAlgorithm;
     std::priority_queue<Process, std::vector<Process>, FCFS> event_queue;
-    std::priority_queue<Process, std::vector<Process>, FCFS> ready_queue;    /*FCFS: both eventqueue and readyqueue are assigned to FCFS*/
-                                                                            /*LCFS: eventqueue:FCFS, readyqueue:LCFS*/
-                                                                            /*SJF: readyqueue:SJF*/
+    std::priority_queue<Process, std::vector<Process>, SchedulerMethod> ready_queue;    /*FCFS: both eventqueue and readyqueue are assigned to FCFS*/
+    /*LCFS: eventqueue:FCFS, readyqueue:LCFS*/
+    /*SJF: readyqueue:SJF*/
 public:
     void put_eventqueue(Process process);
     Process get_eventqueue();
@@ -101,6 +113,10 @@ public:
     bool readyEmpty();
     bool eventEmpty();
     Process checkFirstEvent();
+    //    Scheduler(SchedulerMethod schedulerMethod){
+    //        std::priority_queue<Process, std::vector<Process>, SchedulerMethod> ready_queue = std::priority_queue<Process, std::vector<Process>, schedulerMethod.> ready_queue;
+    //        std::priority_queue<Process, std::vector<Process>, SchedulerMethod> event_queue = std::priority_queue<Process, std::vector<Process>, schedulerMethod> event_queue;
+    //    }
 };
 
 
