@@ -35,12 +35,27 @@ char* numtoken;
 int ofs;
 int quantum = 0;
 
+int readRandNum(FILE* file) {
+    int i = 0;
+    while (!feof(file)) {
+        if (fgets(line_secondbuffer, 40001, file)!= NULL){
+            numtoken = strtok(line_secondbuffer, "\n");
+            randvals[i] = atoi(numtoken);
+            i++;
+        }
+    }
+    return 0;
+}
 
+int myrandom(int burst){
+    return 1 + (randvals[ofs]  % burst);
+}
 
 
 int parse(FILE *file, Scheduler* scheduler){
     
     int i = 0;
+    ofs = 1;
     while (!feof(file)) {
         if (fgets(line_buffer, 512, file)!= NULL) {
             
@@ -71,8 +86,11 @@ int parse(FILE *file, Scheduler* scheduler){
                 }
                 process.ID = tempID;
                 process.order = tempID;
+                process.priority = myrandom(4);
+                processList[i].priority = process.priority;
                 tempID++;
                 i++;
+                ofs++;
                 scheduler->put_eventqueue(process);
                 
                 
@@ -82,21 +100,7 @@ int parse(FILE *file, Scheduler* scheduler){
     return 0;
 };
 
-int readRandNum(FILE* file) {
-    int i = 0;
-    while (!feof(file)) {
-        if (fgets(line_secondbuffer, 40001, file)!= NULL){
-            numtoken = strtok(line_secondbuffer, "\n");
-            randvals[i] = atoi(numtoken);
-            i++;
-        }
-    }
-    return 0;
-}
 
-int myrandom(int burst){
-    return 1 + (randvals[ofs]  % burst);
-}
 
 int readyTime(int j){
     processList[j].CW = processList[j].CW + (runningTime - processList[j].tempAT);
@@ -136,8 +140,8 @@ int main(int argc, const char * argv[]) {
 //                    printf("ofs:%i   cb:%i    rem:%i\n", ofs, cpuBurst, runningProcess.remainTime);
                 }
                 
-//                quantum = runningProcess.cpuBurstRemain;
-                                quantum = 5;
+                quantum = runningProcess.cpuBurstRemain;
+//                                quantum = 5;
                 if (quantum >= runningProcess.cpuBurstRemain) {
                     quantum = runningProcess.cpuBurstRemain;
                     runningProcess.cpuBurstRemain = 0;
@@ -187,6 +191,7 @@ int main(int argc, const char * argv[]) {
                         printf("Process%i  CW:%i\n", runningProcess.ID, processList[runningProcess.ID].CW);
                         printf("Process%i  randcpu:%i\n", runningProcess.ID, processList[runningProcess.ID].randCPU);
                         printf("Process%i  IT:%i\n", runningProcess.ID, processList[runningProcess.ID].IT);
+                        printf("Process%i  PRIO:%i\n", runningProcess.ID, processList[runningProcess.ID].priority);
                         
                         
                     }

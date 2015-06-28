@@ -7,6 +7,7 @@
 
 struct Process{
     int ID;
+    int priority;
     int order;
     int tempAT;
     int AT; /* arriving time*/
