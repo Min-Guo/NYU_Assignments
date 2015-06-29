@@ -52,7 +52,7 @@ int myrandom(int burst){
 }
 
 
-int parse(FILE *file, Scheduler<SchedulerMethod>* scheduler){
+int parse(FILE *file, Scheduler* scheduler){
     
     int i = 0;
     ofs = 1;
@@ -109,29 +109,39 @@ int readyTime(int j){
 
 int main(int argc, const char * argv[]) {
     
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/rfile", "r");
+    file = fopen(argv[1], "r");
+//    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/rfile", "r");
     readRandNum(file);
     fclose(file);
-    Scheduler<SchedulerMethod> scheduler;
-    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input6", "r");
-    parse(file, &scheduler);
+    Scheduler* scheduler;
+    if (strcmp(argv[3], "-sF")) {
+        scheduler = new FCFSScheduler();
+    } else if (strcmp(argv[3], "-sL")) {
+        scheduler = new LCFSScheduler();
+    } else {
+        scheduler = new SJFScheduler();
+    }
+    
+    file = fopen(argv[2], "r");
+//    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input6", "r");
+    parse(file, scheduler);
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
     ofs = tempID;
-    while (scheduler.bothEmpty() == false) {
+    while (scheduler->bothEmpty() == false) {
         
-        while (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
-            scheduler.put_readyqueue(scheduler.get_eventqueue());
+        while (scheduler->isReady(runningTime)== true && !scheduler->eventEmpty()) {
+            scheduler->put_readyqueue(scheduler->get_eventqueue());
         }
         
         if (runningProcess.ID == 0) {
-            if (scheduler.readyEmpty() == true) {
-                while (scheduler.isReady(runningTime)== true && !scheduler.eventEmpty()) {
-                    scheduler.put_readyqueue(scheduler.get_eventqueue());
+            if (scheduler->readyEmpty() == true) {
+                while (scheduler->isReady(runningTime)== true && !scheduler->eventEmpty()) {
+                    scheduler->put_readyqueue(scheduler->get_eventqueue());
                 }
                 runningTime ++;
             } else {
-                runningProcess = scheduler.get_readyqueue();
+                runningProcess = scheduler->get_readyqueue();
                 
                 if (runningProcess.cpuBurstRemain == 0) {
                     ofs++;
@@ -140,7 +150,7 @@ int main(int argc, const char * argv[]) {
                     //                    printf("ofs:%i   cb:%i    rem:%i\n", ofs, cpuBurst, runningProcess.remainTime);
                 }
                 
-                quantum = runningProcess.cpuBurstRemain;
+                quantum = cpuBurst;
                 //                                quantum = 5;
                 if (quantum >= runningProcess.cpuBurstRemain) {
                     quantum = runningProcess.cpuBurstRemain;
@@ -160,8 +170,8 @@ int main(int argc, const char * argv[]) {
                 readyTime(runningProcess.ID);
                 for (int i = 0; i < quantum + 1; i++) {
                     currentTime = runningTime + i;
-                    while (scheduler.isReady(currentTime)== true && !scheduler.eventEmpty()) {
-                        scheduler.put_readyqueue(scheduler.get_eventqueue());
+                    while (scheduler->isReady(currentTime)== true && !scheduler->eventEmpty()) {
+                        scheduler->put_readyqueue(scheduler->get_eventqueue());
                     }
                     //                                        std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
                 }
@@ -172,7 +182,7 @@ int main(int argc, const char * argv[]) {
                     runningProcess.remainTime -= quantum;
                     runningProcess.AT = runningTime;
                     processList[runningProcess.ID].tempAT = runningTime;
-                    scheduler.put_readyqueue(runningProcess);
+                    scheduler->put_readyqueue(runningProcess);
                 } else{
                     runningTime = currentTime;
                     runningProcess.order = runningTime;
@@ -184,7 +194,7 @@ int main(int argc, const char * argv[]) {
                         processList[runningProcess.ID].IT += ioQuantum;
                         runningProcess.AT = runningTime + ioQuantum;
                         processList[runningProcess.ID].tempAT = runningProcess.AT;
-                        scheduler.put_eventqueue(runningProcess);
+                        scheduler->put_eventqueue(runningProcess);
                     } else {
                         processList[runningProcess.ID].FT = runningTime;
                         printf("Process%i  finish:%i\n", runningProcess.ID, processList[runningProcess.ID].FT);
@@ -204,8 +214,8 @@ int main(int argc, const char * argv[]) {
                 runningProcess.order = 0;
             }
         }
-        
-        
+
+    
         
     }
     

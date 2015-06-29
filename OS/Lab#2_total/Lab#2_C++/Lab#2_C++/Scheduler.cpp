@@ -11,7 +11,6 @@
 
 
 
-
 void Scheduler::put_eventqueue(Process process){
     event_queue.push(process);
 }
@@ -21,6 +20,7 @@ Process Scheduler::checkFirstEvent(){
     return process;
 }
 
+
 Process Scheduler::get_eventqueue(){
     Process process = event_queue.top();
     event_queue.pop();
@@ -28,31 +28,94 @@ Process Scheduler::get_eventqueue(){
 }
 
 
-void Scheduler::put_readyqueue(Process process){
+void FCFSScheduler::put_readyqueue(Process process){
     ready_queue.push(process);
 }
 
-Process Scheduler::get_readyqueue(){
+
+Process FCFSScheduler::get_readyqueue(){
     Process process = ready_queue.top();
     ready_queue.pop();
     return process;
 }
 
-bool Scheduler::bothEmpty() {
+
+bool FCFSScheduler::bothEmpty() {
     if (!event_queue.empty() || !ready_queue.empty()) return false;
     return true;
 }
 
 
-bool Scheduler::isReady(double time) {
+bool FCFSScheduler::isReady(double time) {
     if (event_queue.top().AT <= time) return true;
     return false;
 }
 
-bool Scheduler::readyEmpty(){
+
+bool FCFSScheduler::readyEmpty(){
     if (ready_queue.empty()) return true;
     return false;
 }
+
+
+void LCFSScheduler::put_readyqueue(Process process){
+    ready_queue.push(process);
+}
+
+
+Process LCFSScheduler::get_readyqueue(){
+    Process process = ready_queue.top();
+    ready_queue.pop();
+    return process;
+}
+
+
+bool LCFSScheduler::bothEmpty() {
+    if (!event_queue.empty() || !ready_queue.empty()) return false;
+    return true;
+}
+
+
+bool LCFSScheduler::isReady(double time) {
+    if (event_queue.top().AT <= time) return true;
+    return false;
+}
+
+
+bool LCFSScheduler::readyEmpty(){
+    if (ready_queue.empty()) return true;
+    return false;
+}
+
+void SJFScheduler::put_readyqueue(Process process){
+    ready_queue.push(process);
+}
+
+
+Process SJFScheduler::get_readyqueue(){
+    Process process = ready_queue.top();
+    ready_queue.pop();
+    return process;
+}
+
+
+bool SJFScheduler::bothEmpty() {
+    if (!event_queue.empty() || !ready_queue.empty()) return false;
+    return true;
+}
+
+
+bool SJFScheduler::isReady(double time) {
+    if (event_queue.top().AT <= time) return true;
+    return false;
+}
+
+
+bool SJFScheduler::readyEmpty(){
+    if (ready_queue.empty()) return true;
+    return false;
+}
+
 
 bool Scheduler::eventEmpty(){
     if (event_queue.empty()) return true;
