@@ -68,7 +68,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-sF"
+            argument = "-sR2"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
