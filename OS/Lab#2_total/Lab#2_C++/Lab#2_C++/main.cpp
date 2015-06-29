@@ -34,6 +34,11 @@ int randvals[40001];
 char* numtoken;
 int ofs;
 int quantum = 0;
+int number = 0;
+char quantumAssign[15];
+int TotalCpu = 0;
+Process tempProcess;
+//char* tempArgv = "-sR2";
 
 int readRandNum(FILE* file) {
     int i = 0;
@@ -73,6 +78,8 @@ int parse(FILE *file, Scheduler* scheduler){
                     } else if (process.tcRead == false){
                         process.TC = atoi(token);
                         process.remainTime = atoi(token);
+                        TotalCpu += process.TC;
+                        printf("TotalCpu: %i\n", TotalCpu);
                         process.tcRead = true;
                     } else if (process.cbRead == false){
                         process.CB = atoi(token);
@@ -110,20 +117,51 @@ int readyTime(int j){
 int main(int argc, const char * argv[]) {
     
     file = fopen(argv[1], "r");
-//    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/rfile", "r");
     readRandNum(file);
     fclose(file);
     Scheduler* scheduler;
-    if (strcmp(argv[3], "-sF")) {
+//    
+//    for (int i = 0; i < 4; i++) {
+//        std::cout<<tempArgv[i]<<"\n";
+//    }
+//    strcpy(tempArgv, argv[3]);
+//    for (int i = 0; i < 4; i++) {
+//        printf("tempArgv[%i] is %s\n", i, &tempArgv[i]);
+//    }
+//    if (strcmp(&tempArgv[2], "R") == 0) {
+//        std::cout<<"tempArgv[2]  "<<tempArgv[2]<<"\n";
+//    }
+//    if (isdigit(tempArgv[3])) {
+//        printf("true %s\n", &tempArgv[3]);
+//    } else {
+//        printf("false\n");
+//    }
+    
+    if (strcmp(&argv[3][2], "F") == 0) {
         scheduler = new FCFSScheduler();
-    } else if (strcmp(argv[3], "-sL")) {
+        strcpy(quantumAssign, "runningCpuBurst");
+    } else if (strcmp(&argv[3][2], "L") == 0) {
         scheduler = new LCFSScheduler();
-    } else {
+        strcpy(quantumAssign, "runningCpuBurst");
+    } else if (strcmp(&argv[3][2], "S") == 0){
         scheduler = new SJFScheduler();
+        strcpy(quantumAssign, "runningCpuBurst");
+    } else if (strcmp(&argv[3][2], "R2") == 0) {
+        scheduler = new FCFSScheduler();
+        number = atoi(&argv[3][3]);
+        quantum = number;
+    } else if (strcmp(&argv[3][2], "P2") == 0) {
+        if (isdigit(argv[3][3])) {
+            number = atoi(&argv[3][3]);
+            quantum = number;
+        } else {
+            printf("Need a number.\n");
+        }
+    } else {
+        printf("Argument is expected.");
     }
     
     file = fopen(argv[2], "r");
-//    file = fopen("/Users/Min/Development/NYU_Assignments/OS/Lab#2_total/lab2_assign/input6", "r");
     parse(file, scheduler);
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
@@ -150,8 +188,12 @@ int main(int argc, const char * argv[]) {
                     //                    printf("ofs:%i   cb:%i    rem:%i\n", ofs, cpuBurst, runningProcess.remainTime);
                 }
                 
-                quantum = cpuBurst;
-                //                                quantum = 5;
+                if (strcmp(quantumAssign, "runningCpuBurst") == 0 ) {
+                    quantum = runningProcess.cpuBurstRemain;
+                } else {
+                    quantum = number;
+                }
+            
                 if (quantum >= runningProcess.cpuBurstRemain) {
                     quantum = runningProcess.cpuBurstRemain;
                     runningProcess.cpuBurstRemain = 0;
@@ -165,7 +207,7 @@ int main(int argc, const char * argv[]) {
                         runningProcess.cpuBurstRemain = 0;
                     }
                 }
-                processList[runningProcess.ID].randCPU += quantum;
+//                processList[runningProcess.ID].randCPU += quantum;
                 
                 readyTime(runningProcess.ID);
                 for (int i = 0; i < quantum + 1; i++) {
@@ -192,6 +234,7 @@ int main(int argc, const char * argv[]) {
                         ofs++;
                         ioQuantum = myrandom(previousProcess.IO);
                         processList[runningProcess.ID].IT += ioQuantum;
+//                        processList[runningProcess.ID].IOState = true;
                         runningProcess.AT = runningTime + ioQuantum;
                         processList[runningProcess.ID].tempAT = runningProcess.AT;
                         scheduler->put_eventqueue(runningProcess);
@@ -199,9 +242,10 @@ int main(int argc, const char * argv[]) {
                         processList[runningProcess.ID].FT = runningTime;
                         printf("Process%i  finish:%i\n", runningProcess.ID, processList[runningProcess.ID].FT);
                         printf("Process%i  CW:%i\n", runningProcess.ID, processList[runningProcess.ID].CW);
-                        printf("Process%i  randcpu:%i\n", runningProcess.ID, processList[runningProcess.ID].randCPU);
+//                        printf("Process%i  randcpu:%i\n", runningProcess.ID, processList[runningProcess.ID].randCPU);
                         printf("Process%i  IT:%i\n", runningProcess.ID, processList[runningProcess.ID].IT);
                         printf("Process%i  PRIO:%i\n", runningProcess.ID, processList[runningProcess.ID].priority);
+//                        printf("Total CPU: %i\n", TotalCpu);
                         
                         
                     }

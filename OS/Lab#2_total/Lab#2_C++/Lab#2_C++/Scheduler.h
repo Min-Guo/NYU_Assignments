@@ -23,8 +23,7 @@ struct Process{
     int FT;
     int IT;
     int CW;
-    int randCPU;
-    int randIO;
+    int IOState;
     int cpuBurstRemain;
 };
 
