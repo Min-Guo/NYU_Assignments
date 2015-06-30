@@ -253,8 +253,8 @@ int main(int argc, const char * argv[]) {
                         runningProcess.remainTime -= quantum;
                         runningProcess.AT = runningTime;
                         processList[runningProcess.ID].tempAT = runningTime;
-//                        runningProcess.priority--;
-                        scheduler->decreasePriority(runningProcess);
+                        runningProcess.priority--;
+//                        scheduler->decreasePriority(runningProcess);/*differet algorithm*/
                         if (runningProcess.priority == -1) {
                             runningProcess.priority = processList[runningProcess.ID].priority - 1;
                             scheduler->put_expiredqueue(runningProcess);
@@ -279,7 +279,7 @@ int main(int argc, const char * argv[]) {
                             processList[runningProcess.ID].IT += ioQuantum;
                             runningProcess.AT = runningTime + ioQuantum;
                             processList[runningProcess.ID].tempAT = runningProcess.AT;
-//                            runningProcess.priority = processList[runningProcess.ID].priority - 1;
+                            runningProcess.priority = processList[runningProcess.ID].priority - 1;
                             scheduler->put_eventqueue(runningProcess);
                         
                         

@@ -91,7 +91,7 @@ class PRIO{
 public:
     bool operator()(Process& process1, Process& process2)
     {
-        if (process1.priority > process2.priority) {
+        if (process1.priority < process2.priority) {
             return true;
         } else if (process1.priority == process2.priority){
             if (process1.order > process2.order){
