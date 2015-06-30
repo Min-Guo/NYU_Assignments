@@ -37,8 +37,11 @@ int quantum = 0;
 int number = 0;
 char quantumAssign[15];
 int TotalCpu = 0;
-int IOTime = 0;
 Process tempProcess;
+int ioTotal = 0;
+int ioTime[512][2];
+int tempIoTime[2][2];
+int k = 0;
 
 int readRandNum(FILE* file) {
     int i = 0;
@@ -114,6 +117,31 @@ int readyTime(int j){
     return 0;
 }
 
+int ioUtilize(){
+    int i = 0;
+    while (i < k + 1) {
+        if (ioTime[i][1] < ioTime[i + 1][0]) {
+            tempIoTime[0][0] = ioTime[i][0];
+            tempIoTime[0][1] = ioTime[i][1];
+            tempIoTime[1][0] = ioTime[i + 1][0];
+            tempIoTime[1][1] = ioTime[i + 1][1];
+            ioTotal = (tempIoTime[0][1] - tempIoTime[0][0]) + (tempIoTime[1][1] - tempIoTime[1][0]);
+            tempIoTime[0][0] = 0;
+            tempIoTime[0][1] = 0;
+            tempIoTime[1][0] = 0;
+            tempIoTime[1][1] = 0;
+            i++;
+
+        } else if(ioTime[i][1] < ioTime[i + 1][1] && ioTime[i][1] > ioTime[i + 1][0]){
+            tempIoTime[0][0] = ioTime[i][0];
+            tempIoTime[0][1] = ioTime[i + 1][1];
+            ioTotal = tempIoTime[0][1] - tempIoTime[0][0];
+            i++;
+        }
+    }
+    return  0;
+}
+
 int main(int argc, const char * argv[]) {
     
     file = fopen(argv[1], "r");
@@ -135,12 +163,9 @@ int main(int argc, const char * argv[]) {
         number = atoi(&argv[3][3]);
         quantum = number;
     } else if (argv[3][2] == 'P') {
-        if (isdigit(argv[3][3])) {
-            number = atoi(&argv[3][3]);
-            quantum = number;
-        } else {
-            printf("Need a number.\n");
-        }
+        scheduler = new PRIOScheduler();
+        number = atoi(&argv[3][3]);
+        quantum = number;
     } else {
         printf("Argument is expected.");
     }
@@ -153,21 +178,14 @@ int main(int argc, const char * argv[]) {
     while (scheduler->bothEmpty() == false) {
         
         while (scheduler->isReady(runningTime)== true && !scheduler->eventEmpty()) {
-//            scheduler->put_readyqueue(scheduler->get_eventqueue());
-            tempProcess = scheduler->get_eventqueue();
-            tempProcess.IOState = false;
-            processList[tempProcess.ID].IOState = false;
-            scheduler->put_readyqueue(tempProcess);
+            scheduler->put_readyqueue(scheduler->get_eventqueue());
         }
         
         if (runningProcess.ID == 0) {
             if (scheduler->readyEmpty() == true) {
                 while (scheduler->isReady(runningTime)== true && !scheduler->eventEmpty()) {
-//                    scheduler->put_readyqueue(scheduler->get_eventqueue());
-                    tempProcess = scheduler->get_eventqueue();
-                    tempProcess.IOState = false;
-                    processList[tempProcess.ID].IOState = false;
-                    scheduler->put_readyqueue(tempProcess);
+                    scheduler->put_readyqueue(scheduler->get_eventqueue());
+
                 }
                 runningTime ++;
             } else {
@@ -199,21 +217,19 @@ int main(int argc, const char * argv[]) {
                         runningProcess.cpuBurstRemain = 0;
                     }
                 }
-//                processList[runningProcess.ID].randCPU += quantum;
                 
                 readyTime(runningProcess.ID);
-                for (int i = 0; i < quantum + 1; i++) {
+                for (int i = 1; i < quantum + 1; i++) {
                     currentTime = runningTime + i;
                     while (scheduler->isReady(currentTime)== true && !scheduler->eventEmpty()) {
-//                        scheduler->put_readyqueue(scheduler->get_eventqueue());
-                        tempProcess = scheduler->get_eventqueue();
-                        tempProcess.IOState = false;
-                        processList[tempProcess.ID].IOState = false;
-                        scheduler->put_readyqueue(tempProcess);
+                        scheduler->put_readyqueue(scheduler->get_eventqueue());
                     }
-                    //                                        std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
+//                    std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
                 }
-                
+                runningProcess.priority--;
+                if (runningProcess.priority == -1) {
+                    scheduler->put_expiredqueue(runningProcess);
+                }
                 if (runningProcess.cpuBurstRemain !=0) {
                     runningTime = currentTime;
                     runningProcess.order = runningTime;
@@ -229,16 +245,9 @@ int main(int argc, const char * argv[]) {
                         previousProcess.IO = runningProcess.IO;
                         ofs++;
                         ioQuantum = myrandom(previousProcess.IO);
-                        processList[runningProcess.ID].IOState = true;
-                        for (int k = 0; k < ioQuantum; k++){
-                            for (int j = 0; j < 512; j++) {
-                                if (processList[j].IOState == true) {
-                                    goto Endloop;
-                                }
-                            }
-                        Endloop:
-                            IOTime++;
-                        }
+                        ioTime[k][0] = currentTime;
+                        ioTime[k][1] = currentTime + ioQuantum;
+                        k++;
                         processList[runningProcess.ID].IT += ioQuantum;
                         runningProcess.AT = runningTime + ioQuantum;
                         processList[runningProcess.ID].tempAT = runningProcess.AT;
@@ -248,14 +257,7 @@ int main(int argc, const char * argv[]) {
                     } else {
                         processList[runningProcess.ID].FT = runningTime;
                         std::cout<< "Process"<< runningProcess.ID << "   "<<processList[runningProcess.ID].FT << "   "<< processList[runningProcess.ID].IT << "   " << processList[runningProcess.ID].CW << "\n";
-//                        printf("Process%i  finish:%i\n", runningProcess.ID, processList[runningProcess.ID].FT);
-//                        printf("Process%i  CW:%i\n", runningProcess.ID, processList[runningProcess.ID].CW);
-////                        printf("Process%i  randcpu:%i\n", runningProcess.ID, processList[runningProcess.ID].randCPU);
-//                        printf("Process%i  IT:%i\n", runningProcess.ID, processList[runningProcess.ID].IT);
-//                        printf("Process%i  PRIO:%i\n", runningProcess.ID, processList[runningProcess.ID].priority);
-////                        printf("Total CPU: %i\n", TotalCpu);
-//                        
-                        
+                 
                         
                     }
                 }
@@ -271,7 +273,6 @@ int main(int argc, const char * argv[]) {
     
         
     }
-//    printf("IOTime : %i\n", IOTime);
     
     return 0;
 }

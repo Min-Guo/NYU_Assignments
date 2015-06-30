@@ -27,25 +27,6 @@ struct Process{
     int cpuBurstRemain;
 };
 
-//class SchedulerAlgorithm{
-//public:
-//    virtual bool operator()(Process& process1, Process& process2);
-//};
-
-
-//class S{
-//public:
-//    void put_eventqueue(Process process);
-//    Process get_eventqueue();
-//    void put_readyqueue(Process process);
-//    Process get_readyqueue();
-//    bool bothEmpty();
-//    bool isReady(double time);
-//    bool readyEmpty();
-//    bool eventEmpty();
-//    Process checkFirstEvent();
-//};
-
 
 class FCFS{
 public:
@@ -105,15 +86,33 @@ public:
 };
 
 
+class PRIO{
+public:
+    bool operator()(Process& process1, Process& process2)
+    {
+        if (process1.priority > process2.priority) {
+            return true;
+        } else if (process1.priority == process2.priority){
+            if (process1.order > process2.order){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    
+};
+
+
 class Scheduler{
 protected:
     std::priority_queue<Process, std::vector<Process>, FCFS> event_queue;
-//    std::priority_queue<Process, std::vector<Process>, FCFS> ready_queue;    /*FCFS: both eventqueue and readyqueue are assigned to FCFS*/
-    /*LCFS: eventqueue:FCFS, readyqueue:LCFS*/
-    /*SJF: readyqueue:SJF*/
 public:
  
     void put_eventqueue(Process process);
+    virtual void put_expiredqueue(Process process) = 0;
     Process get_eventqueue();
     virtual void put_readyqueue(Process process) = 0;
     virtual Process get_readyqueue() = 0;
@@ -126,9 +125,11 @@ public:
 
 class FCFSScheduler:public Scheduler{
 private:
-   std::priority_queue<Process, std::vector<Process>, FCFS> ready_queue;
+    std::priority_queue<Process, std::vector<Process>, FCFS> ready_queue;
+    std::priority_queue<Process, std::vector<Process>, FCFS> expired_queue;
 public:
     void put_readyqueue(Process process);
+    void put_expiredqueue(Process process);
     Process get_readyqueue();
     bool bothEmpty();
     bool isReady(double time);
@@ -138,8 +139,10 @@ public:
 class LCFSScheduler:public Scheduler{
 private:
     std::priority_queue<Process, std::vector<Process>, LCFS> ready_queue;
+    std::priority_queue<Process, std::vector<Process>, LCFS> expired_queue;
 public:
     void put_readyqueue(Process process);
+    void put_expiredqueue(Process process);
     Process get_readyqueue();
     bool bothEmpty();
     bool isReady(double time);
@@ -149,8 +152,23 @@ public:
 class SJFScheduler:public Scheduler{
 private:
     std::priority_queue<Process, std::vector<Process>, SJF> ready_queue;
+    std::priority_queue<Process, std::vector<Process>, SJF> expired_queue;
 public:
     void put_readyqueue(Process process);
+    void put_expiredqueue(Process process);
+    Process get_readyqueue();
+    bool bothEmpty();
+    bool isReady(double time);
+    bool readyEmpty();
+};
+
+class PRIOScheduler:public Scheduler{
+private:
+    std::priority_queue<Process, std::vector<Process>, PRIO> ready_queue;
+    std::priority_queue<Process, std::vector<Process>, PRIO> expired_queue;
+public:
+    void put_readyqueue(Process process);
+    void put_expiredqueue(Process process);
     Process get_readyqueue();
     bool bothEmpty();
     bool isReady(double time);
@@ -160,61 +178,6 @@ public:
 
 
 
-//template <class T>
-//void Scheduler<T>::put_eventqueue(Process process){
-//    event_queue.push(process);
-//}
-//
-//template <class T>
-//Process Scheduler<T>::checkFirstEvent(){
-//    Process process = event_queue.top();
-//    return process;
-//}
-//
-//template <class T>
-//Process Scheduler<T>::get_eventqueue(){
-//    Process process = event_queue.top();
-//    event_queue.pop();
-//    return process;
-//}
-//
-//template <class T>
-//void Scheduler<T>::put_readyqueue(Process process){
-//    ready_queue.push(process);
-//}
-//
-//template <class T>
-//Process Scheduler<T>::get_readyqueue(){
-//    Process process = ready_queue.top();
-//    ready_queue.pop();
-//    return process;
-//}
-//
-//template <class T>
-//bool Scheduler<T>::bothEmpty() {
-//    if (!event_queue.empty() || !ready_queue.empty()) return false;
-//    return true;
-//}
-//
-//template <class T>
-//bool Scheduler<T>::isReady(double time) {
-//    if (event_queue.top().AT <= time) return true;
-//    return false;
-//}
-//
-//
-//template <class T>
-//bool Scheduler<T>::readyEmpty(){
-//    if (ready_queue.empty()) return true;
-//    return false;
-//}
-//
-//template <class T>
-//bool Scheduler<T>::eventEmpty(){
-//    if (event_queue.empty()) return true;
-//    return false;
-//}
-//
-//
+
 
 #endif

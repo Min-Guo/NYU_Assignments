@@ -51,6 +51,9 @@ bool FCFSScheduler::isReady(double time) {
     return false;
 }
 
+void FCFSScheduler::put_expiredqueue(Process process){
+    expired_queue.push(process);
+}
 
 bool FCFSScheduler::readyEmpty(){
     if (ready_queue.empty()) return true;
@@ -81,6 +84,9 @@ bool LCFSScheduler::isReady(double time) {
     return false;
 }
 
+void LCFSScheduler::put_expiredqueue(Process process){
+    expired_queue.push(process);
+}
 
 bool LCFSScheduler::readyEmpty(){
     if (ready_queue.empty()) return true;
@@ -116,8 +122,47 @@ bool SJFScheduler::readyEmpty(){
     return false;
 }
 
+void SJFScheduler::put_expiredqueue(Process process){
+    expired_queue.push(process);
+}
+
+void PRIOScheduler::put_readyqueue(Process process){
+    ready_queue.push(process);
+}
+
+void PRIOScheduler::put_expiredqueue(Process process){
+    expired_queue.push(process);
+}
+
+
+Process PRIOScheduler::get_readyqueue(){
+    Process process = ready_queue.top();
+    ready_queue.pop();
+    return process;
+}
+
+
+bool PRIOScheduler::bothEmpty() {
+    if (!event_queue.empty() || !ready_queue.empty()) return false;
+    return true;
+}
+
+
+bool PRIOScheduler::isReady(double time) {
+    if (event_queue.top().AT <= time) return true;
+    return false;
+}
+
+
+bool PRIOScheduler::readyEmpty(){
+    if (ready_queue.empty()) return true;
+    return false;
+}
 
 bool Scheduler::eventEmpty(){
     if (event_queue.empty()) return true;
     return false;
 }
+
+
+
