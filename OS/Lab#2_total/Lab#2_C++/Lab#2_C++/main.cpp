@@ -98,6 +98,7 @@ int parse(FILE *file, Scheduler* scheduler){
                 process.order = tempID;
                 process.priority = myrandom(4);
                 processList[i].priority = process.priority;
+                process.priority--;
                 tempID++;
                 i++;
                 ofs++;
@@ -181,96 +182,124 @@ int main(int argc, const char * argv[]) {
             scheduler->put_readyqueue(scheduler->get_eventqueue());
         }
         
-        if (runningProcess.ID == 0) {
+        if (runningProcess.runState == false) {
             if (scheduler->readyEmpty() == true) {
                 while (scheduler->isReady(runningTime)== true && !scheduler->eventEmpty()) {
                     scheduler->put_readyqueue(scheduler->get_eventqueue());
 
                 }
+                
                 runningTime ++;
             } else {
                 runningProcess = scheduler->get_readyqueue();
-                
-                if (runningProcess.cpuBurstRemain == 0) {
-                    ofs++;
-                    cpuBurst = myrandom(runningProcess.CB);
-                    runningProcess.cpuBurstRemain = cpuBurst;
-                    //                    printf("ofs:%i   cb:%i    rem:%i\n", ofs, cpuBurst, runningProcess.remainTime);
-                }
-                
-                if (strcmp(quantumAssign, "runningCpuBurst") == 0 ) {
-                    quantum = runningProcess.cpuBurstRemain;
-                } else {
-                    quantum = number;
-                }
-            
-                if (quantum >= runningProcess.cpuBurstRemain) {
-                    quantum = runningProcess.cpuBurstRemain;
-                    runningProcess.cpuBurstRemain = 0;
-                    if (quantum > runningProcess.remainTime) {
-                        quantum = runningProcess.remainTime;
-                    }
-                } else {
-                    runningProcess.cpuBurstRemain = runningProcess.cpuBurstRemain - quantum;
-                    if (quantum >= runningProcess.remainTime) {
-                        quantum = runningProcess.remainTime;
-                        runningProcess.cpuBurstRemain = 0;
-                    }
-                }
-                
-                readyTime(runningProcess.ID);
-                for (int i = 1; i < quantum + 1; i++) {
-                    currentTime = runningTime + i;
-                    while (scheduler->isReady(currentTime)== true && !scheduler->eventEmpty()) {
-                        scheduler->put_readyqueue(scheduler->get_eventqueue());
-                    }
-//                    std::cout<< "Running time:" << currentTime << "   Running Process:" << runningProcess.ID << "\n";
-                }
-                runningProcess.priority--;
                 if (runningProcess.priority == -1) {
                     scheduler->put_expiredqueue(runningProcess);
-                }
-                if (runningProcess.cpuBurstRemain !=0) {
-                    runningTime = currentTime;
-                    runningProcess.order = runningTime;
-                    runningProcess.remainTime -= quantum;
-                    runningProcess.AT = runningTime;
-                    processList[runningProcess.ID].tempAT = runningTime;
-                    scheduler->put_readyqueue(runningProcess);
-                } else{
-                    runningTime = currentTime;
-                    runningProcess.order = runningTime;
-                    runningProcess.remainTime -= quantum;
-                    if (runningProcess.remainTime != 0) {
-                        previousProcess.IO = runningProcess.IO;
+                    if (scheduler->readyEmpty() == true) {
+                        scheduler->switchPointer();
+                    }
+                } else {
+                    runningProcess.runState = true;
+    
+//                printf("priority: %i", runningProcess.priority);
+                
+                    if (runningProcess.cpuBurstRemain == 0) {
                         ofs++;
-                        ioQuantum = myrandom(previousProcess.IO);
-                        ioTime[k][0] = currentTime;
-                        ioTime[k][1] = currentTime + ioQuantum;
-                        k++;
-                        processList[runningProcess.ID].IT += ioQuantum;
-                        runningProcess.AT = runningTime + ioQuantum;
-                        processList[runningProcess.ID].tempAT = runningProcess.AT;
-                        scheduler->put_eventqueue(runningProcess);
-                        
-                        
+                        cpuBurst = myrandom(runningProcess.CB);
+                        runningProcess.cpuBurstRemain = cpuBurst;
+                    
+                    }
+//                    std::cout<<"cb:"<<runningProcess.cpuBurstRemain<<"\n";
+                    if (strcmp(quantumAssign, "runningCpuBurst") == 0 ) {
+                        quantum = runningProcess.cpuBurstRemain;
                     } else {
-                        processList[runningProcess.ID].FT = runningTime;
-                        std::cout<< "Process"<< runningProcess.ID << "   "<<processList[runningProcess.ID].FT << "   "<< processList[runningProcess.ID].IT << "   " << processList[runningProcess.ID].CW << "\n";
+                        quantum = number;
+                    }
+            
+                    if (quantum >= runningProcess.cpuBurstRemain) {
+                        quantum = runningProcess.cpuBurstRemain;
+                        runningProcess.cpuBurstRemain = 0;
+                        if (quantum > runningProcess.remainTime) {
+                            quantum = runningProcess.remainTime;
+                        }
+                    } else {
+                        runningProcess.cpuBurstRemain = runningProcess.cpuBurstRemain - quantum;
+                        if (quantum >= runningProcess.remainTime) {
+                            quantum = runningProcess.remainTime;
+                            runningProcess.cpuBurstRemain = 0;
+                        }
+                    }
+                
+                    readyTime(runningProcess.ID);
+                    if (runningProcess.priority == -1) {
+                        runningProcess.priority = processList[runningProcess.ID].priority - 1;
+                        scheduler->put_expiredqueue(runningProcess);
+                    }
+                    if (scheduler->readyEmpty() == true) {
+                        scheduler->switchPointer();
+                        runningProcess.runState = false;
+                    }
+                    for (int i = 0; i < quantum + 1; i++) {
+                        currentTime = runningTime + i;
+                        while (scheduler->isReady(currentTime)== true && !scheduler->eventEmpty()) {
+                            scheduler->put_readyqueue(scheduler->get_eventqueue());
+                        }
+//                        std::cout<< "time:" << currentTime << "  Process:" << runningProcess.ID <<"  rem:"<< runningProcess.remainTime<< "  Priority: "<< runningProcess.priority<< "\n";
+                    }
+                    
+                
+                    if (runningProcess.cpuBurstRemain !=0) {
+                        runningTime = currentTime;
+                        runningProcess.order = runningTime;
+                        runningProcess.remainTime -= quantum;
+                        runningProcess.AT = runningTime;
+                        processList[runningProcess.ID].tempAT = runningTime;
+//                        runningProcess.priority--;
+                        scheduler->decreasePriority(runningProcess);
+                        if (runningProcess.priority == -1) {
+                            runningProcess.priority = processList[runningProcess.ID].priority - 1;
+                            scheduler->put_expiredqueue(runningProcess);
+                            if (scheduler->readyEmpty() == true) {
+                                scheduler->switchPointer();
+                            }
+                            
+                        } else{
+                            scheduler->put_readyqueue(runningProcess);
+                        }
+                    } else{
+                        runningTime = currentTime;
+                        runningProcess.order = runningTime;
+                        runningProcess.remainTime -= quantum;
+                        if (runningProcess.remainTime != 0) {
+                            previousProcess.IO = runningProcess.IO;
+                            ofs++;
+                            ioQuantum = myrandom(previousProcess.IO);
+                            ioTime[k][0] = currentTime;
+                            ioTime[k][1] = currentTime + ioQuantum;
+                            k++;
+                            processList[runningProcess.ID].IT += ioQuantum;
+                            runningProcess.AT = runningTime + ioQuantum;
+                            processList[runningProcess.ID].tempAT = runningProcess.AT;
+//                            runningProcess.priority = processList[runningProcess.ID].priority - 1;
+                            scheduler->put_eventqueue(runningProcess);
+                        
+                        
+                        } else {
+                            processList[runningProcess.ID].FT = runningTime;
+                            std::cout<< "Process"<< runningProcess.ID << "   "<<processList[runningProcess.ID].FT << "   "<< processList[runningProcess.ID].IT << "   " << processList[runningProcess.ID].CW << "\n";
                  
                         
+                        }
                     }
+                    runningProcess.runState = false;
+                    runningProcess.AT = 0;
+                    runningProcess.TC = 0;
+                    runningProcess.CB = 0;
+                    runningProcess.IO = 0;
+                    runningProcess.order = 0;
                 }
-                runningProcess.ID = 0;
-                runningProcess.AT = 0;
-                runningProcess.TC = 0;
-                runningProcess.CB = 0;
-                runningProcess.IO = 0;
-                runningProcess.order = 0;
             }
-        }
 
-    
+        }
         
     }
     

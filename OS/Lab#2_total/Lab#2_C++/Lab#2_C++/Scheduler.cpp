@@ -15,6 +15,10 @@ void Scheduler::put_eventqueue(Process process){
     event_queue.push(process);
 }
 
+Process Scheduler::decreasePriority(Process process){
+    return process;
+};
+
 Process Scheduler::checkFirstEvent(){
     Process process = event_queue.top();
     return process;
@@ -27,11 +31,18 @@ Process Scheduler::get_eventqueue(){
     return process;
 }
 
+Process FCFSScheduler::decreasePriority(Process process){
+//    process.priority--;
+    return process;
+}
 
 void FCFSScheduler::put_readyqueue(Process process){
     ready_queue.push(process);
 }
 
+void FCFSScheduler::switchPointer(){
+//    std::swap(ready_queue, expired_queue);
+};
 
 Process FCFSScheduler::get_readyqueue(){
     Process process = ready_queue.top();
@@ -59,7 +70,14 @@ bool FCFSScheduler::readyEmpty(){
     if (ready_queue.empty()) return true;
     return false;
 }
+Process LCFSScheduler::decreasePriority(Process process){
+//    process.priority--;
+    return process;
+}
 
+void LCFSScheduler::switchPointer(){
+//    std::swap(ready_queue, expired_queue);
+};
 
 void LCFSScheduler::put_readyqueue(Process process){
     ready_queue.push(process);
@@ -92,6 +110,16 @@ bool LCFSScheduler::readyEmpty(){
     if (ready_queue.empty()) return true;
     return false;
 }
+
+Process SJFScheduler::decreasePriority(Process process){
+//    process.priority--;
+    return process;
+}
+
+void SJFScheduler::switchPointer(){
+//    std::swap(ready_queue, expired_queue);
+};
+
 
 void SJFScheduler::put_readyqueue(Process process){
     ready_queue.push(process);
@@ -147,12 +175,19 @@ bool PRIOScheduler::bothEmpty() {
     return true;
 }
 
+Process PRIOScheduler::decreasePriority(Process process){
+    process.priority = process.priority - 1;
+    return process;
+}
 
 bool PRIOScheduler::isReady(double time) {
     if (event_queue.top().AT <= time) return true;
     return false;
 }
 
+void PRIOScheduler::switchPointer(){
+    std::swap(ready_queue, expired_queue);
+};
 
 bool PRIOScheduler::readyEmpty(){
     if (ready_queue.empty()) return true;
