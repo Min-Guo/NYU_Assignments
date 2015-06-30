@@ -120,6 +120,7 @@ class Scheduler{
 protected:
     std::priority_queue<Process, std::vector<Process>, FCFS> event_queue;
 public:
+    virtual bool expiredEmpty();
     virtual Process decreasePriority(Process process);
     virtual void switchPointer() = 0;
     void put_eventqueue(Process process);
@@ -147,6 +148,7 @@ public:
     bool bothEmpty();
     bool isReady(double time);
     bool readyEmpty();
+    bool expiredEmpty();
 };
 
 class LCFSScheduler:public Scheduler{
@@ -162,6 +164,7 @@ public:
     bool bothEmpty();
     bool isReady(double time);
     bool readyEmpty();
+    bool expiredEmpty();
 };
 
 class SJFScheduler:public Scheduler{
@@ -177,6 +180,7 @@ public:
     bool bothEmpty();
     bool isReady(double time);
     bool readyEmpty();
+    bool expiredEmpty();
 };
 
 class PRIOScheduler:public Scheduler{
@@ -192,6 +196,7 @@ public:
     bool bothEmpty();
     bool isReady(double time);
     bool readyEmpty();
+    bool expiredEmpty();
 };
 
 

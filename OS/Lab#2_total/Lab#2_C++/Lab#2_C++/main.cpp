@@ -176,7 +176,7 @@ int main(int argc, const char * argv[]) {
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
     ofs = tempID;
-    while (scheduler->bothEmpty() == false) {
+    while (scheduler->bothEmpty() == false || scheduler->expiredEmpty() == false) {
         
         while (scheduler->isReady(runningTime)== true && !scheduler->eventEmpty()) {
             scheduler->put_readyqueue(scheduler->get_eventqueue());
@@ -214,7 +214,7 @@ int main(int argc, const char * argv[]) {
                         runningProcess.cpuBurstRemain = cpuBurst;
                         
                     }
-                    //                    std::cout<<"cb:"<<runningProcess.cpuBurstRemain<<"\n";
+//                                        std::cout<<"cb:"<<runningProcess.cpuBurstRemain<<"\n";
                     if (strcmp(quantumAssign, "runningCpuBurst") == 0 ) {
                         quantum = runningProcess.cpuBurstRemain;
                     } else {
@@ -249,7 +249,7 @@ int main(int argc, const char * argv[]) {
                         while (scheduler->isReady(currentTime)== true && !scheduler->eventEmpty()) {
                             scheduler->put_readyqueue(scheduler->get_eventqueue());
                         }
-                        //                        std::cout<< "time:" << currentTime << "  Process:" << runningProcess.ID <<"  rem:"<< runningProcess.remainTime<< "  Priority: "<< runningProcess.priority<< "\n";
+//                                                std::cout<< "time:" << currentTime << "  Process:" << runningProcess.ID <<"  rem:"<< runningProcess.remainTime<< "  Priority: "<< runningProcess.priority<< "\n";
                     }
                     
                     
