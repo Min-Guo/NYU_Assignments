@@ -188,15 +188,21 @@ int main(int argc, const char * argv[]) {
                     scheduler->put_readyqueue(scheduler->get_eventqueue());
 
                 }
+                if (scheduler->readyEmpty() == true) {
+                    scheduler->switchPointer();
+                }
+                if (scheduler->readyEmpty() == true) {
+                    runningTime ++;
+                }
                 
-                runningTime ++;
+                
             } else {
                 runningProcess = scheduler->get_readyqueue();
                 if (runningProcess.priority == -1) {
                     scheduler->put_expiredqueue(runningProcess);
-                    if (scheduler->readyEmpty() == true) {
-                        scheduler->switchPointer();
-                    }
+//                    if (scheduler->readyEmpty() == true) {
+//                        scheduler->switchPointer();
+//                    }
                 } else {
                     runningProcess.runState = true;
     
@@ -234,10 +240,10 @@ int main(int argc, const char * argv[]) {
                         runningProcess.priority = processList[runningProcess.ID].priority - 1;
                         scheduler->put_expiredqueue(runningProcess);
                     }
-                    if (scheduler->readyEmpty() == true) {
-                        scheduler->switchPointer();
-                        runningProcess.runState = false;
-                    }
+//                    if (scheduler->readyEmpty() == true) {
+//                        scheduler->switchPointer();
+//                        runningProcess.runState = false;
+//                    }
                     for (int i = 0; i < quantum + 1; i++) {
                         currentTime = runningTime + i;
                         while (scheduler->isReady(currentTime)== true && !scheduler->eventEmpty()) {
@@ -258,9 +264,9 @@ int main(int argc, const char * argv[]) {
                         if (runningProcess.priority == -1) {
                             runningProcess.priority = processList[runningProcess.ID].priority - 1;
                             scheduler->put_expiredqueue(runningProcess);
-                            if (scheduler->readyEmpty() == true) {
-                                scheduler->switchPointer();
-                            }
+//                            if (scheduler->readyEmpty() == true) {
+//                                scheduler->switchPointer();
+//                            }
                             
                         } else{
                             scheduler->put_readyqueue(runningProcess);
@@ -290,6 +296,7 @@ int main(int argc, const char * argv[]) {
                         
                         }
                     }
+                    
                     runningProcess.runState = false;
                     runningProcess.AT = 0;
                     runningProcess.TC = 0;
