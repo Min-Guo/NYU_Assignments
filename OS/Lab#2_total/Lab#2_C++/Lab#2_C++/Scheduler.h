@@ -93,15 +93,24 @@ public:
     {
         if (process1.priority < process2.priority) {
             return true;
-        } else if (process1.priority == process2.priority){
-            if (process1.order > process2.order){
+        }
+        
+        if (process1.priority == process2.priority){
+            if (process1.AT > process2.AT) {
                 return true;
-            } else {
+            }
+            
+            if (process1.AT == process2.AT) {
+                if (process1.order > process2.order) {
+                    return true;
+                } else {
                 return false;
+                }
             }
         } else {
             return false;
         }
+        return false;
     }
     
 };

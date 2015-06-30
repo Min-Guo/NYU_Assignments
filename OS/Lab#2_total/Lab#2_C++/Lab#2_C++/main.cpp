@@ -82,7 +82,7 @@ int parse(FILE *file, Scheduler* scheduler){
                         process.TC = atoi(token);
                         process.remainTime = atoi(token);
                         TotalCpu += process.TC;
-//                        printf("TotalCpu: %i\n", TotalCpu);
+                        //                        printf("TotalCpu: %i\n", TotalCpu);
                         process.tcRead = true;
                     } else if (process.cbRead == false){
                         process.CB = atoi(token);
@@ -132,7 +132,7 @@ int ioUtilize(){
             tempIoTime[1][0] = 0;
             tempIoTime[1][1] = 0;
             i++;
-
+            
         } else if(ioTime[i][1] < ioTime[i + 1][1] && ioTime[i][1] > ioTime[i + 1][0]){
             tempIoTime[0][0] = ioTime[i][0];
             tempIoTime[0][1] = ioTime[i + 1][1];
@@ -149,7 +149,7 @@ int main(int argc, const char * argv[]) {
     readRandNum(file);
     fclose(file);
     Scheduler* scheduler;
-
+    
     if (argv[3][2] == 'F') {
         scheduler = new FCFSScheduler();
         strcpy(quantumAssign, "runningCpuBurst");
@@ -186,7 +186,7 @@ int main(int argc, const char * argv[]) {
             if (scheduler->readyEmpty() == true) {
                 while (scheduler->isReady(runningTime)== true && !scheduler->eventEmpty()) {
                     scheduler->put_readyqueue(scheduler->get_eventqueue());
-
+                    
                 }
                 if (scheduler->readyEmpty() == true) {
                     scheduler->switchPointer();
@@ -200,27 +200,27 @@ int main(int argc, const char * argv[]) {
                 runningProcess = scheduler->get_readyqueue();
                 if (runningProcess.priority == -1) {
                     scheduler->put_expiredqueue(runningProcess);
-//                    if (scheduler->readyEmpty() == true) {
-//                        scheduler->switchPointer();
-//                    }
+                    //                    if (scheduler->readyEmpty() == true) {
+                    //                        scheduler->switchPointer();
+                    //                    }
                 } else {
                     runningProcess.runState = true;
-    
-//                printf("priority: %i", runningProcess.priority);
-                
+                    
+                    //                printf("priority: %i", runningProcess.priority);
+                    
                     if (runningProcess.cpuBurstRemain == 0) {
                         ofs++;
                         cpuBurst = myrandom(runningProcess.CB);
                         runningProcess.cpuBurstRemain = cpuBurst;
-                    
+                        
                     }
-//                    std::cout<<"cb:"<<runningProcess.cpuBurstRemain<<"\n";
+                    //                    std::cout<<"cb:"<<runningProcess.cpuBurstRemain<<"\n";
                     if (strcmp(quantumAssign, "runningCpuBurst") == 0 ) {
                         quantum = runningProcess.cpuBurstRemain;
                     } else {
                         quantum = number;
                     }
-            
+                    
                     if (quantum >= runningProcess.cpuBurstRemain) {
                         quantum = runningProcess.cpuBurstRemain;
                         runningProcess.cpuBurstRemain = 0;
@@ -234,25 +234,25 @@ int main(int argc, const char * argv[]) {
                             runningProcess.cpuBurstRemain = 0;
                         }
                     }
-                
+                    
                     readyTime(runningProcess.ID);
                     if (runningProcess.priority == -1) {
                         runningProcess.priority = processList[runningProcess.ID].priority - 1;
                         scheduler->put_expiredqueue(runningProcess);
                     }
-//                    if (scheduler->readyEmpty() == true) {
-//                        scheduler->switchPointer();
-//                        runningProcess.runState = false;
-//                    }
+                    //                    if (scheduler->readyEmpty() == true) {
+                    //                        scheduler->switchPointer();
+                    //                        runningProcess.runState = false;
+                    //                    }
                     for (int i = 0; i < quantum + 1; i++) {
                         currentTime = runningTime + i;
                         while (scheduler->isReady(currentTime)== true && !scheduler->eventEmpty()) {
                             scheduler->put_readyqueue(scheduler->get_eventqueue());
                         }
-//                        std::cout<< "time:" << currentTime << "  Process:" << runningProcess.ID <<"  rem:"<< runningProcess.remainTime<< "  Priority: "<< runningProcess.priority<< "\n";
+                        //                        std::cout<< "time:" << currentTime << "  Process:" << runningProcess.ID <<"  rem:"<< runningProcess.remainTime<< "  Priority: "<< runningProcess.priority<< "\n";
                     }
                     
-                
+                    
                     if (runningProcess.cpuBurstRemain !=0) {
                         runningTime = currentTime;
                         runningProcess.order = runningTime;
@@ -260,13 +260,13 @@ int main(int argc, const char * argv[]) {
                         runningProcess.AT = runningTime;
                         processList[runningProcess.ID].tempAT = runningTime;
                         runningProcess.priority--;
-//                        scheduler->decreasePriority(runningProcess);/*differet algorithm*/
+                        //                        scheduler->decreasePriority(runningProcess);/*differet algorithm*/
                         if (runningProcess.priority == -1) {
                             runningProcess.priority = processList[runningProcess.ID].priority - 1;
                             scheduler->put_expiredqueue(runningProcess);
-//                            if (scheduler->readyEmpty() == true) {
-//                                scheduler->switchPointer();
-//                            }
+                            //                            if (scheduler->readyEmpty() == true) {
+                            //                                scheduler->switchPointer();
+                            //                            }
                             
                         } else{
                             scheduler->put_readyqueue(runningProcess);
@@ -287,13 +287,13 @@ int main(int argc, const char * argv[]) {
                             processList[runningProcess.ID].tempAT = runningProcess.AT;
                             runningProcess.priority = processList[runningProcess.ID].priority - 1;
                             scheduler->put_eventqueue(runningProcess);
-                        
-                        
+                            
+                            
                         } else {
                             processList[runningProcess.ID].FT = runningTime;
                             std::cout<< "Process"<< runningProcess.ID << "   "<<processList[runningProcess.ID].FT << "   "<< processList[runningProcess.ID].IT << "   " << processList[runningProcess.ID].CW << "\n";
-                 
-                        
+                            
+                            
                         }
                     }
                     
@@ -305,7 +305,7 @@ int main(int argc, const char * argv[]) {
                     runningProcess.order = 0;
                 }
             }
-
+            
         }
         
     }
