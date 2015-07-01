@@ -38,10 +38,18 @@ int number = 0;
 char quantumAssign[15];
 int TotalCpu = 0;
 Process tempProcess;
-int ioTotal = 0;
+int ioTotal = 0.0;
 int ioTime[512][2];
-int tempIoTime[2][2];
+int tempIoTime[2];
 int k = 0;
+double io_util = 0.0;
+int maxfintime = 0;
+double cpu_util = 0.0;
+double throughput = 0.0;
+double avg_waittime = 0.0;
+double avg_turnaround = 0.0;
+int totalCW = 0;
+int totalTT = 0;
 
 int readRandNum(FILE* file) {
     int i = 0;
@@ -119,27 +127,30 @@ int readyTime(int j){
 }
 
 int ioUtilize(){
-    int i = 0;
-    while (i < k + 1) {
-        if (ioTime[i][1] < ioTime[i + 1][0]) {
-            tempIoTime[0][0] = ioTime[i][0];
-            tempIoTime[0][1] = ioTime[i][1];
-            tempIoTime[1][0] = ioTime[i + 1][0];
-            tempIoTime[1][1] = ioTime[i + 1][1];
-            ioTotal = (tempIoTime[0][1] - tempIoTime[0][0]) + (tempIoTime[1][1] - tempIoTime[1][0]);
-            tempIoTime[0][0] = 0;
-            tempIoTime[0][1] = 0;
-            tempIoTime[1][0] = 0;
-            tempIoTime[1][1] = 0;
-            i++;
+    tempIoTime[0] = ioTime[0][0];
+    tempIoTime[1] = ioTime[0][1];
+    ioTotal = tempIoTime[1] - tempIoTime[0];
+        for (int i = 0; i < k + 1; i++) {
+           
+        if (tempIoTime[1] < ioTime[i + 1][0]) {
+            ioTotal += (ioTime[i + 1][1] - ioTime[i + 1][0]);
+            tempIoTime[0] = ioTime[i + 1][0];
+            tempIoTime[1] = ioTime[i + 1][1];
             
-        } else if(ioTime[i][1] < ioTime[i + 1][1] && ioTime[i][1] > ioTime[i + 1][0]){
-            tempIoTime[0][0] = ioTime[i][0];
-            tempIoTime[0][1] = ioTime[i + 1][1];
-            ioTotal = tempIoTime[0][1] - tempIoTime[0][0];
-            i++;
+        } else if(tempIoTime[1] < ioTime[i + 1][1] && tempIoTime[1] > ioTime[i + 1][0]){
+            ioTotal += ioTime[i + 1][1] - tempIoTime[1];
+            tempIoTime[0] = ioTime[i][0];
+            tempIoTime[1] = ioTime[i + 1][1];
+        } else if(tempIoTime[0] < ioTime[i + 1][0] && tempIoTime[1] > ioTime[i + 1][1]){
+            ioTotal = ioTotal;
+        } else if(tempIoTime[1] == ioTime[i + 1][0]){
+            tempIoTime[1] = ioTime[i + 1][1];
+            tempIoTime[0] = ioTime[i + 1][0];
+            ioTotal += ioTime[i + 1][1] - ioTime[i + 1][0];
         }
     }
+    io_util = 100.0 * ioTotal / maxfintime;
+    std::cout<<"io "<< io_util <<"\n";
     return  0;
 }
 
@@ -288,6 +299,7 @@ int main(int argc, const char * argv[]) {
                             
                         } else {
                             processList[runningProcess.ID].FT = runningTime;
+                            maxfintime = processList[runningProcess.ID].FT;
                         }
                     }
                     
@@ -303,6 +315,28 @@ int main(int argc, const char * argv[]) {
         }
         
     }
-    printResult();
+//    std::cout<<"finish time  "<<finishTime<< "\n";
+//    printResult();
+    for (int i = 0; i < tempID; i++) {
+        totalCW += processList[i].CW;
+    }
+    
+    for (int i = 0; i < tempID; i++) {
+        processList[i].TT = processList[i].FT - processList[i].AT;
+    }
+    
+    for (int i = 0; i < tempID; i++) {
+        totalTT += processList[i].TT;
+    }
+    
+    avg_turnaround = 1.0 * totalTT / tempID;
+    std::cout<<"avg_turnaround "<< avg_turnaround<<"\n";
+    cpu_util = 100.0 * TotalCpu / maxfintime;
+    std::cout<<"Cpu "<< cpu_util <<"\n";
+    throughput = 100.0 * tempID / maxfintime;
+    std::cout<<"throughput "<<throughput<<"\n";
+    avg_waittime = 1.0 * totalCW / tempID;
+    std::cout<<"avg_waittime "<< avg_waittime<<"\n";
+    ioUtilize();
     return 0;
 }

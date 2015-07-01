@@ -26,6 +26,7 @@ struct Process{
     int CW;
     int IOState;
     int cpuBurstRemain;
+    int TT;
 };
 
 
