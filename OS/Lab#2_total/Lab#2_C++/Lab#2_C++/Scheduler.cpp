@@ -25,7 +25,6 @@ Process Scheduler::checkFirstEvent(){
 }
 
 bool Scheduler::expiredEmpty() {
-//    if (!expired_queue.empty()) return false;
     return true;
 }
 
@@ -36,7 +35,6 @@ Process Scheduler::get_eventqueue(){
 }
 
 Process FCFSScheduler::decreasePriority(Process process){
-//    process.priority--;
     return process;
 }
 
@@ -45,7 +43,6 @@ void FCFSScheduler::put_readyqueue(Process process){
 }
 
 void FCFSScheduler::switchPointer(){
-//    std::swap(ready_queue, expired_queue);
 };
 
 Process FCFSScheduler::get_readyqueue(){
@@ -67,7 +64,6 @@ bool FCFSScheduler::isReady(double time) {
 }
 
 bool FCFSScheduler::expiredEmpty() {
-//    if (!expired_queue.empty()) return false;
     return true;
 }
 
@@ -80,12 +76,10 @@ bool FCFSScheduler::readyEmpty(){
     return false;
 }
 Process LCFSScheduler::decreasePriority(Process process){
-//    process.priority--;
     return process;
 }
 
 void LCFSScheduler::switchPointer(){
-//    std::swap(ready_queue, expired_queue);
 };
 
 void LCFSScheduler::put_readyqueue(Process process){
@@ -116,7 +110,6 @@ void LCFSScheduler::put_expiredqueue(Process process){
 }
 
 bool LCFSScheduler::expiredEmpty() {
-//    if (!expired_queue.empty()) return false;
     return true;
 }
 
@@ -126,12 +119,10 @@ bool LCFSScheduler::readyEmpty(){
 }
 
 Process SJFScheduler::decreasePriority(Process process){
-//    process.priority--;
     return process;
 }
 
 void SJFScheduler::switchPointer(){
-//    std::swap(ready_queue, expired_queue);
 };
 
 
@@ -159,7 +150,6 @@ bool SJFScheduler::isReady(double time) {
 }
 
 bool SJFScheduler::expiredEmpty() {
-//    if (!expired_queue.empty()) return false;
     return true;
 }
 

@@ -143,6 +143,12 @@ int ioUtilize(){
     return  0;
 }
 
+void printResult(){
+    for (int i = 0; i < tempID ; i++) {
+        std::cout<< "Process"<< i << "  " << processList[i].priority << "   "<<processList[i].FT << "   "<< processList[i].IT << "   " << processList[i].CW << "\n";
+    }
+}
+
 int main(int argc, const char * argv[]) {
     
     file = fopen(argv[1], "r");
@@ -200,21 +206,14 @@ int main(int argc, const char * argv[]) {
                 runningProcess = scheduler->get_readyqueue();
                 if (runningProcess.priority == -1) {
                     scheduler->put_expiredqueue(runningProcess);
-                    //                    if (scheduler->readyEmpty() == true) {
-                    //                        scheduler->switchPointer();
-                    //                    }
                 } else {
                     runningProcess.runState = true;
-                    
-                    //                printf("priority: %i", runningProcess.priority);
-                    
                     if (runningProcess.cpuBurstRemain == 0) {
                         ofs++;
                         cpuBurst = myrandom(runningProcess.CB);
                         runningProcess.cpuBurstRemain = cpuBurst;
                         
                     }
-//                                        std::cout<<"cb:"<<runningProcess.cpuBurstRemain<<"\n";
                     if (strcmp(quantumAssign, "runningCpuBurst") == 0 ) {
                         quantum = runningProcess.cpuBurstRemain;
                     } else {
@@ -240,16 +239,11 @@ int main(int argc, const char * argv[]) {
                         runningProcess.priority = processList[runningProcess.ID].priority - 1;
                         scheduler->put_expiredqueue(runningProcess);
                     }
-                    //                    if (scheduler->readyEmpty() == true) {
-                    //                        scheduler->switchPointer();
-                    //                        runningProcess.runState = false;
-                    //                    }
                     for (int i = 0; i < quantum + 1; i++) {
                         currentTime = runningTime + i;
                         while (scheduler->isReady(currentTime)== true && !scheduler->eventEmpty()) {
                             scheduler->put_readyqueue(scheduler->get_eventqueue());
                         }
-//                                                std::cout<< "time:" << currentTime << "  Process:" << runningProcess.ID <<"  rem:"<< runningProcess.remainTime<< "  Priority: "<< runningProcess.priority<< "\n";
                     }
                     
                     
@@ -260,13 +254,10 @@ int main(int argc, const char * argv[]) {
                         runningProcess.AT = runningTime;
                         processList[runningProcess.ID].tempAT = runningTime;
                         runningProcess.priority--;
-                        //                        scheduler->decreasePriority(runningProcess);/*differet algorithm*/
+//                                                scheduler->decreasePriority(runningProcess);/*differet algorithm*/
                         if (runningProcess.priority == -1) {
                             runningProcess.priority = processList[runningProcess.ID].priority - 1;
                             scheduler->put_expiredqueue(runningProcess);
-                            //                            if (scheduler->readyEmpty() == true) {
-                            //                                scheduler->switchPointer();
-                            //                            }
                             
                         } else{
                             scheduler->put_readyqueue(runningProcess);
@@ -291,9 +282,6 @@ int main(int argc, const char * argv[]) {
                             
                         } else {
                             processList[runningProcess.ID].FT = runningTime;
-                            std::cout<< "Process"<< runningProcess.ID << "   "<<processList[runningProcess.ID].FT << "   "<< processList[runningProcess.ID].IT << "   " << processList[runningProcess.ID].CW << "\n";
-                            
-                            
                         }
                     }
                     
@@ -309,6 +297,6 @@ int main(int argc, const char * argv[]) {
         }
         
     }
-    
+    printResult();
     return 0;
 }
