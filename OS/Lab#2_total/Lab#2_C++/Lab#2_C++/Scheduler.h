@@ -122,7 +122,7 @@ protected:
     std::priority_queue<Process, std::vector<Process>, FCFS> event_queue;
 public:
     virtual bool expiredEmpty();
-    virtual Process decreasePriority(Process process);
+    virtual Process decreasePriority(Process* process);
     virtual void switchPointer() = 0;
     void put_eventqueue(Process process);
     virtual void put_expiredqueue(Process process) = 0;
@@ -141,7 +141,7 @@ private:
     std::priority_queue<Process, std::vector<Process>, FCFS> ready_queue;
     std::priority_queue<Process, std::vector<Process>, FCFS> expired_queue;
 public:
-    Process decreasePriority(Process process);
+    Process decreasePriority(Process* process);
     void switchPointer();
     void put_readyqueue(Process process);
     void put_expiredqueue(Process process);
@@ -157,7 +157,7 @@ private:
     std::priority_queue<Process, std::vector<Process>, LCFS> ready_queue;
     std::priority_queue<Process, std::vector<Process>, LCFS> expired_queue;
 public:
-    Process decreasePriority(Process process);
+    Process decreasePriority(Process* process);
     void switchPointer();
     void put_readyqueue(Process process);
     void put_expiredqueue(Process process);
@@ -173,7 +173,7 @@ private:
     std::priority_queue<Process, std::vector<Process>, SJF> ready_queue;
     std::priority_queue<Process, std::vector<Process>, SJF> expired_queue;
 public:
-    Process decreasePriority(Process process);
+    Process decreasePriority(Process* process);
     void switchPointer();
     void put_readyqueue(Process process);
     void put_expiredqueue(Process process);
@@ -189,7 +189,7 @@ private:
     std::priority_queue<Process, std::vector<Process>, PRIO> ready_queue;
     std::priority_queue<Process, std::vector<Process>, PRIO> expired_queue;
 public:
-    Process decreasePriority(Process process);
+    Process decreasePriority(Process* process);
     void switchPointer();
     void put_readyqueue(Process process);
     void put_expiredqueue(Process process);

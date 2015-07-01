@@ -150,7 +150,7 @@ int ioUtilize(){
         }
     }
     io_util = 100.0 * ioTotal / maxfintime;
-    std::cout<<"io "<< io_util <<"\n";
+    std::cout<<io_util <<"\n";
     return  0;
 }
 
@@ -267,8 +267,8 @@ int main(int argc, const char * argv[]) {
                         runningProcess.remainTime -= quantum;
                         runningProcess.AT = runningTime;
                         processList[runningProcess.ID].tempAT = runningTime;
-                        runningProcess.priority--;
-//                                                scheduler->decreasePriority(runningProcess);/*differet algorithm*/
+//                        runningProcess.priority--;
+                                                scheduler->decreasePriority(&runningProcess);/*differet algorithm*/
                         if (runningProcess.priority == -1) {
                             runningProcess.priority = processList[runningProcess.ID].priority - 1;
                             scheduler->put_expiredqueue(runningProcess);
@@ -329,14 +329,17 @@ int main(int argc, const char * argv[]) {
         totalTT += processList[i].TT;
     }
     
-    avg_turnaround = 1.0 * totalTT / tempID;
-    std::cout<<"avg_turnaround "<< avg_turnaround<<"\n";
+    std::cout<<maxfintime<<"\n";
     cpu_util = 100.0 * TotalCpu / maxfintime;
-    std::cout<<"Cpu "<< cpu_util <<"\n";
-    throughput = 100.0 * tempID / maxfintime;
-    std::cout<<"throughput "<<throughput<<"\n";
-    avg_waittime = 1.0 * totalCW / tempID;
-    std::cout<<"avg_waittime "<< avg_waittime<<"\n";
+    std::cout<< cpu_util <<"\n";
     ioUtilize();
+    avg_turnaround = 1.0 * totalTT / tempID;
+    std::cout<< avg_turnaround<<"\n";
+    avg_waittime = 1.0 * totalCW / tempID;
+    std::cout<< avg_waittime<<"\n";
+    throughput = 100.0 * tempID / maxfintime;
+    std::cout<<throughput<<"\n";
+    
+    
     return 0;
 }

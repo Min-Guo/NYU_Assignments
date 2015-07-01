@@ -15,8 +15,8 @@ void Scheduler::put_eventqueue(Process process){
     event_queue.push(process);
 }
 
-Process Scheduler::decreasePriority(Process process){
-    return process;
+Process Scheduler::decreasePriority(Process* process){
+    return *process;
 };
 
 Process Scheduler::checkFirstEvent(){
@@ -34,8 +34,8 @@ Process Scheduler::get_eventqueue(){
     return process;
 }
 
-Process FCFSScheduler::decreasePriority(Process process){
-    return process;
+Process FCFSScheduler::decreasePriority(Process* process){
+    return *process;
 }
 
 void FCFSScheduler::put_readyqueue(Process process){
@@ -75,8 +75,8 @@ bool FCFSScheduler::readyEmpty(){
     if (ready_queue.empty()) return true;
     return false;
 }
-Process LCFSScheduler::decreasePriority(Process process){
-    return process;
+Process LCFSScheduler::decreasePriority(Process* process){
+    return *process;
 }
 
 void LCFSScheduler::switchPointer(){
@@ -118,8 +118,8 @@ bool LCFSScheduler::readyEmpty(){
     return false;
 }
 
-Process SJFScheduler::decreasePriority(Process process){
-    return process;
+Process SJFScheduler::decreasePriority(Process* process){
+    return *process;
 }
 
 void SJFScheduler::switchPointer(){
@@ -188,9 +188,9 @@ bool PRIOScheduler::expiredEmpty() {
     return true;
 }
 
-Process PRIOScheduler::decreasePriority(Process process){
-    process.priority = process.priority - 1;
-    return process;
+Process PRIOScheduler::decreasePriority(Process* process){
+    process->priority = process->priority - 1;
+    return *process;
 }
 
 bool PRIOScheduler::isReady(double time) {
