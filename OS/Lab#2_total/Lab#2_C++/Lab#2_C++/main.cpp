@@ -210,6 +210,9 @@ int main(int argc, const char * argv[]) {
                     runningProcess.runState = true;
                     if (runningProcess.cpuBurstRemain == 0) {
                         ofs++;
+                        if (ofs > 40000) {
+                            ofs = 1;
+                        }
                         cpuBurst = myrandom(runningProcess.CB);
                         runningProcess.cpuBurstRemain = cpuBurst;
                         
@@ -269,6 +272,9 @@ int main(int argc, const char * argv[]) {
                         if (runningProcess.remainTime != 0) {
                             previousProcess.IO = runningProcess.IO;
                             ofs++;
+                            if (ofs > 40000) {
+                                ofs = 1;
+                            }
                             ioQuantum = myrandom(previousProcess.IO);
                             ioTime[k][0] = currentTime;
                             ioTime[k][1] = currentTime + ioQuantum;
