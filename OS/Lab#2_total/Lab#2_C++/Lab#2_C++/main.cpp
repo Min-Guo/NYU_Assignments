@@ -37,7 +37,6 @@ int quantum = 0;
 int number = 0;
 char quantumAssign[15];
 int TotalCpu = 0;
-Process tempProcess;
 int ioTotal = 0.0;
 int ioTime[512][2];
 int tempIoTime[2];
@@ -51,6 +50,7 @@ double avg_turnaround = 0.0;
 int totalCW = 0;
 int totalTT = 0;
 
+/* put random number into randvals[i]*/
 int readRandNum(FILE* file) {
     int i = 0;
     while (!feof(file)) {
@@ -63,11 +63,13 @@ int readRandNum(FILE* file) {
     return 0;
 }
 
+/* Calcaluate cpuBurst or ioBurst */
 int myrandom(int burst){
     return 1 + (randvals[ofs]  % burst);
 }
 
 
+/* read from input file and parse all processes to eventqueue*/
 int parse(FILE *file, Scheduler* scheduler){
     
     int i = 0;
@@ -83,21 +85,25 @@ int parse(FILE *file, Scheduler* scheduler){
                 while (token!= NULL) {
                     if (process.atRead == false) {
                         process.AT = atoi(token);
+                        /* store the original arrival time of each process to processlist*/
                         processList[i].AT = atoi(token);
                         processList[i].tempAT = atoi(token);
                         process.atRead = true;
                     } else if (process.tcRead == false){
                         process.TC = atoi(token);
                         process.remainTime = atoi(token);
+                        processList[i].TC = atoi(token);
                         TotalCpu += process.TC;
                         //                        printf("TotalCpu: %i\n", TotalCpu);
                         process.tcRead = true;
                     } else if (process.cbRead == false){
                         process.CB = atoi(token);
                         process.cbRead = true;
+                        processList[i].CB = atoi(token);
                     } else if (process.ioRead == false){
                         process.IO = atoi(token);
                         process.ioRead = true;
+                        processList[i].IO = atoi(token);
                     }
                     token = strtok(NULL, " ");
                     
@@ -105,11 +111,12 @@ int parse(FILE *file, Scheduler* scheduler){
                 process.ID = tempID;
                 process.order = tempID;
                 process.priority = myrandom(4);
-                processList[i].priority = process.priority;
+                processList[i].priority = process.priority; /* store the static priority to processlist*/
                 process.priority--;
                 tempID++;
                 i++;
                 ofs++;
+                /* put the process into eventqueue*/
                 scheduler->put_eventqueue(process);
                 
                 
@@ -120,12 +127,13 @@ int parse(FILE *file, Scheduler* scheduler){
 };
 
 
-
+/* Calcaluate the cpu waittime of each process*/
 int readyTime(int j){
     processList[j].CW = processList[j].CW + (runningTime - processList[j].tempAT);
     return 0;
 }
 
+/* Calcaluate the io time of all processes */
 int ioUtilize(){
     tempIoTime[0] = ioTime[0][0];
     tempIoTime[1] = ioTime[0][1];
@@ -150,14 +158,31 @@ int ioUtilize(){
         }
     }
     io_util = 100.0 * ioTotal / maxfintime;
-    std::cout<<io_util <<"\n";
     return  0;
 }
 
 void printResult(){
     for (int i = 0; i < tempID ; i++) {
-        std::cout<< "Process"<< i << "  " << processList[i].priority << "   "<<processList[i].FT << "   "<< processList[i].IT << "   " << processList[i].CW << "\n";
+        printf("%04d: %4d %4d %4d %4d %1d | %5d %5d %5d %5d\n",
+               processList[i].ID,
+               processList[i].AT,
+               processList[i].TC,
+               processList[i].CB,
+               processList[i].IO,
+               processList[i].priority,
+               processList[i].FT,
+               processList[i].TT,
+               processList[i].IT,
+               processList[i].CW);
     }
+    
+    printf("SUM: %d %.2lf %.2lf %.2lf %.2lf %.3lf\n",
+           maxfintime,
+           cpu_util,
+           io_util,
+           avg_turnaround,
+           avg_waittime,
+           throughput);
 }
 
 int main(int argc, const char * argv[]) {
@@ -167,6 +192,7 @@ int main(int argc, const char * argv[]) {
     fclose(file);
     Scheduler* scheduler;
     
+    /* command line arguments with different scheduler method*/
     if (argv[3][2] == 'F') {
         scheduler = new FCFSScheduler();
         strcpy(quantumAssign, "runningCpuBurst");
@@ -182,7 +208,7 @@ int main(int argc, const char * argv[]) {
         quantum = number;
     } else if (argv[3][2] == 'P') {
         scheduler = new PRIOScheduler();
-        number = atoi(&argv[3][3]);
+        number = atoi(&argv[3][3]);   /* get the number from the argument*/
         quantum = number;
     } else {
         printf("Argument is expected.");
@@ -192,9 +218,12 @@ int main(int argc, const char * argv[]) {
     parse(file, scheduler);
     fclose(file);
     Process runningProcess = {0, 0, false, 0, false, 0, false, 0, false};
+    /* tempID is the number of the processes in the input file */
     ofs = tempID;
+    
+    /* at least one queue is not empty*/
     while (scheduler->bothEmpty() == false || scheduler->expiredEmpty() == false) {
-        
+        /* check the process in eventqueue is ready or not*/
         while (scheduler->isReady(runningTime)== true && !scheduler->eventEmpty()) {
             scheduler->put_readyqueue(scheduler->get_eventqueue());
         }
@@ -205,6 +234,7 @@ int main(int argc, const char * argv[]) {
                     scheduler->put_readyqueue(scheduler->get_eventqueue());
                     
                 }
+                /* If there is no process in eventqueue is ready and readyqueue is empty, switch the pointers of readyqueue and expiredqueue*/
                 if (scheduler->readyEmpty() == true) {
                     scheduler->switchPointer();
                 }
@@ -214,13 +244,16 @@ int main(int argc, const char * argv[]) {
                 
                 
             } else {
+                /* push the process out of readyqueue to cpu*/
                 runningProcess = scheduler->get_readyqueue();
+                /* If the priority of process is -1, put it to expiredqueue*/
                 if (runningProcess.priority == -1) {
                     scheduler->put_expiredqueue(runningProcess);
                 } else {
                     runningProcess.runState = true;
                     if (runningProcess.cpuBurstRemain == 0) {
                         ofs++;
+                        /* wrap around when running out of number in rfile*/
                         if (ofs > 40000) {
                             ofs = 1;
                         }
@@ -228,6 +261,7 @@ int main(int argc, const char * argv[]) {
                         runningProcess.cpuBurstRemain = cpuBurst;
                         
                     }
+                    /* Different scheduler method assign different quantum*/
                     if (strcmp(quantumAssign, "runningCpuBurst") == 0 ) {
                         quantum = runningProcess.cpuBurstRemain;
                     } else {
@@ -250,6 +284,7 @@ int main(int argc, const char * argv[]) {
                     
                     readyTime(runningProcess.ID);
                     if (runningProcess.priority == -1) {
+                        /*reset the static_priority and put the process into expiredqueue*/
                         runningProcess.priority = processList[runningProcess.ID].priority - 1;
                         scheduler->put_expiredqueue(runningProcess);
                     }
@@ -260,7 +295,7 @@ int main(int argc, const char * argv[]) {
                         }
                     }
                     
-                    
+                    /* if the process doesn't run out of the cpuBurst, put it into the readyqueue */
                     if (runningProcess.cpuBurstRemain !=0) {
                         runningTime = currentTime;
                         runningProcess.order = runningTime;
@@ -268,7 +303,8 @@ int main(int argc, const char * argv[]) {
                         runningProcess.AT = runningTime;
                         processList[runningProcess.ID].tempAT = runningTime;
 //                        runningProcess.priority--;
-                                                scheduler->decreasePriority(&runningProcess);/*differet algorithm*/
+                        /* decrease the priority after running out cpu*/
+                        scheduler->decreasePriority(&runningProcess);
                         if (runningProcess.priority == -1) {
                             runningProcess.priority = processList[runningProcess.ID].priority - 1;
                             scheduler->put_expiredqueue(runningProcess);
@@ -290,6 +326,7 @@ int main(int argc, const char * argv[]) {
                             ioTime[k][0] = currentTime;
                             ioTime[k][1] = currentTime + ioQuantum;
                             k++;
+                            /* run io and calcaluate the next arrival time*/
                             processList[runningProcess.ID].IT += ioQuantum;
                             runningProcess.AT = runningTime + ioQuantum;
                             processList[runningProcess.ID].tempAT = runningProcess.AT;
@@ -298,11 +335,12 @@ int main(int argc, const char * argv[]) {
                             
                             
                         } else {
+                            /* run out of the total cpu time*/
                             processList[runningProcess.ID].FT = runningTime;
                             maxfintime = processList[runningProcess.ID].FT;
                         }
                     }
-                    
+                    /* reset runningProcess*/
                     runningProcess.runState = false;
                     runningProcess.AT = 0;
                     runningProcess.TC = 0;
@@ -315,8 +353,7 @@ int main(int argc, const char * argv[]) {
         }
         
     }
-//    std::cout<<"finish time  "<<finishTime<< "\n";
-//    printResult();
+
     for (int i = 0; i < tempID; i++) {
         totalCW += processList[i].CW;
     }
@@ -328,18 +365,12 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < tempID; i++) {
         totalTT += processList[i].TT;
     }
-    
-    std::cout<<maxfintime<<"\n";
-    cpu_util = 100.0 * TotalCpu / maxfintime;
-    std::cout<< cpu_util <<"\n";
     ioUtilize();
+    cpu_util = 100.0 * TotalCpu / maxfintime;
     avg_turnaround = 1.0 * totalTT / tempID;
-    std::cout<< avg_turnaround<<"\n";
     avg_waittime = 1.0 * totalCW / tempID;
-    std::cout<< avg_waittime<<"\n";
     throughput = 100.0 * tempID / maxfintime;
-    std::cout<<throughput<<"\n";
-    
+    printResult();
     
     return 0;
 }

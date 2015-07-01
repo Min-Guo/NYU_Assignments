@@ -10,7 +10,7 @@ struct Process{
     int ID;
     bool runState;
     int priority;
-    int order;
+    int order; /*excute time*/
     int tempAT;
     int AT; /* arriving time*/
     bool atRead; /* if AT has been read from input file, it is true*/
@@ -20,11 +20,10 @@ struct Process{
     bool cbRead;
     int IO; /* IO burst*/
     bool ioRead;
-    int remainTime;
+    int remainTime; /* remaintime of total cpu time*/
     int FT;
     int IT;
     int CW;
-    int IOState;
     int cpuBurstRemain;
     int TT;
 };
