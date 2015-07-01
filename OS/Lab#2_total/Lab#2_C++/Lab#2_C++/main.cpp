@@ -302,7 +302,6 @@ int main(int argc, const char * argv[]) {
                         runningProcess.remainTime -= quantum;
                         runningProcess.AT = runningTime;
                         processList[runningProcess.ID].tempAT = runningTime;
-//                        runningProcess.priority--;
                         /* decrease the priority after running out cpu*/
                         scheduler->decreasePriority(&runningProcess);
                         if (runningProcess.priority == -1) {
