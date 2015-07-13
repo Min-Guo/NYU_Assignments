@@ -31,16 +31,20 @@ struct PageTableEntry {
 };
 
 class PageMapping{
-private:
+protected:
     PageTableEntry pageTable[64];
 public:
     virtual void insertEmptyPage(Instruction instruction, int a) = 0;
+    virtual bool checkReferred(Instruction instruction) = 0;
+    virtual void printTable(Instruction instruction) = 0;
 };
 
 class FIFOMapping:public PageMapping{
-private:
+protected:
     PageTableEntry pageTable[64];
 public:
     void insertEmptyPage(Instruction instruction, int a);
+    bool checkReferred(Instruction instruction);
+    void printTable(Instruction instruction);
 };
 #endif /* defined(__lab3__VMM__) */

@@ -20,7 +20,7 @@ string lineBuffer;
 char* line;
 char* token;
 const char* file;
-const int* frameNumber;
+int frameNumber = 16;
 PageMapping* pageMapping;
 Instruction tempInstruction = {
     0,
@@ -66,10 +66,20 @@ int readFile(const char* file){
                     }
                     token = strtok(NULL, " ");
                 }
-                cout<<i<< " "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
-                pageMapping->insertEmptyPage(tempInstruction, i);
-                resetTempIns();
-                i++;
+//                cout<<i<< " "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
+                if (i < frameNumber) {
+                    if (pageMapping->checkReferred(tempInstruction) == false) {
+                        pageMapping->insertEmptyPage(tempInstruction, i);
+                        pageMapping->printTable(tempInstruction);
+                        resetTempIns();
+                        i++;
+ 
+                    }
+                    else{
+                        cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
+                    }
+                }
+                
             }
         }
     }
@@ -79,7 +89,9 @@ int readFile(const char* file){
 
 
 int main(int argc, const char * argv[]) {
-    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
-    readFile(argv[1]);
+//    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
+//    frameNumber = atoi(argv[1]);
+    frameNumber = 16;
+    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4");
     return 0;
 }
