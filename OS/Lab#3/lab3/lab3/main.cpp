@@ -13,24 +13,37 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <vector>
+#include "VMM.h"
 using namespace std;
 
 string lineBuffer;
 char* line;
 char* token;
-
-
-struct instruction {
-    int operation;
-    bool operationState;
-    int virtualPageIndex;
-    bool virtualPageState;
+const char* file;
+const int* frameNumber;
+PageMapping* pageMapping;
+Instruction tempInstruction = {
+    0,
+    false,
+    0,
+    false,
 };
-vector<instruction> Inputs;
 
-int readFile(){
+
+
+void resetTempIns(){
+    tempInstruction.operationState = false;
+    tempInstruction.operation = 0;
+    tempInstruction.virtualPageIndex = 0;
+    tempInstruction.virtualPageState = false;
+};
+
+
+
+int readFile(const char* file){
     int i = 0;
-    ifstream infile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4");
+    pageMapping = new FIFOMapping();
+    ifstream infile(file);
     if(!infile.is_open()){
         cout<<"Failed to open"<<endl;
     }
@@ -42,20 +55,20 @@ int readFile(){
                 strcpy(line, lineBuffer.c_str());
                 token = strtok(line, "\n");
                 token = strtok(line, " ");
-                Inputs.push_back(instruction());
                 while (token!= NULL) {
-                    if (Inputs[i].operationState == false) {
-                        Inputs[i].operation = atoi(token);
-                        Inputs[i].operationState = true;
-                        cout<<Inputs[i].operation<<" ";
+                    if (tempInstruction.operationState == false) {
+                        tempInstruction.operation = atoi(token);
+                        tempInstruction.operationState = true;
                     }
                     else
                     {
-                        Inputs[i].virtualPageIndex = atoi(token);
-                        cout<<Inputs[i].virtualPageIndex<< endl;
+                        tempInstruction.virtualPageIndex = atoi(token);
                     }
                     token = strtok(NULL, " ");
                 }
+                cout<<i<< " "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
+                pageMapping->insertEmptyPage(tempInstruction, i);
+                resetTempIns();
                 i++;
             }
         }
@@ -66,6 +79,7 @@ int readFile(){
 
 
 int main(int argc, const char * argv[]) {
-    readFile();
+    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
+    readFile(argv[1]);
     return 0;
 }
