@@ -81,6 +81,20 @@ bool FIFOMapping::checkReferred(Instruction instruction){
     }
 }
 
-void FIFOMapping::printTable(Instruction instruction){
-    cout<<instruction.virtualPageIndex<<" "<<physicalFrameNumber(instruction)<<endl;
+void FIFOMapping::updateFrameTable(int a, Instruction instruction){
+    frameTable[a] = instruction.virtualPageIndex;
+}
+
+void FIFOMapping::printTable(Instruction instruction, int a){
+    cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
+    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction)<<endl;
+    cout<< a << ": MAP     "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction)<<endl;
+}
+
+int FIFOMapping::choosePage(int a){
+    return frameTable[a];
+}
+
+void FIFOMapping::replacePage(int a){
+    
 }

@@ -24,6 +24,7 @@ const char* file;
 int physicalFrameNumber = 16;
 unsigned long temppte;
 
+
 PageMapping* pageMapping;
 Instruction tempInstruction = {
     0,
@@ -46,6 +47,7 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int i = 0;
+    int j = 0;
     pageMapping = new FIFOMapping();
     ifstream infile(file);
     if(!infile.is_open()){
@@ -76,7 +78,8 @@ int readFile(const char* file){
                     if (pageMapping->checkReferred(tempInstruction) == false) {
                         pageMapping->calculatePTE(1, tempInstruction.operation, 1, 0, 0);
                         pageMapping->insertEmptyPage(tempInstruction, i);
-                        pageMapping->printTable(tempInstruction);
+                        pageMapping->updateFrameTable(i, tempInstruction);
+                        pageMapping->printTable(tempInstruction, j);
                         resetTempIns();
                         i++;
                         
@@ -85,7 +88,11 @@ int readFile(const char* file){
                         cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
                     }
                 }
-                
+//                if (i >= physicalFrameNumber) {
+//                    i = 0;
+//                    pageMapping->choosePage(i);
+//                }
+                j++;
             }
         }
     }
