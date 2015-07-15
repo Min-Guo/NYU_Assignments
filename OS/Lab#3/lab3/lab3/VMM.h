@@ -22,29 +22,39 @@ struct Instruction {
     bool virtualPageState;
 };
 
-struct PageTableEntry {
-    int present;
-    int modified;
-    int referenced;
-    string pageout;
-    int physicalFrame;
-};
+
 
 class PageMapping{
-protected:
-    PageTableEntry pageTable[64];
+private:
+    unsigned long pageTable[64];
+    unsigned long pte;
+    unsigned long PhyNumber;
 public:
     virtual void insertEmptyPage(Instruction instruction, int a) = 0;
     virtual bool checkReferred(Instruction instruction) = 0;
     virtual void printTable(Instruction instruction) = 0;
+    virtual int presentBit(unsigned long pte) = 0;
+    virtual int modifiedBit(unsigned long pte) = 0;
+    virtual int referencedBit(unsigned long pte) = 0;
+    virtual int pageoutBit(unsigned long pte) = 0;
+    virtual unsigned long calculatePTE(int a, int b, int c, int d, int e) = 0;
+    virtual unsigned long physicalFrameNumber(Instruction instruction) = 0;
 };
 
 class FIFOMapping:public PageMapping{
-protected:
-    PageTableEntry pageTable[64];
+private:
+    unsigned long pageTable[64];
+    unsigned long pte;
+    unsigned long PhyNumber;
 public:
     void insertEmptyPage(Instruction instruction, int a);
     bool checkReferred(Instruction instruction);
     void printTable(Instruction instruction);
+    int presentBit(unsigned long pte);
+    int modifiedBit(unsigned long pte);
+    int referencedBit(unsigned long pte);
+    int pageoutBit(unsigned long pte);
+    unsigned long calculatePTE(int a, int b, int c, int d, int e);
+    unsigned long physicalFrameNumber(Instruction instruction);
 };
 #endif /* defined(__lab3__VMM__) */

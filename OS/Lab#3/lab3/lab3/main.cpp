@@ -14,13 +14,16 @@
 #include <stdbool.h>
 #include <vector>
 #include "VMM.h"
+#include <math.h>
 using namespace std;
 
 string lineBuffer;
 char* line;
 char* token;
 const char* file;
-int frameNumber = 16;
+int physicalFrameNumber = 16;
+unsigned long temppte;
+
 PageMapping* pageMapping;
 Instruction tempInstruction = {
     0,
@@ -37,6 +40,7 @@ void resetTempIns(){
     tempInstruction.virtualPageIndex = 0;
     tempInstruction.virtualPageState = false;
 };
+
 
 
 
@@ -59,6 +63,8 @@ int readFile(const char* file){
                     if (tempInstruction.operationState == false) {
                         tempInstruction.operation = atoi(token);
                         tempInstruction.operationState = true;
+                        pageMapping->calculatePTE(1, tempInstruction.operation, 0, 0, 0);
+                        temppte = pageMapping->calculatePTE(1, tempInstruction.operation, 0, 0, 0);
                     }
                     else
                     {
@@ -66,14 +72,14 @@ int readFile(const char* file){
                     }
                     token = strtok(NULL, " ");
                 }
-//                cout<<i<< " "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
-                if (i < frameNumber) {
+                if (i < physicalFrameNumber) {
                     if (pageMapping->checkReferred(tempInstruction) == false) {
+                        pageMapping->calculatePTE(1, tempInstruction.operation, 1, 0, 0);
                         pageMapping->insertEmptyPage(tempInstruction, i);
                         pageMapping->printTable(tempInstruction);
                         resetTempIns();
                         i++;
- 
+                        
                     }
                     else{
                         cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
@@ -83,15 +89,14 @@ int readFile(const char* file){
             }
         }
     }
-
+    
     return 0;
 };
 
 
 int main(int argc, const char * argv[]) {
-//    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
-//    frameNumber = atoi(argv[1]);
-    frameNumber = 16;
+    //    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
+    //    frameNumber = atoi(argv[1]);
     readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4");
     return 0;
 }
