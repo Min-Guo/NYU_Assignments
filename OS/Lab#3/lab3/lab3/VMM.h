@@ -46,6 +46,7 @@ public:
     virtual bool sameVaildPage(int inputLine, int Page, Instruction instruction) = 0;
     virtual void outPage(int inputLine,int page, Instruction instruction) = 0;
     virtual void printMap(int inputLine, Instruction instruction) = 0;
+    virtual int tablePosition() = 0;
 };
 
 
@@ -71,6 +72,7 @@ public:
     bool sameVaildPage(int inputLine, int page, Instruction instruction);
     void outPage(int inputLine,int page, Instruction instruction);
     void printMap(int inputLine, Instruction instruction);
+    int tablePosition();
 };
 
 class LRUMapping:public PageMapping{
@@ -90,7 +92,7 @@ public:
     unsigned long calculatePTE(int a, int b, int c, int d, int e);
     int physicalFrameNumber(int a);
     void updateFrameTable(int inputLine, int a, Instruction instruction);
-    int choosePage(int a);
+    int choosePage(Instruction instruction);
     void replacePage(int inputLine, int oldPage, Instruction instruction);
     bool sameVaildPage(int inputLine, int page, Instruction instruction);
     void outPage(int inputLine,int page, Instruction instruction);

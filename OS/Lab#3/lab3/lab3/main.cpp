@@ -48,7 +48,7 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new LRUMapping();
+    pageMapping = new FIFOMapping();
     ifstream infile(file);
     if(!infile.is_open()){
         cout<<"Failed to open"<<endl;
@@ -74,33 +74,21 @@ int readFile(const char* file){
                     }
                     token = strtok(NULL, " ");
                 }
+                i = pageMapping->tablePosition();
                 if (i < physicalFrameNumber) {
-                    if (pageMapping->checkReferred(tempInstruction) == false) {
-                        pageMapping->calculatePTE(1, tempInstruction.operation, 1, 0, 0);
+                    if(pageMapping->sameVaildPage(j, i, tempInstruction) == false){
                         pageMapping->insertEmptyPage(tempInstruction, i);
                         pageMapping->updateFrameTable(j, i, tempInstruction);
                         pageMapping->printTable(tempInstruction, j);
-                        resetTempIns();
-                        i++;
-                        
                     }
-                    else{
-                        cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
-                        resetTempIns();
-                    }
-                }
-                else
-                {
-                    if (pageMapping->sameVaildPage(j, tempInstruction.virtualPageIndex, tempInstruction) == true) {
-                        cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
-                        resetTempIns();
-                    } else {
+                } else{
+                    if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction) == false)) {
                         pageIndex = pageMapping->choosePage(physicalFrameNumber);
                         pageMapping->replacePage(j, pageIndex, tempInstruction);
-                        i++;
-                        resetTempIns();
-                    }
+                    } 
                 }
+                
+                resetTempIns();
                 j++;
             }
         }
