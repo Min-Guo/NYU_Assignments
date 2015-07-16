@@ -40,10 +40,10 @@ public:
     virtual int pageoutBit(unsigned long pte) = 0;
     virtual unsigned long calculatePTE(int a, int b, int c, int d, int e) = 0;
     virtual int physicalFrameNumber(int a) = 0;
-    virtual void updateFrameTable(int a, Instruction instruction) = 0;
+    virtual void updateFrameTable(int inputLine, int a, Instruction instruction) = 0;
     virtual int choosePage(int a) = 0;
     virtual void replacePage(int inputLine, int oldPage, Instruction instruction) = 0;
-    virtual bool sameVaildPage(int Page, Instruction instruction) = 0;
+    virtual bool sameVaildPage(int inputLine, int Page, Instruction instruction) = 0;
     virtual void outPage(int inputLine,int page, Instruction instruction) = 0;
     virtual void printMap(int inputLine, Instruction instruction) = 0;
 };
@@ -65,10 +65,34 @@ public:
     int pageoutBit(unsigned long pte);
     unsigned long calculatePTE(int a, int b, int c, int d, int e);
     int physicalFrameNumber(int a);
-    void updateFrameTable(int a, Instruction instruction);
+    void updateFrameTable(int inputLine, int a, Instruction instruction);
     int choosePage(int a);
     void replacePage(int inputLine, int oldPage, Instruction instruction);
-    bool sameVaildPage(int page, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction);
+    void outPage(int inputLine,int page, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction);
+};
+
+class LRUMapping:public PageMapping{
+private:
+    unsigned long pageTable[64];
+    int frameTable[16][2];
+    unsigned long pte;
+    int PhyNumber;
+public:
+    void insertEmptyPage(Instruction instruction, int a);
+    bool checkReferred(Instruction instruction);
+    void printTable(Instruction instruction, int inputLine);
+    int presentBit(unsigned long pte);
+    int modifiedBit(unsigned long pte);
+    int referencedBit(unsigned long pte);
+    int pageoutBit(unsigned long pte);
+    unsigned long calculatePTE(int a, int b, int c, int d, int e);
+    int physicalFrameNumber(int a);
+    void updateFrameTable(int inputLine, int a, Instruction instruction);
+    int choosePage(int a);
+    void replacePage(int inputLine, int oldPage, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction);
     void outPage(int inputLine,int page, Instruction instruction);
     void printMap(int inputLine, Instruction instruction);
 };

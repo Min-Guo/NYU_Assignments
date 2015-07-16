@@ -24,7 +24,6 @@ const char* file;
 int physicalFrameNumber = 16;
 unsigned long temppte;
 int pageIndex;
-int n = 1;
 int i = 0;
 
 PageMapping* pageMapping;
@@ -49,7 +48,7 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new FIFOMapping();
+    pageMapping = new LRUMapping();
     ifstream infile(file);
     if(!infile.is_open()){
         cout<<"Failed to open"<<endl;
@@ -79,7 +78,7 @@ int readFile(const char* file){
                     if (pageMapping->checkReferred(tempInstruction) == false) {
                         pageMapping->calculatePTE(1, tempInstruction.operation, 1, 0, 0);
                         pageMapping->insertEmptyPage(tempInstruction, i);
-                        pageMapping->updateFrameTable(i, tempInstruction);
+                        pageMapping->updateFrameTable(j, i, tempInstruction);
                         pageMapping->printTable(tempInstruction, j);
                         resetTempIns();
                         i++;
@@ -92,24 +91,15 @@ int readFile(const char* file){
                 }
                 else
                 {
-//                    int frameChose;
-//                    frameChose = i - n * physicalFrameNumber;
-//                    pageIndex = pageMapping->choosePage(frameChose);
-                    if (pageMapping->sameVaildPage(tempInstruction.virtualPageIndex, tempInstruction) == true) {
+                    if (pageMapping->sameVaildPage(j, tempInstruction.virtualPageIndex, tempInstruction) == true) {
                         cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
                         resetTempIns();
                     } else {
                         pageIndex = pageMapping->choosePage(physicalFrameNumber);
                         pageMapping->replacePage(j, pageIndex, tempInstruction);
                         i++;
-//                        frameChose++;
                         resetTempIns();
                     }
-                    
-//                    if (frameChose >= physicalFrameNumber) {
-//                        n++;
-//                    }
-                    
                 }
                 j++;
             }
