@@ -12,6 +12,8 @@
 #include <iostream>
 #include <math.h>
 
+int k = 0;
+
 void PageMapping::insertEmptyPage(Instruction instruction, int a){
     pageTable[instruction.virtualPageIndex] = a;
 }
@@ -94,8 +96,14 @@ void FIFOMapping::printTable(Instruction instruction, int a){
     cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
 }
 
-int FIFOMapping::choosePage(int currentFrame){
-    return frameTable[currentFrame];
+int FIFOMapping::choosePage(int a){
+    int page;
+    if (k >= a) {
+        k = k - a;
+    }
+    page = frameTable[k];
+    k++;
+    return page;
 }
 
 bool FIFOMapping::sameVaildPage(int page, Instruction instruction){

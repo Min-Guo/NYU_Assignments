@@ -92,23 +92,23 @@ int readFile(const char* file){
                 }
                 else
                 {
-                    int frameChose;
-                    frameChose = i - n * physicalFrameNumber;
-                    pageIndex = pageMapping->choosePage(frameChose);
+//                    int frameChose;
+//                    frameChose = i - n * physicalFrameNumber;
+//                    pageIndex = pageMapping->choosePage(frameChose);
                     if (pageMapping->sameVaildPage(tempInstruction.virtualPageIndex, tempInstruction) == true) {
                         cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
                         resetTempIns();
                     } else {
+                        pageIndex = pageMapping->choosePage(physicalFrameNumber);
                         pageMapping->replacePage(j, pageIndex, tempInstruction);
-//                        pageMapping->updateFrameTable(j, tempInstruction);
                         i++;
-                        frameChose++;
+//                        frameChose++;
                         resetTempIns();
                     }
                     
-                    if (frameChose >= physicalFrameNumber) {
-                        n++;
-                    }
+//                    if (frameChose >= physicalFrameNumber) {
+//                        n++;
+//                    }
                     
                 }
                 j++;
