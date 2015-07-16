@@ -28,6 +28,8 @@ void FIFOMapping::insertEmptyPage(Instruction instruction, int x){
 
 
 
+
+
 int FIFOMapping::presentBit(unsigned long pte){
     int x;
     pte = pte >> 31;
@@ -56,15 +58,16 @@ int FIFOMapping::pageoutBit(unsigned long pte){
     return x;
 };
 
-unsigned long FIFOMapping::physicalFrameNumber(Instruction instruction){
+int FIFOMapping::physicalFrameNumber(int a){
     int i = 6;
     unsigned long x;
+    int y;
     PhyNumber = 0;
     while (i > 0) {
-        x = pageTable[instruction.virtualPageIndex];
+        x = pageTable[a];
         x = x >> (i - 1);
-        x = x & 1;
-        PhyNumber += x * pow(2, i - 1);
+        y = x & 1;
+        PhyNumber += y * pow(2, i - 1);
         i--;
     }
     return PhyNumber;
@@ -87,14 +90,58 @@ void FIFOMapping::updateFrameTable(int a, Instruction instruction){
 
 void FIFOMapping::printTable(Instruction instruction, int a){
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
-    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction)<<endl;
-    cout<< a << ": MAP     "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction)<<endl;
+    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
 }
 
-int FIFOMapping::choosePage(int a){
-    return frameTable[a];
+int FIFOMapping::choosePage(int currentFrame){
+    return frameTable[currentFrame];
 }
 
-void FIFOMapping::replacePage(int a){
+bool FIFOMapping::sameVaildPage(int page, Instruction instruction){
+    for (int i = 0; i < 16; i++) {
+        if (frameTable[i] == page) {
+            if (instruction.operation ==  1) {
+                pageTable[page] = calculatePTE(presentBit(pageTable[page]), 1, referencedBit(pageTable[page]), pageoutBit(pageTable[page]), physicalFrameNumber(page));
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void FIFOMapping::outPage(int inputLine,int page, Instruction instruction){
+    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+    pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
+    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
+    frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+}
+
+
+void FIFOMapping::printMap(int inputLine, Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else {
+        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    }
     
 }
+void FIFOMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    if (modifiedBit(pageTable[oldPage]) == 1) {
+        outPage(inputLine, oldPage, instruction);
+        printMap(inputLine, instruction);
+    } else{
+        pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
+        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
+        frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+        printMap(inputLine, instruction);
+    }
+}
+

@@ -27,42 +27,49 @@ struct Instruction {
 class PageMapping{
 private:
     unsigned long pageTable[64];
-    int frameTable[64];
+    int frameTable[16];
     unsigned long pte;
-    unsigned long PhyNumber;
+    int PhyNumber;
 public:
     virtual void insertEmptyPage(Instruction instruction, int a) = 0;
     virtual bool checkReferred(Instruction instruction) = 0;
-    virtual void printTable(Instruction instruction, int a) = 0;
+    virtual void printTable(Instruction instruction, int inputLine) = 0;
     virtual int presentBit(unsigned long pte) = 0;
     virtual int modifiedBit(unsigned long pte) = 0;
     virtual int referencedBit(unsigned long pte) = 0;
     virtual int pageoutBit(unsigned long pte) = 0;
     virtual unsigned long calculatePTE(int a, int b, int c, int d, int e) = 0;
-    virtual unsigned long physicalFrameNumber(Instruction instruction) = 0;
+    virtual int physicalFrameNumber(int a) = 0;
     virtual void updateFrameTable(int a, Instruction instruction) = 0;
     virtual int choosePage(int a) = 0;
-    virtual void replacePage(int a) = 0;
+    virtual void replacePage(int inputLine, int oldPage, Instruction instruction) = 0;
+    virtual bool sameVaildPage(int Page, Instruction instruction) = 0;
+    virtual void outPage(int inputLine,int page, Instruction instruction) = 0;
+    virtual void printMap(int inputLine, Instruction instruction) = 0;
 };
+
 
 class FIFOMapping:public PageMapping{
 private:
     unsigned long pageTable[64];
-    int frameTable[64];
+    int frameTable[16];
     unsigned long pte;
-    unsigned long PhyNumber;
+    int PhyNumber;
 public:
     void insertEmptyPage(Instruction instruction, int a);
     bool checkReferred(Instruction instruction);
-    void printTable(Instruction instruction, int a);
+    void printTable(Instruction instruction, int inputLine);
     int presentBit(unsigned long pte);
     int modifiedBit(unsigned long pte);
     int referencedBit(unsigned long pte);
     int pageoutBit(unsigned long pte);
     unsigned long calculatePTE(int a, int b, int c, int d, int e);
-    unsigned long physicalFrameNumber(Instruction instruction);
+    int physicalFrameNumber(int a);
     void updateFrameTable(int a, Instruction instruction);
     int choosePage(int a);
-    void replacePage(int a);
+    void replacePage(int inputLine, int oldPage, Instruction instruction);
+    bool sameVaildPage(int page, Instruction instruction);
+    void outPage(int inputLine,int page, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction);
 };
 #endif /* defined(__lab3__VMM__) */

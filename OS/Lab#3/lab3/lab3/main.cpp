@@ -23,7 +23,9 @@ char* token;
 const char* file;
 int physicalFrameNumber = 16;
 unsigned long temppte;
-
+int pageIndex;
+int n = 1;
+int i = 0;
 
 PageMapping* pageMapping;
 Instruction tempInstruction = {
@@ -46,7 +48,6 @@ void resetTempIns(){
 
 
 int readFile(const char* file){
-    int i = 0;
     int j = 0;
     pageMapping = new FIFOMapping();
     ifstream infile(file);
@@ -86,12 +87,30 @@ int readFile(const char* file){
                     }
                     else{
                         cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
+                        resetTempIns();
                     }
                 }
-//                if (i >= physicalFrameNumber) {
-//                    i = 0;
-//                    pageMapping->choosePage(i);
-//                }
+                else
+                {
+                    int frameChose;
+                    frameChose = i - n * physicalFrameNumber;
+                    pageIndex = pageMapping->choosePage(frameChose);
+                    if (pageMapping->sameVaildPage(tempInstruction.virtualPageIndex, tempInstruction) == true) {
+                        cout<<"==> inst: "<<tempInstruction.operation<<" "<<tempInstruction.virtualPageIndex<< endl;
+                        resetTempIns();
+                    } else {
+                        pageMapping->replacePage(j, pageIndex, tempInstruction);
+//                        pageMapping->updateFrameTable(j, tempInstruction);
+                        i++;
+                        frameChose++;
+                        resetTempIns();
+                    }
+                    
+                    if (frameChose >= physicalFrameNumber) {
+                        n++;
+                    }
+                    
+                }
                 j++;
             }
         }
