@@ -92,10 +92,11 @@ public:
     unsigned long calculatePTE(int a, int b, int c, int d, int e);
     int physicalFrameNumber(int a);
     void updateFrameTable(int inputLine, int a, Instruction instruction);
-    int choosePage(Instruction instruction);
+    int choosePage(int a);
     void replacePage(int inputLine, int oldPage, Instruction instruction);
     bool sameVaildPage(int inputLine, int page, Instruction instruction);
     void outPage(int inputLine,int page, Instruction instruction);
     void printMap(int inputLine, Instruction instruction);
+    int tablePosition();
 };
 #endif /* defined(__lab3__VMM__) */
