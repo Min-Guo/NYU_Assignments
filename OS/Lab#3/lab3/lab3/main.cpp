@@ -48,7 +48,7 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new LRUMapping();
+    pageMapping = new ClockMapping();
     ifstream infile(file);
     if(!infile.is_open()){
         cout<<"Failed to open"<<endl;

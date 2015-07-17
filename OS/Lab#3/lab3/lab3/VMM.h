@@ -53,7 +53,7 @@ public:
 class FIFOMapping:public PageMapping{
 private:
     unsigned long pageTable[64];
-    int frameTable[16];
+    int frameTable[64];
     unsigned long pte;
     int PhyNumber;
 public:
@@ -78,7 +78,32 @@ public:
 class LRUMapping:public PageMapping{
 private:
     unsigned long pageTable[64];
-    int frameTable[16][2];
+    int frameTable[64][2];
+    unsigned long pte;
+    int PhyNumber;
+public:
+    void insertEmptyPage(Instruction instruction, int a);
+    bool checkReferred(Instruction instruction);
+    void printTable(Instruction instruction, int inputLine);
+    int presentBit(unsigned long pte);
+    int modifiedBit(unsigned long pte);
+    int referencedBit(unsigned long pte);
+    int pageoutBit(unsigned long pte);
+    unsigned long calculatePTE(int a, int b, int c, int d, int e);
+    int physicalFrameNumber(int a);
+    void updateFrameTable(int inputLine, int a, Instruction instruction);
+    int choosePage(int a);
+    void replacePage(int inputLine, int oldPage, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction);
+    void outPage(int inputLine,int page, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction);
+    int tablePosition();
+};
+
+class ClockMapping:public PageMapping{
+private:
+    unsigned long pageTable[64];
+    int frameTable[64];
     unsigned long pte;
     int PhyNumber;
 public:
