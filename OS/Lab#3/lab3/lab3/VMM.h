@@ -48,6 +48,7 @@ public:
     virtual void printMap(int inputLine, Instruction instruction) = 0;
     virtual int tablePosition() = 0;
     virtual void resizeFrameTable(int a) = 0;
+    virtual void readRfile(const char*rfile) = 0;
 };
 
 
@@ -75,6 +76,7 @@ public:
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
     void resizeFrameTable(int a);
+    void readRfile(const char*rfile);
 };
 
 class LRUMapping:public PageMapping{
@@ -101,6 +103,7 @@ public:
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
     void resizeFrameTable(int a);
+    void readRfile(const char*rfile);
 };
 
 class ClockMapping:public PageMapping{
@@ -127,6 +130,7 @@ public:
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
     void resizeFrameTable(int a);
+    void readRfile(const char*rfile);
 };
 
 class SecondChanceMapping:public PageMapping{
@@ -153,5 +157,36 @@ public:
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
     void resizeFrameTable(int a);
+    void readRfile(const char*rfile);
 };
+
+class RandomMapping:public PageMapping{
+private:
+    unsigned long pageTable[64];
+    int frameTable[64];
+    vector<unsigned int> randomNum;
+    FILE *rfile;
+    unsigned long pte;
+    int PhyNumber;
+public:
+    void insertEmptyPage(Instruction instruction, int a);
+    bool checkReferred(Instruction instruction);
+    void printTable(Instruction instruction, int inputLine);
+    int presentBit(unsigned long pte);
+    int modifiedBit(unsigned long pte);
+    int referencedBit(unsigned long pte);
+    int pageoutBit(unsigned long pte);
+    unsigned long calculatePTE(int a, int b, int c, int d, int e);
+    int physicalFrameNumber(int a);
+    void updateFrameTable(int inputLine, int a, Instruction instruction);
+    int choosePage(int a);
+    void replacePage(int inputLine, int oldPage, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction);
+    void outPage(int inputLine,int page, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction);
+    int tablePosition();
+    void resizeFrameTable(int a);
+    void readRfile(const char*rfile);
+};
+
 #endif /* defined(__lab3__VMM__) */

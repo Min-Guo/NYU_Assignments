@@ -7,16 +7,19 @@
 //
 
 #include "VMM.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
 #include <math.h>
 #include <array>
 #include <vector>
-
+#include <fstream>
 int k = 0;
 int frameCount = 0;
 int pageTablePosition = 0;
+unsigned int rNum = 0;
+char* buffer1;
 
 void PageMapping::insertEmptyPage(Instruction instruction, int a){
     pageTable[instruction.virtualPageIndex] = a;
@@ -453,6 +456,11 @@ void ClockMapping::replacePage(int inputLine, int oldPage, Instruction instructi
 void FIFOMapping::resizeFrameTable(int a){};
 void LRUMapping::resizeFrameTable(int a){};
 void ClockMapping::resizeFrameTable(int a){};
+void RandomMapping::resizeFrameTable(int a){};
+void FIFOMapping::readRfile(const char*rfile){};
+void LRUMapping::readRfile(const char*rfile){};
+void ClockMapping::readRfile(const char*rfile){};
+void SecondChanceMapping::readRfile(const char*rfile){};
 
 
 // Second Chance Algorithm
@@ -549,10 +557,8 @@ int SecondChanceMapping::choosePage(int a){
     refBit = referencedBit(pageTable[tempPage]);
     while ( refBit != 0) {
         pageTable[tempPage] = calculatePTE(presentBit(pageTable[tempPage]), modifiedBit(pageTable[tempPage]), 0, pageoutBit(pageTable[tempPage]), physicalFrameNumber(tempPage));
-//        cout<< referencedBit(pageTable[tempPage])<<endl;
         frameTable.erase(frameTable.begin());
         frameTable.push_back(tempPage);
-//        cout<<"After  "<<referencedBit(pageTable[frameTable.back()])<< endl;
         tempPage = frameTable.front();
         refBit = referencedBit(pageTable[tempPage]);
     }
@@ -611,4 +617,169 @@ void SecondChanceMapping::replacePage(int inputLine, int oldPage, Instruction in
         printMap(inputLine, instruction);
     }
 }
+
+//Random Page Replace Algorithm
+
+unsigned long RandomMapping::calculatePTE(int a, int b, int c, int d, int e){
+    pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
+    return pte;
+};
+
+void RandomMapping::insertEmptyPage(Instruction instruction, int x){
+    pageTable[instruction.virtualPageIndex] = pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, 0, x);
+    pageTablePosition++;
+    k = pageTablePosition;
+}
+
+int RandomMapping::presentBit(unsigned long pte){
+    int x;
+    pte = pte >> 31;
+    x = pte & 1;
+    return x;
+};
+
+int RandomMapping::modifiedBit(unsigned long pte){
+    int x;
+    pte = pte >> 30;
+    x = pte & 1;
+    return x;
+};
+
+int RandomMapping::referencedBit(unsigned long pte){
+    int x;
+    pte = pte >> 29;
+    x = pte & 1;
+    return x;
+};
+
+int RandomMapping::pageoutBit(unsigned long pte){
+    int x;
+    pte = pte >> 28;
+    x = pte & 1;
+    return x;
+};
+
+int RandomMapping::physicalFrameNumber(int a){
+    int i = 6;
+    unsigned long x;
+    int y;
+    PhyNumber = 0;
+    while (i > 0) {
+        x = pageTable[a];
+        x = x >> (i - 1);
+        y = x & 1;
+        PhyNumber += y * pow(2, i - 1);
+        i--;
+    }
+    return PhyNumber;
+};
+
+bool RandomMapping::checkReferred(Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) != 0) {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void RandomMapping::updateFrameTable(int inputLine, int a, Instruction instruction){
+    frameTable[a] = instruction.virtualPageIndex;
+}
+
+void RandomMapping::printTable(Instruction instruction, int a){
+    cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
+    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+}
+
+int RandomMapping::tablePosition(){
+    return pageTablePosition;
+}
+
+int RandomMapping::choosePage(int a){
+    int j = 0;
+    int page = 0;
+    if (rNum >= randomNum.size()) {
+        rNum -= randomNum.size();
+    }
+    j = randomNum[rNum] % a;
+    page = frameTable[j];
+    rNum++;
+    return page;
+}
+
+bool RandomMapping::sameVaildPage(int a, int b, Instruction instruction){
+    for (int i = 0; i < b; i++) {
+        if (frameTable[i] == instruction.virtualPageIndex) {
+            cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
+            if (instruction.operation ==  1) {
+                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, referencedBit(pageTable[instruction.virtualPageIndex]), pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void RandomMapping::outPage(int inputLine,int page, Instruction instruction){
+    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+    pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
+    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
+    frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+}
+
+void RandomMapping::printMap(int inputLine, Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else {
+        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    }
+    
+}
+void RandomMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    if (modifiedBit(pageTable[oldPage]) == 1) {
+        outPage(inputLine, oldPage, instruction);
+        printMap(inputLine, instruction);
+    } else{
+        pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
+        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
+        frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+        printMap(inputLine, instruction);
+    }
+}
+
+void RandomMapping::readRfile(const char* rfile){
+    int i = 0;
+    string buffer;
+    ifstream infile(rfile);
+    char* numtoken;
+    if(!infile.is_open()){
+        cout<<"Failed to open"<<endl;
+    }
+    else{
+        while (!infile.eof()) {
+            getline(infile, buffer);
+            buffer1 = new char[buffer.length() + 1];
+            strcpy(buffer1, buffer.c_str());
+            numtoken = strtok(buffer1, "\n");
+            if (i == 0) {
+                randomNum.resize(atoi(numtoken));
+            } else if (i <= randomNum.size()){
+                randomNum[i - 1] = atoi(numtoken);
+            }
+            i++;
+        }
+    }
+    infile.close();
+}
+
 
