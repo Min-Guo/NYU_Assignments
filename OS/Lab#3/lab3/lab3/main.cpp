@@ -48,7 +48,8 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new ClockMapping();
+    pageMapping = new SecondChanceMapping();
+    pageMapping->resizeFrameTable(8);
     ifstream infile(file);
     if(!infile.is_open()){
         cout<<"Failed to open"<<endl;
@@ -101,6 +102,7 @@ int readFile(const char* file){
 int main(int argc, const char * argv[]) {
     //    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
     //    frameNumber = atoi(argv[1]);
+    
     readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in60");
     return 0;
 }

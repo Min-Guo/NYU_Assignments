@@ -12,6 +12,7 @@
 #include <iostream>
 #include <math.h>
 #include <array>
+#include <vector>
 
 int k = 0;
 int frameCount = 0;
@@ -445,6 +446,168 @@ void ClockMapping::replacePage(int inputLine, int oldPage, Instruction instructi
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
         pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
         frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+        printMap(inputLine, instruction);
+    }
+}
+
+void FIFOMapping::resizeFrameTable(int a){};
+void LRUMapping::resizeFrameTable(int a){};
+void ClockMapping::resizeFrameTable(int a){};
+
+
+// Second Chance Algorithm
+void SecondChanceMapping::resizeFrameTable(int a){
+    frameTable.resize(a);
+}
+
+unsigned long SecondChanceMapping::calculatePTE(int a, int b, int c, int d, int e){
+    pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
+    return pte;
+};
+
+void SecondChanceMapping::insertEmptyPage(Instruction instruction, int x){
+    pageTable[instruction.virtualPageIndex] = pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, 0, x);
+    pageTablePosition++;
+    k = pageTablePosition;
+}
+
+int SecondChanceMapping::presentBit(unsigned long pte){
+    int x;
+    pte = pte >> 31;
+    x = pte & 1;
+    return x;
+};
+
+int SecondChanceMapping::modifiedBit(unsigned long pte){
+    int x;
+    pte = pte >> 30;
+    x = pte & 1;
+    return x;
+};
+
+int SecondChanceMapping::referencedBit(unsigned long pte){
+    int x;
+    pte = pte >> 29;
+    x = pte & 1;
+    return x;
+};
+
+int SecondChanceMapping::pageoutBit(unsigned long pte){
+    int x;
+    pte = pte >> 28;
+    x = pte & 1;
+    return x;
+};
+
+int SecondChanceMapping::physicalFrameNumber(int a){
+    int i = 6;
+    unsigned long x;
+    int y;
+    PhyNumber = 0;
+    while (i > 0) {
+        x = pageTable[a];
+        x = x >> (i - 1);
+        y = x & 1;
+        PhyNumber += y * pow(2, i - 1);
+        i--;
+    }
+    return PhyNumber;
+};
+
+bool SecondChanceMapping::checkReferred(Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) != 0) {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void SecondChanceMapping::updateFrameTable(int inputLine, int a, Instruction instruction){
+    frameTable[a] = instruction.virtualPageIndex;
+}
+
+void SecondChanceMapping::printTable(Instruction instruction, int a){
+    cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
+    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+}
+
+int SecondChanceMapping::tablePosition(){
+    return pageTablePosition;
+}
+
+int SecondChanceMapping::choosePage(int a){
+    int page = 0;
+    int refBit = 0;
+    int tempPage = 0;
+    if (k >= a) {
+        k -= a;
+    }
+    tempPage = frameTable.front();
+    refBit = referencedBit(pageTable[tempPage]);
+    while ( refBit != 0) {
+        pageTable[tempPage] = calculatePTE(presentBit(pageTable[tempPage]), modifiedBit(pageTable[tempPage]), 0, pageoutBit(pageTable[tempPage]), physicalFrameNumber(tempPage));
+//        cout<< referencedBit(pageTable[tempPage])<<endl;
+        frameTable.erase(frameTable.begin());
+        frameTable.push_back(tempPage);
+//        cout<<"After  "<<referencedBit(pageTable[frameTable.back()])<< endl;
+        tempPage = frameTable.front();
+        refBit = referencedBit(pageTable[tempPage]);
+    }
+    page = tempPage;
+    return page;
+}
+
+bool SecondChanceMapping::sameVaildPage(int a, int b, Instruction instruction){
+    for (int i = 0; i < b; i++) {
+        if (frameTable[i] == instruction.virtualPageIndex) {
+            cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
+            pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), modifiedBit(pageTable[instruction.virtualPageIndex]), 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+            if (instruction.operation ==  1) {
+                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, referencedBit(pageTable[instruction.virtualPageIndex]), pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+            }
+            return true;
+        }
+    }
+    
+    for (int i = 0; i < 8; i++) {
+        cout<< frameTable[i]<<"  "<< referencedBit(pageTable[frameTable[i]])<<endl;
+    }
+    return false;
+}
+
+void SecondChanceMapping::outPage(int inputLine,int page, Instruction instruction){
+    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+    pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
+    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
+    frameTable.front() = instruction.virtualPageIndex;
+}
+
+void SecondChanceMapping::printMap(int inputLine, Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else {
+        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    }
+    
+}
+void SecondChanceMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    if (modifiedBit(pageTable[oldPage]) == 1) {
+        outPage(inputLine, oldPage, instruction);
+        printMap(inputLine, instruction);
+    } else{
+        pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
+        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
+        frameTable.front() = instruction.virtualPageIndex;
         printMap(inputLine, instruction);
     }
 }

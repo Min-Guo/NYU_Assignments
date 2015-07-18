@@ -47,6 +47,7 @@ public:
     virtual void outPage(int inputLine,int page, Instruction instruction) = 0;
     virtual void printMap(int inputLine, Instruction instruction) = 0;
     virtual int tablePosition() = 0;
+    virtual void resizeFrameTable(int a) = 0;
 };
 
 
@@ -73,6 +74,7 @@ public:
     void outPage(int inputLine,int page, Instruction instruction);
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
+    void resizeFrameTable(int a);
 };
 
 class LRUMapping:public PageMapping{
@@ -98,6 +100,7 @@ public:
     void outPage(int inputLine,int page, Instruction instruction);
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
+    void resizeFrameTable(int a);
 };
 
 class ClockMapping:public PageMapping{
@@ -123,5 +126,32 @@ public:
     void outPage(int inputLine,int page, Instruction instruction);
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
+    void resizeFrameTable(int a);
+};
+
+class SecondChanceMapping:public PageMapping{
+private:
+    unsigned long pageTable[64];
+    vector<int> frameTable;
+    unsigned long pte;
+    int PhyNumber;
+public:
+    void insertEmptyPage(Instruction instruction, int a);
+    bool checkReferred(Instruction instruction);
+    void printTable(Instruction instruction, int inputLine);
+    int presentBit(unsigned long pte);
+    int modifiedBit(unsigned long pte);
+    int referencedBit(unsigned long pte);
+    int pageoutBit(unsigned long pte);
+    unsigned long calculatePTE(int a, int b, int c, int d, int e);
+    int physicalFrameNumber(int a);
+    void updateFrameTable(int inputLine, int a, Instruction instruction);
+    int choosePage(int a);
+    void replacePage(int inputLine, int oldPage, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction);
+    void outPage(int inputLine,int page, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction);
+    int tablePosition();
+    void resizeFrameTable(int a);
 };
 #endif /* defined(__lab3__VMM__) */
