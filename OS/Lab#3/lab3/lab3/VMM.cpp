@@ -953,7 +953,7 @@ bool NRUMapping::sameVaildPage(int a, int b, Instruction instruction){
         if (frameTable[i] == instruction.virtualPageIndex) {
             cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
             if (instruction.operation ==  1) {
-                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, referencedBit(pageTable[instruction.virtualPageIndex]), pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
                 
             }
             if (instruction.operation == 0) {

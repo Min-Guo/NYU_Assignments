@@ -79,6 +79,7 @@ int readFile(const char* file){
                         token = strtok(NULL, " ");
                     }
                     i = pageMapping->tablePosition();
+                    pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
                     if (i < physicalFrameNumber) {
                         if(pageMapping->sameVaildPage(j, i, tempInstruction) == false){
                             pageMapping->insertEmptyPage(tempInstruction, i);
@@ -89,13 +90,12 @@ int readFile(const char* file){
                     } else {
                         if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction) == false)) {
                             pageReplace++;
+                            pageMapping->insertClass();
+                            pageIndex = pageMapping->choosePage(physicalFrameNumber);
                             if (pageReplace == 10) {
                                 pageMapping->resetRef();
                                 pageReplace = 0;
                             }
-                            pageMapping->insertClass();
-                            pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
-                            pageIndex = pageMapping->choosePage(physicalFrameNumber);
                             pageMapping->replacePage(j, pageIndex, tempInstruction);
                             pageMapping->pageTableOPtion();
                         }
