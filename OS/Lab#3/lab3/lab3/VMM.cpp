@@ -20,6 +20,11 @@ int frameCount = 0;
 int pageTablePosition = 0;
 unsigned int rNum = 0;
 char* buffer1;
+int nruNum = 0;
+unsigned int nruRand = 0;
+int nruClassIndex = 0;
+int classType = 0;
+int j = 0;
 
 void PageMapping::insertEmptyPage(Instruction instruction, int a){
     pageTable[instruction.virtualPageIndex] = a;
@@ -453,6 +458,7 @@ void ClockMapping::replacePage(int inputLine, int oldPage, Instruction instructi
     }
 }
 
+void NRUMapping::resizeFrameTable(int a){};
 void FIFOMapping::resizeFrameTable(int a){};
 void LRUMapping::resizeFrameTable(int a){};
 void ClockMapping::resizeFrameTable(int a){};
@@ -780,6 +786,214 @@ void RandomMapping::readRfile(const char* rfile){
         }
     }
     infile.close();
+}
+
+//NRU Algorithm
+
+unsigned long NRUMapping::calculatePTE(int a, int b, int c, int d, int e){
+    pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
+    return pte;
+};
+
+void NRUMapping::insertEmptyPage(Instruction instruction, int x){
+    pageTable[instruction.virtualPageIndex] = pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, 0, x);
+    pageTablePosition++;
+}
+
+
+int NRUMapping::presentBit(unsigned long pte){
+    int x;
+    pte = pte >> 31;
+    x = pte & 1;
+    return x;
+};
+
+int NRUMapping::modifiedBit(unsigned long pte){
+    int x;
+    pte = pte >> 30;
+    x = pte & 1;
+    return x;
+};
+
+int NRUMapping::referencedBit(unsigned long pte){
+    int x;
+    pte = pte >> 29;
+    x = pte & 1;
+    return x;
+};
+
+int NRUMapping::pageoutBit(unsigned long pte){
+    int x;
+    pte = pte >> 28;
+    x = pte & 1;
+    return x;
+};
+
+int NRUMapping::physicalFrameNumber(int a){
+    int i = 6;
+    unsigned long x;
+    int y;
+    PhyNumber = 0;
+    while (i > 0) {
+        x = pageTable[a];
+        x = x >> (i - 1);
+        y = x & 1;
+        PhyNumber += y * pow(2, i - 1);
+        i--;
+    }
+    return PhyNumber;
+};
+
+bool NRUMapping::checkReferred(Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) != 0) {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void NRUMapping::updateFrameTable(int inputLine, int a, Instruction instruction){
+    frameTable[a] = instruction.virtualPageIndex;
+}
+
+void NRUMapping::printTable(Instruction instruction, int a){
+    cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
+    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+}
+
+int NRUMapping::tablePosition(){
+    return pageTablePosition;
+}
+
+
+//void NRUMapping::updateClass(int previousClass, int newClass, int page){
+//    if (previousClass != newClass) {
+//        NRUClass[previousClass].erase(remove(NRUClass[previousClass].begin(), NRUClass[previousClass].end(), page), NRUClass[previousClass].end());
+//        NRUClass[newClass].push_back(page);
+//    }
+//}
+
+int NRUMapping::checkClass(int refernced, int modified){
+    if (refernced == 1 && modified == 1) {
+        return 3;
+    } else if (refernced == 1 && modified == 0){
+        return 2;
+    } else if (refernced == 0 && modified == 1){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+void NRUMapping::insertClass(){
+    for (int i = 0 ; i < 64; i++) {
+        if (presentBit(pageTable[i]) == 1) {
+            NRUClass[checkClass(referencedBit(pageTable[i]), modifiedBit(pageTable[i]))].push_back(i);
+        }
+    }
+}
+
+void NRUMapping::clearClass(){
+    for (int i = 0; i < 4; i++) {
+        NRUClass[i].clear();
+    }
+}
+
+void NRUMapping::resetRef(){
+    for (int i = 0; i < 64; i++) {
+        pageTable[i] = calculatePTE(presentBit(pageTable[i]), modifiedBit(pageTable[i]), 0, pageoutBit(pageTable[i]), physicalFrameNumber(i));
+    }
+}
+
+
+void NRUMapping::readRfile(const char* rfile){
+    int i = 0;
+    string buffer;
+    ifstream infile(rfile);
+    char* numtoken;
+    if(!infile.is_open()){
+        cout<<"Failed to open"<<endl;
+    }
+    else{
+        while (!infile.eof()) {
+            getline(infile, buffer);
+            buffer1 = new char[buffer.length() + 1];
+            strcpy(buffer1, buffer.c_str());
+            numtoken = strtok(buffer1, "\n");
+            if (i == 0) {
+                randomNum.resize(atoi(numtoken));
+            } else if (i <= randomNum.size()){
+                randomNum[i - 1] = atoi(numtoken);
+            }
+            i++;
+        }
+    }
+    infile.close();
+}
+
+int NRUMapping::choosePage(int a){
+    int page = 0;
+    for (int i = 0; i < 4; i++) {
+        if (!NRUClass[i].empty()) {
+            classType = i;
+            nruClassIndex = randomNum[rNum] % (NRUClass[i].size());
+            page = NRUClass[i][nruClassIndex];
+            rNum++;
+            clearClass();
+            return page;
+        }
+    }
+    return 0;
+}
+
+bool NRUMapping::sameVaildPage(int a, int b, Instruction instruction){
+    for (int i = 0; i < b; i++) {
+        if (frameTable[i] == instruction.virtualPageIndex) {
+            cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
+            if (instruction.operation ==  1) {
+                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, referencedBit(pageTable[instruction.virtualPageIndex]), pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+                
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void NRUMapping::outPage(int inputLine,int page, Instruction instruction){
+    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+    pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
+    pageTable[page] = calculatePTE(0, 0, referencedBit(pageTable[page]), 1, 0);
+    frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+}
+
+void NRUMapping::printMap(int inputLine, Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else {
+        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    }
+    
+}
+void NRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    if (modifiedBit(pageTable[oldPage]) == 1) {
+        outPage(inputLine, oldPage, instruction);
+        printMap(inputLine, instruction);
+    } else{
+        pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
+        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
+        frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+        printMap(inputLine, instruction);
+    }
 }
 
 

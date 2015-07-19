@@ -21,10 +21,12 @@ string lineBuffer;
 char* line;
 char* token;
 const char* file;
-int physicalFrameNumber = 16;
+int physicalFrameNumber = 8;
 unsigned long temppte;
 int pageIndex;
 int i = 0;
+int insertState = false;
+int pageReplace = 0;
 
 PageMapping* pageMapping;
 Instruction tempInstruction = {
@@ -48,8 +50,8 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new RandomMapping();
-    pageMapping->resizeFrameTable(16);
+    pageMapping = new NRUMapping();
+    pageMapping->resizeFrameTable(8);
     ifstream infile(file);
     if(!infile.is_open()){
         cout<<"Failed to open"<<endl;
@@ -60,38 +62,46 @@ int readFile(const char* file){
             if (lineBuffer.find("#") != 0) {
                 line = new char[lineBuffer.length() + 1];
                 strcpy(line, lineBuffer.c_str());
-                token = strtok(line, "\n");
-                token = strtok(line, " ");
-                while (token!= NULL) {
-                    if (tempInstruction.operationState == false) {
-                        tempInstruction.operation = atoi(token);
-                        tempInstruction.operationState = true;
-                        pageMapping->calculatePTE(1, tempInstruction.operation, 0, 0, 0);
-                        temppte = pageMapping->calculatePTE(1, tempInstruction.operation, 0, 0, 0);
+                if (strcmp(line, "") != 0) {
+                    token = strtok(line, "\n");
+                    token = strtok(line, " ");
+                    while (token!= NULL) {
+                        if (tempInstruction.operationState == false) {
+                            tempInstruction.operation = atoi(token);
+                            tempInstruction.operationState = true;
+                            pageMapping->calculatePTE(1, tempInstruction.operation, 0, 0, 0);
+                            temppte = pageMapping->calculatePTE(1, tempInstruction.operation, 0, 0, 0);
+                        }
+                        else
+                        {
+                            tempInstruction.virtualPageIndex = atoi(token);
+                        }
+                        token = strtok(NULL, " ");
                     }
-                    else
-                    {
-                        tempInstruction.virtualPageIndex = atoi(token);
+                    i = pageMapping->tablePosition();
+                    if (i < physicalFrameNumber) {
+                        if(pageMapping->sameVaildPage(j, i, tempInstruction) == false){
+                            pageMapping->insertEmptyPage(tempInstruction, i);
+                            pageMapping->updateFrameTable(j, i, tempInstruction);
+                            pageMapping->printTable(tempInstruction, j);
+                        }
+                    } else {
+                        if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction) == false)) {
+                            pageReplace++;
+                            if (pageReplace == 10) {
+                                pageMapping->resetRef();
+                                pageReplace = 0;
+                            }
+                            pageMapping->insertClass();
+                            pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
+                            pageIndex = pageMapping->choosePage(physicalFrameNumber);
+                            pageMapping->replacePage(j, pageIndex, tempInstruction);
+                        }
                     }
-                    token = strtok(NULL, " ");
-                }
-                i = pageMapping->tablePosition();
-                if (i < physicalFrameNumber) {
-                    if(pageMapping->sameVaildPage(j, i, tempInstruction) == false){
-                        pageMapping->insertEmptyPage(tempInstruction, i);
-                        pageMapping->updateFrameTable(j, i, tempInstruction);
-                        pageMapping->printTable(tempInstruction, j);
-                    }
-                } else{
-                    if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction) == false)) {
-                        pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
-                        pageIndex = pageMapping->choosePage(physicalFrameNumber);
-                        pageMapping->replacePage(j, pageIndex, tempInstruction);
-                    } 
-                }
                 
-                resetTempIns();
-                j++;
+                    resetTempIns();
+                    j++;
+                }
             }
         }
     }
@@ -104,6 +114,6 @@ int main(int argc, const char * argv[]) {
     //    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
     //    frameNumber = atoi(argv[1]);
     
-    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4");
+    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in60");
     return 0;
 }
