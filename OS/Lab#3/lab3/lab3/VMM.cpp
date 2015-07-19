@@ -25,6 +25,7 @@ unsigned int nruRand = 0;
 int nruClassIndex = 0;
 int classType = 0;
 int j = 0;
+int pageCount = 0;
 
 void PageMapping::insertEmptyPage(Instruction instruction, int a){
     pageTable[instruction.virtualPageIndex] = a;
@@ -32,6 +33,12 @@ void PageMapping::insertEmptyPage(Instruction instruction, int a){
 }
 
 //FIFO Page Replace Algorithm
+void FIFOMapping::resizeFrameTable(int a){};
+void FIFOMapping::insertClass(){};
+void FIFOMapping::resetRef(){};
+void FIFOMapping::readRfile(const char*rfile){};
+void FIFOMapping::clearClass(){};
+int FIFOMapping::checkClass(int refernced, int modified){return 0;};
 unsigned long FIFOMapping::calculatePTE(int a, int b, int c, int d, int e){
     pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
     return pte;
@@ -167,8 +174,42 @@ void FIFOMapping::replacePage(int inputLine, int oldPage, Instruction instructio
     }
 }
 
+void FIFOMapping::pageTableOPtion(){
+    for (int i = 0; i < 64; i++) {
+        if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) != 1) {
+            cout << "* ";
+        }else if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) == 1) {
+            cout << "# ";
+        }else {
+            if (referencedBit(pageTable[i]) == 1) {
+                cout << " "<< i << ":R";
+            } else{
+                cout << " "<< i << ":-";
+            }
+            if (modifiedBit(pageTable[i]) == 1) {
+                cout << "M";
+            }else{
+                cout << "-";
+            }
+            if (pageoutBit(pageTable[i]) == 1) {
+                cout << "S ";
+            }else{
+                cout << "- ";
+            }
+        }
+    }
+    cout <<"\n";
+}
+
+
 //LRU Page Replace Algorithm
 
+void LRUMapping::readRfile(const char*rfile){};
+void LRUMapping::resizeFrameTable(int a){};
+void LRUMapping::insertClass(){};
+void LRUMapping::resetRef(){};
+void LRUMapping::clearClass(){};
+int LRUMapping::checkClass(int refernced, int modified){return 0;};
 
 unsigned long LRUMapping::calculatePTE(int a, int b, int c, int d, int e){
     pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
@@ -311,8 +352,43 @@ void LRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction
     }
 }
 
+void LRUMapping::pageTableOPtion(){
+    for (int i = 0; i < 64; i++) {
+        if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) != 1) {
+            cout << "* ";
+        }else if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) == 1) {
+            cout << "# ";
+        }else {
+            if (referencedBit(pageTable[i]) == 1) {
+                cout << " "<< i << ":R";
+            } else{
+                cout << " "<< i << ":-";
+            }
+            if (modifiedBit(pageTable[i]) == 1) {
+                cout << "M";
+            }else{
+                cout << "-";
+            }
+            if (pageoutBit(pageTable[i]) == 1) {
+                cout << "S ";
+            }else{
+                cout << "- ";
+            }
+        }
+    }
+    cout <<"\n";
+}
+
 
 //Clock Page Replace Algorithm
+
+void ClockMapping::readRfile(const char*rfile){};
+void ClockMapping::resizeFrameTable(int a){};
+void ClockMapping::insertClass(){};
+void ClockMapping::resetRef(){};
+void ClockMapping::clearClass(){};
+int ClockMapping::checkClass(int refernced, int modified){return 0;};
+
 
 unsigned long ClockMapping::calculatePTE(int a, int b, int c, int d, int e){
     pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
@@ -457,19 +533,234 @@ void ClockMapping::replacePage(int inputLine, int oldPage, Instruction instructi
         printMap(inputLine, instruction);
     }
 }
+void ClockMapping::pageTableOPtion(){
+    for (int i = 0; i < 64; i++) {
+        if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) != 1) {
+            cout << "* ";
+        }else if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) == 1) {
+            cout << "# ";
+        }else {
+            if (referencedBit(pageTable[i]) == 1) {
+                cout << " "<< i << ":R";
+            } else{
+                cout << " "<< i << ":-";
+            }
+            if (modifiedBit(pageTable[i]) == 1) {
+                cout << "M";
+            }else{
+                cout << "-";
+            }
+            if (pageoutBit(pageTable[i]) == 1) {
+                cout << "S ";
+            }else{
+                cout << "- ";
+            }
+        }
+    }
+    cout <<"\n";
+}
 
-void NRUMapping::resizeFrameTable(int a){};
-void FIFOMapping::resizeFrameTable(int a){};
-void LRUMapping::resizeFrameTable(int a){};
-void ClockMapping::resizeFrameTable(int a){};
-void RandomMapping::resizeFrameTable(int a){};
-void FIFOMapping::readRfile(const char*rfile){};
-void LRUMapping::readRfile(const char*rfile){};
-void ClockMapping::readRfile(const char*rfile){};
-void SecondChanceMapping::readRfile(const char*rfile){};
+
+// Clock Algorithm with Global Policy
+void ClockGlobalMapping::resizeFrameTable(int a){};
+void ClockGlobalMapping::readRfile(const char*rfile){};
+void ClockGlobalMapping::insertClass(){};
+void ClockGlobalMapping::resetRef(){};
+void ClockGlobalMapping::clearClass(){};
+int ClockGlobalMapping::checkClass(int refernced, int modified){return 0;};
+
+
+unsigned long ClockGlobalMapping::calculatePTE(int a, int b, int c, int d, int e){
+    pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
+    return pte;
+};
+
+void ClockGlobalMapping::insertEmptyPage(Instruction instruction, int x){
+    pageTable[instruction.virtualPageIndex] = pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, 0, x);
+    pageTablePosition++;
+    k = pageTablePosition;
+}
+
+int ClockGlobalMapping::presentBit(unsigned long pte){
+    int x;
+    pte = pte >> 31;
+    x = pte & 1;
+    return x;
+};
+
+int ClockGlobalMapping::modifiedBit(unsigned long pte){
+    int x;
+    pte = pte >> 30;
+    x = pte & 1;
+    return x;
+};
+
+int ClockGlobalMapping::referencedBit(unsigned long pte){
+    int x;
+    pte = pte >> 29;
+    x = pte & 1;
+    return x;
+};
+
+int ClockGlobalMapping::pageoutBit(unsigned long pte){
+    int x;
+    pte = pte >> 28;
+    x = pte & 1;
+    return x;
+};
+
+int ClockGlobalMapping::physicalFrameNumber(int a){
+    int i = 6;
+    unsigned long x;
+    int y;
+    PhyNumber = 0;
+    while (i > 0) {
+        x = pageTable[a];
+        x = x >> (i - 1);
+        y = x & 1;
+        PhyNumber += y * pow(2, i - 1);
+        i--;
+    }
+    return PhyNumber;
+};
+
+bool ClockGlobalMapping::checkReferred(Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) != 0) {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void ClockGlobalMapping::updateFrameTable(int inputLine, int a, Instruction instruction){
+    frameTable[a] = instruction.virtualPageIndex;
+    //    cout<< "frameNum:"<<a << "  Virtual:"<<frameTable[a] << "  Ref:"<< referencedBit(pageTable[frameTable[a]])<<endl;
+}
+
+void ClockGlobalMapping::printTable(Instruction instruction, int a){
+    cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
+    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+}
+
+int ClockGlobalMapping::tablePosition(){
+    return pageTablePosition;
+}
+
+int ClockGlobalMapping::choosePage(int a){
+    int page = 0;
+    if (pageCount >= 64) {
+        pageCount -= 64;
+    }
+    
+    while (presentBit(pageTable[pageCount]) != 1 || referencedBit(pageTable[pageCount]) != 0) {
+        if (presentBit(pageTable[pageCount]) != 1) {
+            pageCount++;
+            if (pageCount >= 64) {
+                pageCount -= 64;
+            }
+        }
+        if (presentBit(pageTable[pageCount]) == 1 && referencedBit(pageTable[pageCount]) != 0) {
+            pageTable[pageCount] = calculatePTE(presentBit(pageTable[pageCount]), modifiedBit(pageTable[pageCount]), 0, pageoutBit(pageTable[pageCount]), physicalFrameNumber(pageCount));
+            pageCount++;
+            if (pageCount >= 64) {
+                pageCount -= 64;
+            }
+        }
+    }
+    page = pageCount;
+    pageCount++;
+    return page;
+    
+}
+
+bool ClockGlobalMapping::sameVaildPage(int a, int b, Instruction instruction){
+    for (int i = 0; i < b; i++) {
+        if (frameTable[i] == instruction.virtualPageIndex) {
+            cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
+            pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), modifiedBit(pageTable[instruction.virtualPageIndex]), 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+            if (instruction.operation ==  1) {
+                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, referencedBit(pageTable[instruction.virtualPageIndex]), pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+            }
+            pageTableOPtion();
+            return true;
+        }
+    }
+    return false;
+}
+
+void ClockGlobalMapping::outPage(int inputLine,int page, Instruction instruction){
+    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+    pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
+    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
+    frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+}
+
+void ClockGlobalMapping::printMap(int inputLine, Instruction instruction){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    } else {
+        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
+        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+    }
+    
+}
+void ClockGlobalMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    if (modifiedBit(pageTable[oldPage]) == 1) {
+        outPage(inputLine, oldPage, instruction);
+        printMap(inputLine, instruction);
+    } else{
+        pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
+        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
+        frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+        printMap(inputLine, instruction);
+    }
+}
+
+void ClockGlobalMapping::pageTableOPtion(){
+    for (int i = 0; i < 64; i++) {
+        if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) != 1) {
+            cout << "* ";
+        }else if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) == 1) {
+            cout << "# ";
+        }else {
+            if (referencedBit(pageTable[i]) == 1) {
+                cout << " "<< i << ":R";
+            } else{
+                cout << " "<< i << ":-";
+            }
+            if (modifiedBit(pageTable[i]) == 1) {
+                cout << "M";
+            }else{
+                cout << "-";
+            }
+            if (pageoutBit(pageTable[i]) == 1) {
+                cout << "S ";
+            }else{
+                cout << "- ";
+            }
+        }
+    }
+    cout <<"  || hand = "<< pageCount << "\n";
+}
 
 
 // Second Chance Algorithm
+
+void SecondChanceMapping::insertClass(){};
+void SecondChanceMapping::resetRef(){};
+void SecondChanceMapping::clearClass(){};
+void SecondChanceMapping::readRfile(const char*rfile){};
+int SecondChanceMapping::checkClass(int refernced, int modified){return 0;};
+
 void SecondChanceMapping::resizeFrameTable(int a){
     frameTable.resize(a);
 }
@@ -623,8 +914,40 @@ void SecondChanceMapping::replacePage(int inputLine, int oldPage, Instruction in
         printMap(inputLine, instruction);
     }
 }
+void SecondChanceMapping::pageTableOPtion(){
+    for (int i = 0; i < 64; i++) {
+        if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) != 1) {
+            cout << "* ";
+        }else if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) == 1) {
+            cout << "# ";
+        }else {
+            if (referencedBit(pageTable[i]) == 1) {
+                cout << " "<< i << ":R";
+            } else{
+                cout << " "<< i << ":-";
+            }
+            if (modifiedBit(pageTable[i]) == 1) {
+                cout << "M";
+            }else{
+                cout << "-";
+            }
+            if (pageoutBit(pageTable[i]) == 1) {
+                cout << "S ";
+            }else{
+                cout << "- ";
+            }
+        }
+    }
+    cout <<"\n";
+}
+
 
 //Random Page Replace Algorithm
+void RandomMapping::resizeFrameTable(int a){};
+void RandomMapping::insertClass(){};
+void RandomMapping::resetRef(){};
+void RandomMapping::clearClass(){};
+int RandomMapping::checkClass(int refernced, int modified){return 0;};
 
 unsigned long RandomMapping::calculatePTE(int a, int b, int c, int d, int e){
     pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
@@ -787,9 +1110,36 @@ void RandomMapping::readRfile(const char* rfile){
     }
     infile.close();
 }
+void RandomMapping::pageTableOPtion(){
+    for (int i = 0; i < 64; i++) {
+        if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) != 1) {
+            cout << "* ";
+        }else if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) == 1) {
+            cout << "# ";
+        }else {
+            if (referencedBit(pageTable[i]) == 1) {
+                cout << " "<< i << ":R";
+            } else{
+                cout << " "<< i << ":-";
+            }
+            if (modifiedBit(pageTable[i]) == 1) {
+                cout << "M";
+            }else{
+                cout << "-";
+            }
+            if (pageoutBit(pageTable[i]) == 1) {
+                cout << "S ";
+            }else{
+                cout << "- ";
+            }
+        }
+    }
+    cout <<"\n";
+}
+
 
 //NRU Algorithm
-
+void NRUMapping::resizeFrameTable(int a){};
 unsigned long NRUMapping::calculatePTE(int a, int b, int c, int d, int e){
     pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
     return pte;
@@ -867,14 +1217,6 @@ void NRUMapping::printTable(Instruction instruction, int a){
 int NRUMapping::tablePosition(){
     return pageTablePosition;
 }
-
-
-//void NRUMapping::updateClass(int previousClass, int newClass, int page){
-//    if (previousClass != newClass) {
-//        NRUClass[previousClass].erase(remove(NRUClass[previousClass].begin(), NRUClass[previousClass].end(), page), NRUClass[previousClass].end());
-//        NRUClass[newClass].push_back(page);
-//    }
-//}
 
 int NRUMapping::checkClass(int refernced, int modified){
     if (refernced == 1 && modified == 1) {
