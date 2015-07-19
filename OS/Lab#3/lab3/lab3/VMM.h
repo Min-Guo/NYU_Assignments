@@ -53,6 +53,7 @@ public:
 //    virtual void updateClass(int previousClass, int newClass, int page) =  0;
     virtual int checkClass(int refernced, int modified) = 0;
     virtual void resetRef() = 0;
+    virtual void pageTableOPtion() = 0;
 };
 
 
@@ -226,6 +227,7 @@ public:
     int checkClass(int refernced, int modified);
     void insertClass();
     void resetRef();
+    void pageTableOPtion();
 };
 
 

@@ -956,6 +956,10 @@ bool NRUMapping::sameVaildPage(int a, int b, Instruction instruction){
                 pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, referencedBit(pageTable[instruction.virtualPageIndex]), pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
                 
             }
+            if (instruction.operation == 0) {
+                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), modifiedBit(pageTable[instruction.virtualPageIndex]), 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+            }
+            pageTableOPtion();
             return true;
         }
     }
@@ -996,4 +1000,30 @@ void NRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction
     }
 }
 
+void NRUMapping::pageTableOPtion(){
+    for (int i = 0; i < 64; i++) {
+        if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) != 1) {
+            cout << "* ";
+        }else if (presentBit(pageTable[i]) == 0 && pageoutBit(pageTable[i]) == 1) {
+            cout << "# ";
+        }else {
+            if (referencedBit(pageTable[i]) == 1) {
+                cout << " "<< i << ":R";
+            } else{
+                cout << " "<< i << ":-";
+            }
+            if (modifiedBit(pageTable[i]) == 1) {
+                cout << "M";
+            }else{
+                cout << "-";
+            }
+            if (pageoutBit(pageTable[i]) == 1) {
+                cout << "S ";
+            }else{
+                cout << "- ";
+            }
+        }
+    }
+    cout <<"\n";
+}
 

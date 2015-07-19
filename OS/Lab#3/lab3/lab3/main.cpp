@@ -84,6 +84,7 @@ int readFile(const char* file){
                             pageMapping->insertEmptyPage(tempInstruction, i);
                             pageMapping->updateFrameTable(j, i, tempInstruction);
                             pageMapping->printTable(tempInstruction, j);
+                            pageMapping->pageTableOPtion();
                         }
                     } else {
                         if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction) == false)) {
@@ -96,6 +97,7 @@ int readFile(const char* file){
                             pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
                             pageIndex = pageMapping->choosePage(physicalFrameNumber);
                             pageMapping->replacePage(j, pageIndex, tempInstruction);
+                            pageMapping->pageTableOPtion();
                         }
                     }
                 
