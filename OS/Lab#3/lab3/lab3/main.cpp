@@ -50,7 +50,7 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new ClockGlobalMapping();
+    pageMapping = new SecondChanceMapping();
     pageMapping->resizeFrameTable(16);
     ifstream infile(file);
     if(!infile.is_open()){
