@@ -325,5 +325,42 @@ public:
     void updateAgePageTable();
 };
 
+class AgingLocalMapping:public PageMapping{
+private:
+    unsigned long pageTable[64];
+    int frameTable[64];
+    unsigned long pte;
+    int PhyNumber;
+    vector<unsigned long> agebitF;
+    vector<unsigned long> agebitP;
+    vector<int> tempAge;
+    int order[64];
+public:
+    void insertEmptyPage(Instruction instruction, int a, int inputLine);
+    bool checkReferred(Instruction instruction);
+    void printTable(Instruction instruction, int inputLine);
+    int presentBit(unsigned long pte);
+    int modifiedBit(unsigned long pte);
+    int referencedBit(unsigned long pte);
+    int pageoutBit(unsigned long pte);
+    unsigned long calculatePTE(int a, int b, int c, int d, int e);
+    int physicalFrameNumber(int a);
+    void updateFrameTable(int inputLine, int a, Instruction instruction);
+    int choosePage(int a);
+    void replacePage(int inputLine, int oldPage, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
+    void outPage(int inputLine,int page, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction);
+    int tablePosition();
+    void resizeFrameTable(int a);
+    void readRfile(const char*rfile);
+    void pageTableOPtion();
+    void insertClass();
+    void resetRef();
+    void clearClass();
+    int checkClass(int refernced, int modified);
+    void updateAgePageTable();
+};
+
 
 #endif /* defined(__lab3__VMM__) */
