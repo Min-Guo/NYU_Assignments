@@ -50,7 +50,7 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new SecondChanceMapping();
+    pageMapping = new AgingMapping();
     pageMapping->resizeFrameTable(16);
     ifstream infile(file);
     if(!infile.is_open()){
@@ -81,14 +81,14 @@ int readFile(const char* file){
                     i = pageMapping->tablePosition();
                     pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
                     if (i < physicalFrameNumber) {
-                        if(pageMapping->sameVaildPage(j, i, tempInstruction) == false){
-                            pageMapping->insertEmptyPage(tempInstruction, i);
+                        if(pageMapping->sameVaildPage(j, i, tempInstruction, 0) == false){
+                            pageMapping->insertEmptyPage(tempInstruction, i, j);
                             pageMapping->updateFrameTable(j, i, tempInstruction);
                             pageMapping->printTable(tempInstruction, j);
                             pageMapping->pageTableOPtion();
                         }
                     } else {
-                        if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction) == false)) {
+                        if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction, 1) == false)) {
                             pageReplace++;
                             pageMapping->insertClass();
                             pageIndex = pageMapping->choosePage(physicalFrameNumber);
