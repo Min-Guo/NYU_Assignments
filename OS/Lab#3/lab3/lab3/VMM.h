@@ -33,19 +33,19 @@ private:
 public:
     virtual void insertEmptyPage(Instruction instruction, int a) = 0;
     virtual bool checkReferred(Instruction instruction) = 0;
-    virtual void printTable(Instruction instruction, long long inputLine) = 0;
+    virtual void printTable(Instruction instruction, int inputLine) = 0;
     virtual int presentBit(unsigned long pte) = 0;
     virtual int modifiedBit(unsigned long pte) = 0;
     virtual int referencedBit(unsigned long pte) = 0;
     virtual int pageoutBit(unsigned long pte) = 0;
     virtual unsigned long calculatePTE(int a, int b, int c, int d, int e) = 0;
     virtual int physicalFrameNumber(int a) = 0;
-    virtual void updateFrameTable(long long inputLine, int a, Instruction instruction) = 0;
+    virtual void updateFrameTable(int inputLine, int a, Instruction instruction) = 0;
     virtual int choosePage(int a) = 0;
-    virtual void replacePage(long long inputLine, int oldPage, Instruction instruction) = 0;
-    virtual bool sameVaildPage(long long inputLine, int Page, Instruction instruction, int state) = 0;
-    virtual void outPage(long long inputLine,int page, Instruction instruction) = 0;
-    virtual void printMap(long long inputLine, Instruction instruction) = 0;
+    virtual void replacePage(int inputLine, int oldPage, Instruction instruction) = 0;
+    virtual bool sameVaildPage(int inputLine, int Page, Instruction instruction, int state) = 0;
+    virtual void outPage(int inputLine,int page, Instruction instruction) = 0;
+    virtual void printMap(int inputLine, Instruction instruction) = 0;
     virtual int tablePosition() = 0;
     virtual void resizeFrameTable(int a) = 0;
     virtual void readRfile(const char*rfile) = 0;
@@ -55,7 +55,7 @@ public:
     virtual void pageTableOPtion() = 0;
     virtual void clearClass() = 0;
     virtual void updateAgePageTable() = 0;
-    virtual void printSummary(unsigned long inputLine) = 0;
+    virtual void printSummary(int inputLine) = 0;
     virtual void printFrameMap(int frameNum) = 0;
 };
 
@@ -75,19 +75,19 @@ private:
 public:
     void insertEmptyPage(Instruction instruction, int a);
     bool checkReferred(Instruction instruction);
-    void printTable(Instruction instruction, long long inputLine);
+    void printTable(Instruction instruction, int inputLine);
     int presentBit(unsigned long pte);
     int modifiedBit(unsigned long pte);
     int referencedBit(unsigned long pte);
     int pageoutBit(unsigned long pte);
     unsigned long calculatePTE(int a, int b, int c, int d, int e);
     int physicalFrameNumber(int a);
-    void updateFrameTable(long long inputLine, int a, Instruction instruction);
+    void updateFrameTable(int inputLine, int a, Instruction instruction);
     int choosePage(int a);
-    void replacePage(long long inputLine, int oldPage, Instruction instruction);
-    bool sameVaildPage(long long inputLine, int page, Instruction instruction, int state);
-    void outPage(long long inputLine,int page, Instruction instruction);
-    void printMap(long long inputLine, Instruction instruction);
+    void replacePage(int inputLine, int oldPage, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
+    void outPage(int inputLine,int page, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction);
     int tablePosition();
     void resizeFrameTable(int a);
     void readRfile(const char*rfile);
@@ -97,7 +97,7 @@ public:
     void clearClass();
     int checkClass(int refernced, int modified);
     void updateAgePageTable();
-    void printSummary(unsigned long inputLine);
+    void printSummary(int inputLine);
     void printFrameMap(int frameNum);
 };
 
@@ -107,6 +107,12 @@ private:
     int frameTable[64][2];
     unsigned long pte;
     int PhyNumber;
+    unsigned int unmapCount;
+    unsigned int mapCount;
+    unsigned int inCount;
+    unsigned int outCount;
+    unsigned int zeroCount;
+    long long totalCost;
 public:
     void insertEmptyPage(Instruction instruction, int a);
     bool checkReferred(Instruction instruction);
@@ -120,7 +126,7 @@ public:
     void updateFrameTable(int inputLine, int a, Instruction instruction);
     int choosePage(int a);
     void replacePage(int inputLine, int oldPage, Instruction instruction);
-    bool sameVaildPage(int inputLine, int page, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
     void outPage(int inputLine,int page, Instruction instruction);
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
@@ -131,6 +137,9 @@ public:
     void pageTableOPtion();
     void clearClass();
     int checkClass(int refernced, int modified);
+    void updateAgePageTable();
+    void printSummary(int inputLine);
+    void printFrameMap(int frameNum);
 };
 
 class ClockMapping:public PageMapping{

@@ -49,8 +49,8 @@ void resetTempIns(){
 
 
 int readFile(const char* file){
-    long long j = 0;
-    pageMapping = new FIFOMapping();
+    int j = 0;
+    pageMapping = new LRUMapping();
     pageMapping->resizeFrameTable(physicalFrameNumber);
     ifstream infile(file);
     if(!infile.is_open()){
@@ -85,7 +85,6 @@ int readFile(const char* file){
                             pageMapping->insertEmptyPage(tempInstruction, i);
                             pageMapping->updateFrameTable(j, i, tempInstruction);
                             pageMapping->printTable(tempInstruction, j);
-//                            pageMapping->pageTableOPtion();
                         }
                     } else {
                         if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction, 1) == false)) {
@@ -97,7 +96,6 @@ int readFile(const char* file){
                                 pageReplace = 0;
                             }
                             pageMapping->replacePage(j, pageIndex, tempInstruction);
-//                            pageMapping->pageTableOPtion();
                         }
                     }
                 

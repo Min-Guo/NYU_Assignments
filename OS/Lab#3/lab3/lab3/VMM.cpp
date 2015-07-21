@@ -33,7 +33,7 @@ void PageMapping::insertEmptyPage(Instruction instruction, int a){
    
 }
 
-//FIFO Page Replace Algorithm
+////------> FIFO Page Replace Algorithm
 void FIFOMapping::resizeFrameTable(int a){};
 void FIFOMapping::insertClass(){};
 void FIFOMapping::resetRef(){};
@@ -105,16 +105,16 @@ bool FIFOMapping::checkReferred(Instruction instruction){
     }
 }
 
-void FIFOMapping::updateFrameTable(long long inputLine, int a, Instruction instruction){
+void FIFOMapping::updateFrameTable(int inputLine, int a, Instruction instruction){
     frameTable[a] = instruction.virtualPageIndex;
 }
 
-void FIFOMapping::printTable(Instruction instruction, long long a){
+void FIFOMapping::printTable(Instruction instruction, int a){
     zeroCount++;
     mapCount++;
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
-    printf("%lld: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
-    printf("%lld: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+    printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
+    printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
 }
 
 int FIFOMapping::tablePosition(){
@@ -131,7 +131,7 @@ int FIFOMapping::choosePage(int a){
     return page;
 }
 
-bool FIFOMapping::sameVaildPage(long long a, int b, Instruction instruction, int state){
+bool FIFOMapping::sameVaildPage(int a, int b, Instruction instruction, int state){
     for (int i = 0; i < b; i++) {
         if (frameTable[i] == instruction.virtualPageIndex) {
             cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
@@ -144,43 +144,36 @@ bool FIFOMapping::sameVaildPage(long long a, int b, Instruction instruction, int
     return false;
 }
 
-void FIFOMapping::outPage(long long inputLine,int page, Instruction instruction){
+void FIFOMapping::outPage(int inputLine,int page, Instruction instruction){
     outCount++;
-    printf("%lld: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
+    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
     pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
     frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
 }
 
-void FIFOMapping::printMap(long long inputLine, Instruction instruction){
+void FIFOMapping::printMap(int inputLine, Instruction instruction){
     if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
         zeroCount++;
         mapCount++;
-        printf("%lld: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%lld: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-
-//        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-//        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
         zeroCount++;
         mapCount++;
-        printf("%lld: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%lld: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-//        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-//        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else {
         inCount++;
         mapCount++;
-        printf("%lld: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%lld: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-//        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
-//        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     }
     
 }
-void FIFOMapping::replacePage(long long inputLine, int oldPage, Instruction instruction){
+void FIFOMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
-    printf("%lld: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
+    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     unmapCount++;
     if (modifiedBit(pageTable[oldPage]) == 1) {
         outPage(inputLine, oldPage, instruction);
@@ -220,9 +213,9 @@ void FIFOMapping::pageTableOPtion(){
     cout <<"\n";
 }
 
-void FIFOMapping::printSummary(unsigned long inputLine){
+void FIFOMapping::printSummary(int inputLine){
     totalCost = (unmapCount + mapCount) * 400 + (inCount + outCount) * 3000 + zeroCount * 150 + inputLine;
-    printf("SUM %lu U=%u M=%u I=%u O=%u Z=%u ===> %lld\n", inputLine, unmapCount, mapCount, inCount, outCount, zeroCount, totalCost);
+    printf("SUM %d U=%u M=%u I=%u O=%u Z=%u ===> %lld\n", inputLine, unmapCount, mapCount, inCount, outCount, zeroCount, totalCost);
 }
 
 void FIFOMapping::printFrameMap(int frameNum){
@@ -231,7 +224,10 @@ void FIFOMapping::printFrameMap(int frameNum){
     }
     cout<<"\n";
 }
-//LRU Page Replace Algorithm
+
+
+
+//------> LRU Page Replace Algorithm
 
 void LRUMapping::readRfile(const char*rfile){};
 void LRUMapping::resizeFrameTable(int a){};
@@ -239,6 +235,7 @@ void LRUMapping::insertClass(){};
 void LRUMapping::resetRef(){};
 void LRUMapping::clearClass(){};
 int LRUMapping::checkClass(int refernced, int modified){return 0;};
+void LRUMapping::updateAgePageTable(){};
 
 unsigned long LRUMapping::calculatePTE(int a, int b, int c, int d, int e){
     pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
@@ -310,6 +307,8 @@ void LRUMapping::updateFrameTable(int inputLine, int a, Instruction instruction)
 }
 
 void LRUMapping::printTable(Instruction instruction, int a){
+    zeroCount++;
+    mapCount++;
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
     cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
     cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
@@ -331,7 +330,7 @@ int LRUMapping::choosePage(int a){
     return page;
 }
 
-bool LRUMapping::sameVaildPage(int a, int b, Instruction instruction){
+bool LRUMapping::sameVaildPage(int a, int b, Instruction instruction, int state){
     for (int i = 0; i < b; i++) {
         if (frameTable[i][1] == instruction.virtualPageIndex) {
             frameTable[i][0] = a;
@@ -346,6 +345,7 @@ bool LRUMapping::sameVaildPage(int a, int b, Instruction instruction){
 }
 
 void LRUMapping::outPage(int inputLine,int page, Instruction instruction){
+    outCount++;
     cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
     pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
@@ -355,12 +355,18 @@ void LRUMapping::outPage(int inputLine,int page, Instruction instruction){
 
 void LRUMapping::printMap(int inputLine, Instruction instruction){
     if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+        zeroCount++;
+        mapCount++;
         cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
         cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
     } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        zeroCount++;
+        mapCount++;
         cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
         cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
     } else {
+        inCount++;
+        mapCount++;
         cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
         cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
     }
@@ -369,6 +375,7 @@ void LRUMapping::printMap(int inputLine, Instruction instruction){
 void LRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
     cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    unmapCount++;
     if (modifiedBit(pageTable[oldPage]) == 1) {
         outPage(inputLine, oldPage, instruction);
         printMap(inputLine, instruction);
@@ -406,6 +413,18 @@ void LRUMapping::pageTableOPtion(){
         }
     }
     cout <<"\n";
+}
+
+void LRUMapping::printSummary(int inputLine){
+    totalCost = (unmapCount + mapCount) * 400 + (inCount + outCount) * 3000 + zeroCount * 150 + inputLine;
+    printf("SUM %d U=%d M=%d I=%d O=%d Z=%d ===> %llu\n", inputLine, unmapCount, mapCount, inCount, outCount, zeroCount, totalCost);
+}
+
+void LRUMapping::printFrameMap(int frameNum){
+    for (int i = 0; i < frameNum; i++){
+        cout<< frameTable[i][1]<<" ";
+    }
+    cout<<"\n";
 }
 
 
