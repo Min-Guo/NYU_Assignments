@@ -96,6 +96,7 @@ int readFile(const char* file){
                                 pageReplace = 0;
                             }
                             pageMapping->replacePage(j, pageIndex, tempInstruction, physicalFrameNumber);
+                            pageMapping->printMap(j, tempInstruction);
                         }
                     }
                 
