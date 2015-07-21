@@ -21,7 +21,7 @@ string lineBuffer;
 char* line;
 char* token;
 const char* file;
-int physicalFrameNumber = 32;
+int physicalFrameNumber = 16;
 unsigned long temppte;
 int pageIndex;
 int i = 0;
@@ -50,7 +50,7 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new SecondChanceMapping();
+    pageMapping = new RandomMapping();
     pageMapping->resizeFrameTable(physicalFrameNumber);
     ifstream infile(file);
     if(!infile.is_open()){
@@ -118,6 +118,6 @@ int main(int argc, const char * argv[]) {
     //    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
     //    frameNumber = atoi(argv[1]);
     
-    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1M2");
+    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4");
     return 0;
 }

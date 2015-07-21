@@ -233,6 +233,12 @@ private:
     FILE *rfile;
     unsigned long pte;
     int PhyNumber;
+    unsigned int unmapCount;
+    unsigned int mapCount;
+    unsigned int inCount;
+    unsigned int outCount;
+    unsigned int zeroCount;
+    long long totalCost;
 public:
     void insertEmptyPage(Instruction instruction, int a);
     bool checkReferred(Instruction instruction);
@@ -246,7 +252,7 @@ public:
     void updateFrameTable(int inputLine, int a, Instruction instruction);
     int choosePage(int a);
     void replacePage(int inputLine, int oldPage, Instruction instruction);
-    bool sameVaildPage(int inputLine, int page, Instruction instruction);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
     void outPage(int inputLine,int page, Instruction instruction);
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
@@ -257,6 +263,9 @@ public:
     void pageTableOPtion();
     void clearClass();
     int checkClass(int refernced, int modified);
+    void updateAgePageTable();
+    void printSummary(int inputLine);
+    void printFrameMap(int frameNum);
 };
 
 class NRUMapping:public PageMapping{

@@ -1074,6 +1074,7 @@ void RandomMapping::insertClass(){};
 void RandomMapping::resetRef(){};
 void RandomMapping::clearClass(){};
 int RandomMapping::checkClass(int refernced, int modified){return 0;};
+void RandomMapping::updateAgePageTable(){};
 
 unsigned long RandomMapping::calculatePTE(int a, int b, int c, int d, int e){
     pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
@@ -1144,10 +1145,11 @@ void RandomMapping::updateFrameTable(int inputLine, int a, Instruction instructi
 }
 
 void RandomMapping::printTable(Instruction instruction, int a){
+    zeroCount++;
+    mapCount++;
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
-    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
-    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
-}
+    printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
+    printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));}
 
 int RandomMapping::tablePosition(){
     return pageTablePosition;
@@ -1165,7 +1167,7 @@ int RandomMapping::choosePage(int a){
     return page;
 }
 
-bool RandomMapping::sameVaildPage(int a, int b, Instruction instruction){
+bool RandomMapping::sameVaildPage(int a, int b, Instruction instruction, int state){
     for (int i = 0; i < b; i++) {
         if (frameTable[i] == instruction.virtualPageIndex) {
             cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
@@ -1179,7 +1181,8 @@ bool RandomMapping::sameVaildPage(int a, int b, Instruction instruction){
 }
 
 void RandomMapping::outPage(int inputLine,int page, Instruction instruction){
-    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
+    outCount++;
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
     pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
     frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
@@ -1187,20 +1190,27 @@ void RandomMapping::outPage(int inputLine,int page, Instruction instruction){
 
 void RandomMapping::printMap(int inputLine, Instruction instruction){
     if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
-        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        zeroCount++;
+        mapCount++;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
-        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        zeroCount++;
+        mapCount++;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else {
-        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        inCount++;
+        mapCount++;
+        printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     }
     
 }
 void RandomMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
-    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    unmapCount++;
+    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     if (modifiedBit(pageTable[oldPage]) == 1) {
         outPage(inputLine, oldPage, instruction);
         printMap(inputLine, instruction);
@@ -1244,9 +1254,9 @@ void RandomMapping::pageTableOPtion(){
             cout << "# ";
         }else {
             if (referencedBit(pageTable[i]) == 1) {
-                cout << " "<< i << ":R";
+                cout << i << ":R";
             } else{
-                cout << " "<< i << ":-";
+                cout << i << ":-";
             }
             if (modifiedBit(pageTable[i]) == 1) {
                 cout << "M";
@@ -1262,7 +1272,17 @@ void RandomMapping::pageTableOPtion(){
     }
     cout <<"\n";
 }
+void RandomMapping::printSummary(int inputLine){
+    totalCost = (unmapCount + mapCount) * 400 + (inCount + outCount) * 3000 + zeroCount * 150 + inputLine;
+    printf("SUM %d U=%d M=%d I=%d O=%d Z=%d ===> %llu\n", inputLine, unmapCount, mapCount, inCount, outCount, zeroCount, totalCost);
+}
 
+void RandomMapping::printFrameMap(int frameNum){
+    for (int i = 0; i < frameNum; i++){
+        cout<< frameTable[i]<<" ";
+    }
+    cout<<"\n";
+}
 
 //NRU Algorithm
 void NRUMapping::resizeFrameTable(int a){};
