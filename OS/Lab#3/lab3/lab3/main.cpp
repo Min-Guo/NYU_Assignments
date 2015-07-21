@@ -21,7 +21,7 @@ string lineBuffer;
 char* line;
 char* token;
 const char* file;
-int physicalFrameNumber = 16;
+int physicalFrameNumber = 32;
 unsigned long temppte;
 int pageIndex;
 int i = 0;
@@ -49,9 +49,9 @@ void resetTempIns(){
 
 
 int readFile(const char* file){
-    int j = 0;
-    pageMapping = new AgingLocalMapping();
-    pageMapping->resizeFrameTable(16);
+    long long j = 0;
+    pageMapping = new FIFOMapping();
+    pageMapping->resizeFrameTable(physicalFrameNumber);
     ifstream infile(file);
     if(!infile.is_open()){
         cout<<"Failed to open"<<endl;
@@ -82,10 +82,10 @@ int readFile(const char* file){
                     pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
                     if (i < physicalFrameNumber) {
                         if(pageMapping->sameVaildPage(j, i, tempInstruction, 0) == false){
-                            pageMapping->insertEmptyPage(tempInstruction, i, j);
+                            pageMapping->insertEmptyPage(tempInstruction, i);
                             pageMapping->updateFrameTable(j, i, tempInstruction);
                             pageMapping->printTable(tempInstruction, j);
-                            pageMapping->pageTableOPtion();
+//                            pageMapping->pageTableOPtion();
                         }
                     } else {
                         if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction, 1) == false)) {
@@ -97,7 +97,7 @@ int readFile(const char* file){
                                 pageReplace = 0;
                             }
                             pageMapping->replacePage(j, pageIndex, tempInstruction);
-                            pageMapping->pageTableOPtion();
+//                            pageMapping->pageTableOPtion();
                         }
                     }
                 
@@ -106,6 +106,10 @@ int readFile(const char* file){
                 }
             }
         }
+        pageMapping->pageTableOPtion();
+        pageMapping->printFrameMap(physicalFrameNumber);
+        pageMapping->printSummary(j);
+    
     }
     infile.close();
     return 0;
@@ -116,6 +120,6 @@ int main(int argc, const char * argv[]) {
     //    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
     //    frameNumber = atoi(argv[1]);
     
-    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4");
+    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1M2");
     return 0;
 }
