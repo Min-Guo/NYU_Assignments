@@ -144,7 +144,7 @@ bool FIFOMapping::sameVaildPage(int a, int b, Instruction instruction, int state
     return false;
 }
 
-void FIFOMapping::outPage(int inputLine,int page, Instruction instruction){
+void FIFOMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
     outCount++;
     printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
@@ -171,12 +171,12 @@ void FIFOMapping::printMap(int inputLine, Instruction instruction){
     }
     
 }
-void FIFOMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void FIFOMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
     printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     unmapCount++;
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
@@ -346,7 +346,7 @@ bool LRUMapping::sameVaildPage(int a, int b, Instruction instruction, int state)
     return false;
 }
 
-void LRUMapping::outPage(int inputLine,int page, Instruction instruction){
+void LRUMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
     outCount++;
 //    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
     printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
@@ -381,14 +381,14 @@ void LRUMapping::printMap(int inputLine, Instruction instruction){
     }
     
 }
-void LRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void LRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
 //    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
     printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
 
     unmapCount++;
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
@@ -565,7 +565,7 @@ bool ClockMapping::sameVaildPage(int a, int b, Instruction instruction, int stat
     return false;
 }
 
-void ClockMapping::outPage(int inputLine,int page, Instruction instruction){
+void ClockMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
 //    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
     printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     outCount++;
@@ -599,14 +599,14 @@ void ClockMapping::printMap(int inputLine, Instruction instruction){
     }
     
 }
-void ClockMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void ClockMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
 //    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
     printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
 
     unmapCount++;
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
@@ -787,7 +787,7 @@ bool ClockGlobalMapping::sameVaildPage(int a, int b, Instruction instruction, in
     return false;
 }
 
-void ClockGlobalMapping::outPage(int inputLine,int page, Instruction instruction){
+void ClockGlobalMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
     printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     outCount++;
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
@@ -814,12 +814,12 @@ void ClockGlobalMapping::printMap(int inputLine, Instruction instruction){
     }
     
 }
-void ClockGlobalMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void ClockGlobalMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
     unmapCount++;
     printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
@@ -997,7 +997,7 @@ bool SecondChanceMapping::sameVaildPage(int a, int b, Instruction instruction, i
     return false;
 }
 
-void SecondChanceMapping::outPage(int inputLine,int page, Instruction instruction){
+void SecondChanceMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
     outCount++;
     printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
@@ -1027,12 +1027,12 @@ void SecondChanceMapping::printMap(int inputLine, Instruction instruction){
     }
     
 }
-void SecondChanceMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void SecondChanceMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
     printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     unmapCount++;
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
@@ -1202,7 +1202,7 @@ bool RandomMapping::sameVaildPage(int a, int b, Instruction instruction, int sta
     return false;
 }
 
-void RandomMapping::outPage(int inputLine,int page, Instruction instruction){
+void RandomMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
     printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     outCount++;
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
@@ -1229,12 +1229,12 @@ void RandomMapping::printMap(int inputLine, Instruction instruction){
     }
     
 }
-void RandomMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void RandomMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
     unmapCount++;
     printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
@@ -1479,7 +1479,7 @@ bool NRUMapping::sameVaildPage(int a, int b, Instruction instruction, int state)
     return false;
 }
 
-void NRUMapping::outPage(int inputLine,int page, Instruction instruction){
+void NRUMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
     outCount++;
     printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
@@ -1506,12 +1506,12 @@ void NRUMapping::printMap(int inputLine, Instruction instruction){
     }
     
 }
-void NRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void NRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
     unmapCount++;
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
     printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
