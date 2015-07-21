@@ -42,9 +42,9 @@ public:
     virtual int physicalFrameNumber(int a) = 0;
     virtual void updateFrameTable(int inputLine, int a, Instruction instruction) = 0;
     virtual int choosePage(int a) = 0;
-    virtual void replacePage(int inputLine, int oldPage, Instruction instruction) = 0;
+    virtual void replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum) = 0;
     virtual bool sameVaildPage(int inputLine, int Page, Instruction instruction, int state) = 0;
-    virtual void outPage(int inputLine,int page, Instruction instruction) = 0;
+    virtual void outPage(int inputLine,int page, Instruction instruction, int phyNum) = 0;
     virtual void printMap(int inputLine, Instruction instruction) = 0;
     virtual int tablePosition() = 0;
     virtual void resizeFrameTable(int a) = 0;
@@ -364,43 +364,12 @@ private:
     vector<unsigned long> agebitP;
     vector<unsigned long> tempAge;
     int order[64];
-public:
-    void insertEmptyPage(Instruction instruction, int a, int inputLine);
-    bool checkReferred(Instruction instruction);
-    void printTable(Instruction instruction, long long inputLine);
-    int presentBit(unsigned long pte);
-    int modifiedBit(unsigned long pte);
-    int referencedBit(unsigned long pte);
-    int pageoutBit(unsigned long pte);
-    unsigned long calculatePTE(int a, int b, int c, int d, int e);
-    int physicalFrameNumber(int a);
-    void updateFrameTable(int inputLine, int a, Instruction instruction);
-    int choosePage(int a);
-    void replacePage(int inputLine, int oldPage, Instruction instruction);
-    bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
-    void outPage(int inputLine,int page, Instruction instruction);
-    void printMap(int inputLine, Instruction instruction);
-    int tablePosition();
-    void resizeFrameTable(int a);
-    void readRfile(const char*rfile);
-    void pageTableOPtion();
-    void insertClass();
-    void resetRef();
-    void clearClass();
-    int checkClass(int refernced, int modified);
-    void updateAgePageTable();
-};
-
-class AgingLocalMapping:public PageMapping{
-private:
-    unsigned long pageTable[64];
-    int frameTable[64];
-    unsigned long pte;
-    int PhyNumber;
-    vector<unsigned long> agebitF;
-    vector<unsigned long> agebitP;
-    vector<int> tempAge;
-    int order[64];
+    unsigned int unmapCount;
+    unsigned int mapCount;
+    unsigned int inCount;
+    unsigned int outCount;
+    unsigned int zeroCount;
+    long long totalCost;
 public:
     void insertEmptyPage(Instruction instruction, int a);
     bool checkReferred(Instruction instruction);
@@ -413,9 +382,9 @@ public:
     int physicalFrameNumber(int a);
     void updateFrameTable(int inputLine, int a, Instruction instruction);
     int choosePage(int a);
-    void replacePage(int inputLine, int oldPage, Instruction instruction);
+    void replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum);
     bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
-    void outPage(int inputLine,int page, Instruction instruction);
+    void outPage(int inputLine,int page, Instruction instruction, int phyNum);
     void printMap(int inputLine, Instruction instruction);
     int tablePosition();
     void resizeFrameTable(int a);
@@ -426,6 +395,53 @@ public:
     void clearClass();
     int checkClass(int refernced, int modified);
     void updateAgePageTable();
+    void printSummary(int inputLine);
+    void printFrameMap(int frameNum);
+};
+
+class AgingLocalMapping:public PageMapping{
+private:
+    unsigned long pageTable[64];
+    int frameTable[64];
+    unsigned long pte;
+    int PhyNumber;
+    vector<unsigned long> agebitF;
+    vector<unsigned long> agebitP;
+    vector<int> tempAge;
+    int order[64];
+    unsigned int unmapCount;
+    unsigned int mapCount;
+    unsigned int inCount;
+    unsigned int outCount;
+    unsigned int zeroCount;
+    long long totalCost;
+public:
+    void insertEmptyPage(Instruction instruction, int a);
+    bool checkReferred(Instruction instruction);
+    void printTable(Instruction instruction, int inputLine);
+    int presentBit(unsigned long pte);
+    int modifiedBit(unsigned long pte);
+    int referencedBit(unsigned long pte);
+    int pageoutBit(unsigned long pte);
+    unsigned long calculatePTE(int a, int b, int c, int d, int e);
+    int physicalFrameNumber(int a);
+    void updateFrameTable(int inputLine, int a, Instruction instruction);
+    int choosePage(int a);
+    void replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum);
+    bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
+    void outPage(int inputLine,int page, Instruction instruction, int phyNum);
+    void printMap(int inputLine, Instruction instruction);
+    int tablePosition();
+    void resizeFrameTable(int a);
+    void readRfile(const char*rfile);
+    void pageTableOPtion();
+    void insertClass();
+    void resetRef();
+    void clearClass();
+    int checkClass(int refernced, int modified);
+    void updateAgePageTable();
+    void printSummary(int inputLine);
+    void printFrameMap(int frameNum);
 };
 
 

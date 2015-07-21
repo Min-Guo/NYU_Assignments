@@ -1577,7 +1577,7 @@ unsigned long AgingMapping::calculatePTE(int a, int b, int c, int d, int e){
 };
 
 
-void AgingMapping::insertEmptyPage(Instruction instruction, int x, int inputLine){
+void AgingMapping::insertEmptyPage(Instruction instruction, int x){
     agebitP.resize(64);
     pageTable[instruction.virtualPageIndex] =  calculatePTE(1, instruction.operation, 1, 0, x);
     pageTablePosition++;
@@ -1643,10 +1643,12 @@ void AgingMapping::updateFrameTable(int inputLine, int a, Instruction instructio
     //    cout<< "frameNum:"<<a << "  Virtual:"<<frameTable[a] << "  Ref:"<< referencedBit(pageTable[frameTable[a]])<<endl;
 }
 
-void AgingMapping::printTable(Instruction instruction, long long a){
+void AgingMapping::printTable(Instruction instruction, int a){
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
-    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
-    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+    zeroCount++;
+    mapCount++;
+    printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
+    printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
 }
 
 int AgingMapping::tablePosition(){
@@ -1703,14 +1705,19 @@ bool AgingMapping::sameVaildPage(int a, int b, Instruction instruction, int stat
                     tempAge.push_back(instruction.virtualPageIndex);
                 }
             }
+            pageTableOPtion();
             return true;
         }
     }
     return false;
 }
 
-void AgingMapping::outPage(int inputLine,int page, Instruction instruction){
-    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+void AgingMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
+    outCount++;
+    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
+    for (int i = 0; i < phyNum; i++) {
+        pageTable[frameTable[i]] = calculatePTE(1, modifiedBit(pageTable[frameTable[i]]), 0, pageoutBit(pageTable[frameTable[i]]), physicalFrameNumber(frameTable[i]));
+    }
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
     pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
     frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
@@ -1718,14 +1725,20 @@ void AgingMapping::outPage(int inputLine,int page, Instruction instruction){
 
 void AgingMapping::printMap(int inputLine, Instruction instruction){
     if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
-        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        zeroCount++;
+        mapCount++;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
-        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        zeroCount++;
+        mapCount++;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else {
-        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        inCount++;
+        mapCount++;
+        printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     }
     
 }
@@ -1734,13 +1747,17 @@ void AgingMapping::printMap(int inputLine, Instruction instruction){
 
 
 
-void AgingMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void AgingMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
+    unmapCount++;
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
-    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
+        for (int i = 0; i < phyNum; i++) {
+            pageTable[frameTable[i]] = calculatePTE(1, modifiedBit(pageTable[frameTable[i]]), 0, pageoutBit(pageTable[frameTable[i]]), physicalFrameNumber(frameTable[i]));
+        }
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
         pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
         frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
@@ -1775,6 +1792,17 @@ void AgingMapping::pageTableOPtion(){
     }
     cout <<"\n";
 }
+void AgingMapping::printSummary(int inputLine){
+    totalCost = (unmapCount + mapCount) * 400 + (inCount + outCount) * 3000 + zeroCount * 150 + inputLine;
+    printf("SUM %d U=%d M=%d I=%d O=%d Z=%d ===> %llu\n", inputLine, unmapCount, mapCount, inCount, outCount, zeroCount, totalCost);
+}
+
+void AgingMapping::printFrameMap(int frameNum){
+    for (int i = 0; i < frameNum; i++){
+        cout<< frameTable[i]<<" ";
+    }
+    cout<<"\n";
+}
 
 //Aging Local Algorithm
 
@@ -1794,10 +1822,12 @@ unsigned long AgingLocalMapping::calculatePTE(int a, int b, int c, int d, int e)
 
 void AgingLocalMapping::insertEmptyPage(Instruction instruction, int x){
     agebitP.resize(64);
+//    pageTableOPtion();
     pageTable[instruction.virtualPageIndex] =  calculatePTE(1, instruction.operation, 1, 0, x);
     pageTablePosition++;
     tempAge.push_back(instruction.virtualPageIndex);
     k = pageTablePosition;
+    
 }
 
 int AgingLocalMapping::presentBit(unsigned long pte){
@@ -1859,9 +1889,11 @@ void AgingLocalMapping::updateFrameTable(int inputLine, int a, Instruction instr
 }
 
 void AgingLocalMapping::printTable(Instruction instruction, int a){
+    zeroCount++;
+    mapCount++;
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
-    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
-    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+    printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
+    printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
 }
 
 int AgingLocalMapping::tablePosition(){
@@ -1918,36 +1950,47 @@ bool AgingLocalMapping::sameVaildPage(int a, int b, Instruction instruction, int
             cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
             pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), modifiedBit(pageTable[instruction.virtualPageIndex]), 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
             if (instruction.operation ==  1) {
-                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, referencedBit(pageTable[instruction.virtualPageIndex]), pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
+                pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
             }
             if (state == 1) {
                 if (find(tempAge.begin(), tempAge.end(), instruction.virtualPageIndex) == tempAge.end()) {
                     tempAge.push_back(instruction.virtualPageIndex);
                 }
             }
+//            pageTableOPtion();
             return true;
         }
     }
     return false;
 }
 
-void AgingLocalMapping::outPage(int inputLine,int page, Instruction instruction){
-    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+void AgingLocalMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
+    outCount++;
+    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
+    for (int i = 0; i < phyNum; i++) {
+        pageTable[frameTable[i]] = calculatePTE(1, modifiedBit(pageTable[frameTable[i]]), 0, pageoutBit(pageTable[frameTable[i]]), physicalFrameNumber(frameTable[i]));
+    }
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
-    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
+    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), 0, 1, 0);
     frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
 }
 
 void AgingLocalMapping::printMap(int inputLine, Instruction instruction){
     if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
-        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        zeroCount++;
+        mapCount++;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
-        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        zeroCount++;
+        mapCount++;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else {
-        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        inCount++;
+        mapCount++;
+        printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     }
     
 }
@@ -1956,20 +1999,25 @@ void AgingLocalMapping::printMap(int inputLine, Instruction instruction){
 
 
 
-void AgingLocalMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+void AgingLocalMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum) {
+    unmapCount++;
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
-    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     if (modifiedBit(pageTable[oldPage]) == 1) {
-        outPage(inputLine, oldPage, instruction);
+        outPage(inputLine, oldPage, instruction, phyNum);
         printMap(inputLine, instruction);
     } else{
+        for (int i = 0; i < phyNum; i++) {
+            pageTable[frameTable[i]] = calculatePTE(1, modifiedBit(pageTable[frameTable[i]]), 0, pageoutBit(pageTable[frameTable[i]]), physicalFrameNumber(frameTable[i]));
+        }
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
-        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
+        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), 0, pageoutBit(pageTable[oldPage]), 0);
         frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
         printMap(inputLine, instruction);
     }
     agebitP[instruction.virtualPageIndex] = 0;
     tempAge.push_back(instruction.virtualPageIndex);
+//    pageTableOPtion();
 }
 void AgingLocalMapping::pageTableOPtion(){
     for (int i = 0; i < 64; i++) {
@@ -1979,9 +2027,9 @@ void AgingLocalMapping::pageTableOPtion(){
             cout << "# ";
         }else {
             if (referencedBit(pageTable[i]) == 1) {
-                cout << " "<< i << ":R";
+                cout << i << ":R";
             } else{
-                cout << " "<< i << ":-";
+                cout << i << ":-";
             }
             if (modifiedBit(pageTable[i]) == 1) {
                 cout << "M";
@@ -1998,5 +2046,15 @@ void AgingLocalMapping::pageTableOPtion(){
     cout <<"\n";
 }
 
+void AgingLocalMapping::printSummary(int inputLine){
+    totalCost = (unmapCount + mapCount) * 400 + (inCount + outCount) * 3000 + zeroCount * 150 + inputLine;
+    printf("SUM %d U=%d M=%d I=%d O=%d Z=%d ===> %llu\n", inputLine, unmapCount, mapCount, inCount, outCount, zeroCount, totalCost);
+}
 
+void AgingLocalMapping::printFrameMap(int frameNum){
+    for (int i = 0; i < frameNum; i++){
+        cout<< frameTable[i]<<" ";
+    }
+    cout<<"\n";
+}
 

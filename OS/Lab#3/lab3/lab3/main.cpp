@@ -21,7 +21,7 @@ string lineBuffer;
 char* line;
 char* token;
 const char* file;
-int physicalFrameNumber = 16;
+int physicalFrameNumber = 32;
 unsigned long temppte;
 int pageIndex;
 int i = 0;
@@ -50,8 +50,9 @@ void resetTempIns(){
 
 int readFile(const char* file){
     int j = 0;
-    pageMapping = new ClockGlobalMapping();
+    pageMapping = new AgingLocalMapping();
     pageMapping->resizeFrameTable(physicalFrameNumber);
+    pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
     ifstream infile(file);
     if(!infile.is_open()){
         cout<<"Failed to open"<<endl;
@@ -79,7 +80,6 @@ int readFile(const char* file){
                         token = strtok(NULL, " ");
                     }
                     i = pageMapping->tablePosition();
-                    pageMapping->readRfile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile");
                     if (i < physicalFrameNumber) {
                         if(pageMapping->sameVaildPage(j, i, tempInstruction, 0) == false){
                             pageMapping->insertEmptyPage(tempInstruction, i);
@@ -95,7 +95,7 @@ int readFile(const char* file){
                                 pageMapping->resetRef();
                                 pageReplace = 0;
                             }
-                            pageMapping->replacePage(j, pageIndex, tempInstruction);
+                            pageMapping->replacePage(j, pageIndex, tempInstruction, physicalFrameNumber);
                         }
                     }
                 
@@ -118,6 +118,6 @@ int main(int argc, const char * argv[]) {
     //    argv[1] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
     //    frameNumber = atoi(argv[1]);
     
-    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4");
+    readFile("/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1M2");
     return 0;
 }
