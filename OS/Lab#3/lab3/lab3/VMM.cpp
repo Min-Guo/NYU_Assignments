@@ -1286,6 +1286,7 @@ void RandomMapping::printFrameMap(int frameNum){
 
 //NRU Algorithm
 void NRUMapping::resizeFrameTable(int a){};
+void NRUMapping::updateAgePageTable(){};
 unsigned long NRUMapping::calculatePTE(int a, int b, int c, int d, int e){
     pte = a * pow(2, 31) + b * pow(2, 30) + c * pow(2, 29) + d * pow(2, 28) + e;
     return pte;
@@ -1355,9 +1356,11 @@ void NRUMapping::updateFrameTable(int inputLine, int a, Instruction instruction)
 }
 
 void NRUMapping::printTable(Instruction instruction, int a){
+    zeroCount++;
+    mapCount++;
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
-    cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
-    cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
+    printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
+    printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
 }
 
 int NRUMapping::tablePosition(){
@@ -1436,7 +1439,7 @@ int NRUMapping::choosePage(int a){
     return 0;
 }
 
-bool NRUMapping::sameVaildPage(int a, int b, Instruction instruction){
+bool NRUMapping::sameVaildPage(int a, int b, Instruction instruction, int state){
     for (int i = 0; i < b; i++) {
         if (frameTable[i] == instruction.virtualPageIndex) {
             cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
@@ -1447,7 +1450,7 @@ bool NRUMapping::sameVaildPage(int a, int b, Instruction instruction){
             if (instruction.operation == 0) {
                 pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), modifiedBit(pageTable[instruction.virtualPageIndex]), 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
             }
-            pageTableOPtion();
+//            pageTableOPtion();
             return true;
         }
     }
@@ -1455,7 +1458,8 @@ bool NRUMapping::sameVaildPage(int a, int b, Instruction instruction){
 }
 
 void NRUMapping::outPage(int inputLine,int page, Instruction instruction){
-    cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+    outCount++;
+    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
     pageTable[page] = calculatePTE(0, 0, referencedBit(pageTable[page]), 1, 0);
     frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
@@ -1463,20 +1467,27 @@ void NRUMapping::outPage(int inputLine,int page, Instruction instruction){
 
 void NRUMapping::printMap(int inputLine, Instruction instruction){
     if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
-        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        zeroCount++;
+        mapCount++;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
-        cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        zeroCount++;
+        mapCount++;
+        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     } else {
-        cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
-        cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
+        inCount++;
+        mapCount++;
+        printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     }
     
 }
 void NRUMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
+    unmapCount++;
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
-    cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     if (modifiedBit(pageTable[oldPage]) == 1) {
         outPage(inputLine, oldPage, instruction);
         printMap(inputLine, instruction);
@@ -1496,9 +1507,9 @@ void NRUMapping::pageTableOPtion(){
             cout << "# ";
         }else {
             if (referencedBit(pageTable[i]) == 1) {
-                cout << " "<< i << ":R";
+                cout << i << ":R";
             } else{
-                cout << " "<< i << ":-";
+                cout << i << ":-";
             }
             if (modifiedBit(pageTable[i]) == 1) {
                 cout << "M";
@@ -1513,6 +1524,18 @@ void NRUMapping::pageTableOPtion(){
         }
     }
     cout <<"\n";
+}
+
+void NRUMapping::printSummary(int inputLine){
+    totalCost = (unmapCount + mapCount) * 400 + (inCount + outCount) * 3000 + zeroCount * 150 + inputLine;
+    printf("SUM %d U=%d M=%d I=%d O=%d Z=%d ===> %llu\n", inputLine, unmapCount, mapCount, inCount, outCount, zeroCount, totalCost);
+}
+
+void NRUMapping::printFrameMap(int frameNum){
+    for (int i = 0; i < frameNum; i++){
+        cout<< frameTable[i]<<" ";
+    }
+    cout<<"\n";
 }
 
 
