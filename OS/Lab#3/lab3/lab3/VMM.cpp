@@ -396,9 +396,9 @@ void LRUMapping::pageTableOPtion(){
             cout << "# ";
         }else {
             if (referencedBit(pageTable[i]) == 1) {
-                cout << " "<< i << ":R";
+                cout << i << ":R";
             } else{
-                cout << " "<< i << ":-";
+                cout <<  i << ":-";
             }
             if (modifiedBit(pageTable[i]) == 1) {
                 cout << "M";
@@ -428,7 +428,8 @@ void LRUMapping::printFrameMap(int frameNum){
 }
 
 
-//Clock Page Replace Algorithm
+
+//------> Clock Page Replace Algorithm
 
 void ClockMapping::readRfile(const char*rfile){};
 void ClockMapping::resizeFrameTable(int a){};
@@ -436,6 +437,7 @@ void ClockMapping::insertClass(){};
 void ClockMapping::resetRef(){};
 void ClockMapping::clearClass(){};
 int ClockMapping::checkClass(int refernced, int modified){return 0;};
+void ClockMapping::updateAgePageTable(){};
 
 
 unsigned long ClockMapping::calculatePTE(int a, int b, int c, int d, int e){
@@ -508,6 +510,8 @@ void ClockMapping::updateFrameTable(int inputLine, int a, Instruction instructio
 }
 
 void ClockMapping::printTable(Instruction instruction, int a){
+    zeroCount++;
+    mapCount++;
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
     cout<< a << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
     cout<< a << ": MAP    "<< instruction.virtualPageIndex <<"   "<< physicalFrameNumber(instruction.virtualPageIndex)<<endl;
@@ -533,7 +537,7 @@ int ClockMapping::choosePage(int a){
     return page;
 }
 
-bool ClockMapping::sameVaildPage(int a, int b, Instruction instruction){
+bool ClockMapping::sameVaildPage(int a, int b, Instruction instruction, int state){
     for (int i = 0; i < b; i++) {
         if (frameTable[i] == instruction.virtualPageIndex) {
             cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
@@ -550,6 +554,7 @@ bool ClockMapping::sameVaildPage(int a, int b, Instruction instruction){
 
 void ClockMapping::outPage(int inputLine,int page, Instruction instruction){
     cout<< inputLine << ": OUT     "<< page << "   "<< physicalFrameNumber(page)<< endl;
+    outCount++;
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
     pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
     frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
@@ -557,12 +562,18 @@ void ClockMapping::outPage(int inputLine,int page, Instruction instruction){
 
 void ClockMapping::printMap(int inputLine, Instruction instruction){
     if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+        zeroCount++;
+        mapCount++;
         cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
         cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
     } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        zeroCount++;
+        mapCount++;
         cout<< inputLine << ": ZERO        "<< physicalFrameNumber(instruction.virtualPageIndex) << endl;
         cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
     } else {
+        inCount++;
+        mapCount++;
         cout<< inputLine << ": IN      "<< instruction.virtualPageIndex <<"   " << physicalFrameNumber(instruction.virtualPageIndex) << endl;
         cout<< inputLine << ": MAP    "<< instruction.virtualPageIndex << "   "<< physicalFrameNumber(instruction.virtualPageIndex)<< endl;
     }
@@ -571,6 +582,7 @@ void ClockMapping::printMap(int inputLine, Instruction instruction){
 void ClockMapping::replacePage(int inputLine, int oldPage, Instruction instruction){
     cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
     cout<< inputLine << ": UNMAP   "<< oldPage << "   "<< physicalFrameNumber(oldPage)<< endl;
+    unmapCount++;
     if (modifiedBit(pageTable[oldPage]) == 1) {
         outPage(inputLine, oldPage, instruction);
         printMap(inputLine, instruction);
@@ -589,9 +601,9 @@ void ClockMapping::pageTableOPtion(){
             cout << "# ";
         }else {
             if (referencedBit(pageTable[i]) == 1) {
-                cout << " "<< i << ":R";
+                cout << i << ":R";
             } else{
-                cout << " "<< i << ":-";
+                cout << i << ":-";
             }
             if (modifiedBit(pageTable[i]) == 1) {
                 cout << "M";
@@ -608,6 +620,17 @@ void ClockMapping::pageTableOPtion(){
     cout <<"\n";
 }
 
+void ClockMapping::printSummary(int inputLine){
+    totalCost = (unmapCount + mapCount) * 400 + (inCount + outCount) * 3000 + zeroCount * 150 + inputLine;
+    printf("SUM %d U=%d M=%d I=%d O=%d Z=%d ===> %llu\n", inputLine, unmapCount, mapCount, inCount, outCount, zeroCount, totalCost);
+}
+
+void ClockMapping::printFrameMap(int frameNum){
+    for (int i = 0; i < frameNum; i++){
+        cout<< frameTable[i]<<" ";
+    }
+    cout<<"\n";
+}
 
 // Clock Algorithm with Global Policy
 void ClockGlobalMapping::resizeFrameTable(int a){};
