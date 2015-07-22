@@ -45,7 +45,7 @@ public:
     virtual void replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum) = 0;
     virtual bool sameVaildPage(int inputLine, int Page, Instruction instruction, int state) = 0;
     virtual void outPage(int inputLine,int page, Instruction instruction, int phyNum) = 0;
-    virtual void printMap(int inputLine, Instruction instruction) = 0;
+    virtual void printMap(int inputLine, Instruction instruction, int oldPage, int oldPhy, int sameState) = 0;
     virtual int tablePosition() = 0;
     virtual void resizeFrameTable(int a) = 0;
     virtual void readRfile(const char*rfile) = 0;
@@ -87,7 +87,7 @@ public:
     void replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum);
     bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
     void outPage(int inputLine,int page, Instruction instruction, int phyNum);
-    void printMap(int inputLine, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction, int oldPage, int oldPhy, int sameState);
     int tablePosition();
     void resizeFrameTable(int a);
     void readRfile(const char*rfile);

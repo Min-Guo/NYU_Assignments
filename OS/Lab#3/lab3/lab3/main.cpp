@@ -40,6 +40,7 @@ int Fflag;
 int Sflag;
 char* tempA;
 char* tempF;
+int tempOldPhy;
 
 PageMapping* pageMapping;
 Instruction tempInstruction = {
@@ -99,64 +100,35 @@ void resetTempIns(){
 
 int readFile(const char* file, const char* rfile){
     int j = 0;
-    if (strcmp(aValue, "a") == 0) {
-        pageMapping = new AgingLocalMapping();
-    }
-    if (strcmp(aValue, "f") == 0) {
-        pageMapping = new FIFOMapping();
-    }
-    if (strcmp(aValue, "l") == 0) {
-        pageMapping = new LRUMapping();
-    }
-    if (strcmp(aValue, "s") == 0) {
-        pageMapping = new SecondChanceMapping();
-    }
-    if (strcmp(aValue, "r") == 0) {
-        pageMapping = new RandomMapping();
-    }
-    if (strcmp(aValue, "N") == 0) {
-        pageMapping = new NRUMapping();
-    }
-    if (strcmp(aValue, "c") == 0) {
-        pageMapping = new ClockMapping();
-    }
-    if (strcmp(aValue, "X") == 0) {
-        pageMapping = new ClockGlobalMapping();
-    }
-    if (strcmp(aValue, "Y") == 0) {
-        pageMapping = new AgingMapping();
-    }
-//    if (arg1[2] == 'a') {
+//    if (strcmp(aValue, "a") == 0) {
 //        pageMapping = new AgingLocalMapping();
 //    }
-//    if (arg1[2] == 'f') {
-//        pageMapping = new FIFOMapping();
+//    if (strcmp(aValue, "f") == 0) {
+        pageMapping = new FIFOMapping();
 //    }
-//    if (arg1[2] == 'l') {
+//    if (strcmp(aValue, "l") == 0) {
 //        pageMapping = new LRUMapping();
 //    }
-//    if (arg1[2] == 's') {
+//    if (strcmp(aValue, "s") == 0) {
 //        pageMapping = new SecondChanceMapping();
 //    }
-//    if (arg1[2] == 'r') {
+//    if (strcmp(aValue, "r") == 0) {
 //        pageMapping = new RandomMapping();
 //    }
-//    if (arg1[2] == 'N') {
+//    if (strcmp(aValue, "N") == 0) {
 //        pageMapping = new NRUMapping();
 //    }
-//    if (arg1[2] == 'c') {
+//    if (strcmp(aValue, "c") == 0) {
 //        pageMapping = new ClockMapping();
 //    }
-//    if (arg1[2] == 'X') {
+//    if (strcmp(aValue, "X") == 0) {
 //        pageMapping = new ClockGlobalMapping();
 //    }
-//    if (arg1[2] == 'Y') {
+//    if (strcmp(aValue, "Y") == 0) {
 //        pageMapping = new AgingMapping();
 //    }
-//    physicalFrameNumber = atoi(&arg3[2]);
     physicalFrameNumber = atoi(fValue);
     pageMapping->resizeFrameTable(physicalFrameNumber);
-//    "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile"
     pageMapping->readRfile(rfile);
     ifstream infile(file);
     if(!infile.is_open()){
@@ -189,6 +161,7 @@ int readFile(const char* file, const char* rfile){
                         if(pageMapping->sameVaildPage(j, i, tempInstruction, 0) == false){
                             pageMapping->insertEmptyPage(tempInstruction, i);
                             pageMapping->updateFrameTable(j, i, tempInstruction);
+                            tempOldPhy = pageMapping->physicalFrameNumber(pageIndex);
                             if (Oflag == 1) {
                                 pageMapping->printTable(tempInstruction, j);
                             }
@@ -199,13 +172,18 @@ int readFile(const char* file, const char* rfile){
                             pageReplace++;
                             pageMapping->insertClass();
                             pageIndex = pageMapping->choosePage(physicalFrameNumber);
+                            tempOldPhy = pageMapping->physicalFrameNumber(pageIndex);
                             if (pageReplace == 10) {
                                 pageMapping->resetRef();
                                 pageReplace = 0;
                             }
                             pageMapping->replacePage(j, pageIndex, tempInstruction, physicalFrameNumber);
                             if (Oflag == 1) {
-                                pageMapping->printMap(j, tempInstruction);
+                                pageMapping->printMap(j, tempInstruction, pageIndex, tempOldPhy, 0);
+                            }
+                        } else {
+                            if (Oflag == 1) {
+                                pageMapping->printMap(j, tempInstruction, pageIndex, tempOldPhy, 1);
                             }
                         }
                     }
@@ -231,8 +209,6 @@ int readFile(const char* file, const char* rfile){
 
 
 int main(int argc, char** argv) {
-//    char* tempargv = "-af -oOPFS -f16 /Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4 /Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile";
-//    argv = &tempargv;
     while ((c = getopt (argc, argv, "a::o::f::")) != -1) {
         switch (c) {
             case 'a':
@@ -247,17 +223,6 @@ int main(int argc, char** argv) {
                 break;
         }
     }
-    if (optind < argc)	/* these are the arguments after the command-line options */
-        for (; optind < argc; optind++)
-            printf("argument: \"%s\"\n", argv[optind]);
-    else {
-        printf("no arguments left to process\n");
-    }
-//    argv[1] = "-af";
-//    argv[2] = "-oOPFS";
-//    argv[3] = "-f16";
-//    argv[4] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4";
-//    argv[5] = "/Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile";
     searchOperation();
     readFile(argv[4], argv[5]);
     return 0;
