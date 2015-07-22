@@ -109,9 +109,9 @@ int readFile(const char* file, const char* rfile){
     if (strcmp(aValue, "l") == 0) {
         pageMapping = new LRUMapping();
     }
-//    if (strcmp(aValue, "s") == 0) {
-//        pageMapping = new SecondChanceMapping();
-//    }
+    if (strcmp(aValue, "s") == 0) {
+        pageMapping = new SecondChanceMapping();
+    }
 //    if (strcmp(aValue, "r") == 0) {
 //        pageMapping = new RandomMapping();
 //    }
