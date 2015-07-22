@@ -124,9 +124,9 @@ int readFile(const char* file, const char* rfile){
     if (strcmp(aValue, "X") == 0) {
         pageMapping = new ClockGlobalMapping();
     }
-    //    if (strcmp(aValue, "Y") == 0) {
-    //        pageMapping = new AgingMapping();
-    //    }
+    if (strcmp(aValue, "Y") == 0) {
+        pageMapping = new AgingMapping();
+    }
     physicalFrameNumber = atoi(fValue);
     pageMapping->resizeFrameTable(physicalFrameNumber);
     pageMapping->readRfile(rfile);
