@@ -157,7 +157,7 @@ private:
 public:
     void insertEmptyPage(Instruction instruction, int a);
     bool checkReferred(Instruction instruction);
-    void printTable(Instruction instruction, int inputLine);
+    void printTable(Instruction instruction, int inputLine, int sameState);
     int presentBit(unsigned long pte);
     int modifiedBit(unsigned long pte);
     int referencedBit(unsigned long pte);
@@ -169,7 +169,7 @@ public:
     void replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum);
     bool sameVaildPage(int inputLine, int page, Instruction instruction, int state);
     void outPage(int inputLine,int page, Instruction instruction, int phyNum);
-    void printMap(int inputLine, Instruction instruction);
+    void printMap(int inputLine, Instruction instruction, int oldPage, int oldPhy, int sameState);
     int tablePosition();
     void resizeFrameTable(int a);
     void readRfile(const char*rfile);

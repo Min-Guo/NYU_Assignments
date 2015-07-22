@@ -103,9 +103,9 @@ int readFile(const char* file, const char* rfile){
 //    if (strcmp(aValue, "a") == 0) {
 //        pageMapping = new AgingLocalMapping();
 //    }
-//    if (strcmp(aValue, "f") == 0) {
-//        pageMapping = new FIFOMapping();
-//    }
+    if (strcmp(aValue, "f") == 0) {
+        pageMapping = new FIFOMapping();
+    }
     if (strcmp(aValue, "l") == 0) {
         pageMapping = new LRUMapping();
     }
@@ -118,9 +118,9 @@ int readFile(const char* file, const char* rfile){
 //    if (strcmp(aValue, "N") == 0) {
 //        pageMapping = new NRUMapping();
 //    }
-//    if (strcmp(aValue, "c") == 0) {
-//        pageMapping = new ClockMapping();
-//    }
+    if (strcmp(aValue, "c") == 0) {
+        pageMapping = new ClockMapping();
+    }
 //    if (strcmp(aValue, "X") == 0) {
 //        pageMapping = new ClockGlobalMapping();
 //    }

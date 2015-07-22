@@ -522,6 +522,8 @@ void ClockMapping::insertEmptyPage(Instruction instruction, int x){
     pageTable[instruction.virtualPageIndex] = pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, 0, x);
     pageTablePosition++;
     k = pageTablePosition;
+    zeroCount++;
+    mapCount++;
 }
 int ClockMapping::presentBit(unsigned long pte){
     int x;
@@ -574,12 +576,12 @@ bool ClockMapping::checkReferred(Instruction instruction){
 void ClockMapping::updateFrameTable(int inputLine, int a, Instruction instruction){
     frameTable[a] = instruction.virtualPageIndex;
 }
-void ClockMapping::printTable(Instruction instruction, int a){
-    zeroCount++;
-    mapCount++;
+void ClockMapping::printTable(Instruction instruction, int a, int sameState){
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
-    printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
-    printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+    if (sameState == 0) {
+        printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+    }
 }
 
 int ClockMapping::tablePosition(){
@@ -604,7 +606,7 @@ int ClockMapping::choosePage(int a){
 bool ClockMapping::sameVaildPage(int a, int b, Instruction instruction, int state){
     for (int i = 0; i < b; i++) {
         if (frameTable[i] == instruction.virtualPageIndex) {
-            cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
+//            cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
             pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), modifiedBit(pageTable[instruction.virtualPageIndex]), 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
             if (instruction.operation ==  1) {
                 pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, referencedBit(pageTable[instruction.virtualPageIndex]), pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
@@ -616,46 +618,102 @@ bool ClockMapping::sameVaildPage(int a, int b, Instruction instruction, int stat
 }
 
 void ClockMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
-    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
+//    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     outCount++;
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
     pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
     frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
-}
-
-void ClockMapping::printMap(int inputLine, Instruction instruction){
-    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0) {
         zeroCount++;
         mapCount++;
-        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-    } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+    }else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
         zeroCount++;
         mapCount++;
-        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-    } else {
+    }else {
         inCount++;
         mapCount++;
-        printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
     }
-    
+}
+
+void ClockMapping::printMap(int inputLine, Instruction instruction, int oldPage, int oldPhy, int sameState){
+    if (sameState == 1) {
+        cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+    }else {
+        cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+        printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, oldPhy);
+        if (modifiedBit(pageTable[oldPage]) == 1) {
+            printf("%d: OUT    %2d  %2d\n", inputLine, oldPage, oldPhy);
+            if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+                printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+                printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+            } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+                printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+                printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+            } else {
+                printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+                printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+            }
+        } else if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+            printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+            printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+            printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+            printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        } else {
+            printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+            printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        }
+    }
+//    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+//        zeroCount++;
+//        mapCount++;
+//        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+//        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+//    } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+//        zeroCount++;
+//        mapCount++;
+//        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+//        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+//    } else {
+//        inCount++;
+//        mapCount++;
+//        printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+//        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+//    }
+//    
 }
 void ClockMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum){
-    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
-    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
-
     unmapCount++;
     if (modifiedBit(pageTable[oldPage]) == 1) {
         outPage(inputLine, oldPage, instruction, phyNum);
-//        printMap(inputLine, instruction);
     } else{
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
         pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
         frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
-//        printMap(inputLine, instruction);
+        if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0) {
+            zeroCount++;
+            mapCount++;
+        }else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+            zeroCount++;
+            mapCount++;
+        }else {
+            inCount++;
+            mapCount++;
+        }
     }
+//    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+//    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
+//
+//    unmapCount++;
+//    if (modifiedBit(pageTable[oldPage]) == 1) {
+//        outPage(inputLine, oldPage, instruction, phyNum);
+////        printMap(inputLine, instruction);
+//    } else{
+//        pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
+//        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
+//        frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+////        printMap(inputLine, instruction);
+//    }
 }
 void ClockMapping::pageTableOPtion(){
     for (int i = 0; i < 64; i++) {
