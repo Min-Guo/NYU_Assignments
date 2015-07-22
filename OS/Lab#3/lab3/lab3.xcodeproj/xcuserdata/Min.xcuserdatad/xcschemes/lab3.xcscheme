@@ -60,7 +60,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-af -oPFS -f16 /Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1K4 /Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile"
+            argument = "-al -oPFS -f32 /Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/in1M2 /Users/Min/Development/NYU_Assignments/OS/Lab#3/lab3_assign/rfile"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

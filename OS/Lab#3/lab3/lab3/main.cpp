@@ -104,11 +104,11 @@ int readFile(const char* file, const char* rfile){
 //        pageMapping = new AgingLocalMapping();
 //    }
 //    if (strcmp(aValue, "f") == 0) {
-        pageMapping = new FIFOMapping();
+//        pageMapping = new FIFOMapping();
 //    }
-//    if (strcmp(aValue, "l") == 0) {
-//        pageMapping = new LRUMapping();
-//    }
+    if (strcmp(aValue, "l") == 0) {
+        pageMapping = new LRUMapping();
+    }
 //    if (strcmp(aValue, "s") == 0) {
 //        pageMapping = new SecondChanceMapping();
 //    }
@@ -163,9 +163,12 @@ int readFile(const char* file, const char* rfile){
                             pageMapping->updateFrameTable(j, i, tempInstruction);
                             tempOldPhy = pageMapping->physicalFrameNumber(pageIndex);
                             if (Oflag == 1) {
-                                pageMapping->printTable(tempInstruction, j);
+                                pageMapping->printTable(tempInstruction, j, 0);
                             }
-                            
+                        } else{
+                            if (Oflag == 1) {
+                                pageMapping->printTable(tempInstruction, j, 1);
+                            }
                         }
                     } else {
                         if ((pageMapping->sameVaildPage(j, physicalFrameNumber, tempInstruction, 1) == false)) {
