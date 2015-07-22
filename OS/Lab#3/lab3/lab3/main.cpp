@@ -100,9 +100,9 @@ void resetTempIns(){
 
 int readFile(const char* file, const char* rfile){
     int j = 0;
-//    if (strcmp(aValue, "a") == 0) {
-//        pageMapping = new AgingLocalMapping();
-//    }
+    //    if (strcmp(aValue, "a") == 0) {
+    //        pageMapping = new AgingLocalMapping();
+    //    }
     if (strcmp(aValue, "f") == 0) {
         pageMapping = new FIFOMapping();
     }
@@ -115,18 +115,18 @@ int readFile(const char* file, const char* rfile){
     if (strcmp(aValue, "r") == 0) {
         pageMapping = new RandomMapping();
     }
-//    if (strcmp(aValue, "N") == 0) {
-//        pageMapping = new NRUMapping();
-//    }
+    if (strcmp(aValue, "N") == 0) {
+        pageMapping = new NRUMapping();
+    }
     if (strcmp(aValue, "c") == 0) {
         pageMapping = new ClockMapping();
     }
-//    if (strcmp(aValue, "X") == 0) {
-//        pageMapping = new ClockGlobalMapping();
-//    }
-//    if (strcmp(aValue, "Y") == 0) {
-//        pageMapping = new AgingMapping();
-//    }
+    if (strcmp(aValue, "X") == 0) {
+        pageMapping = new ClockGlobalMapping();
+    }
+    //    if (strcmp(aValue, "Y") == 0) {
+    //        pageMapping = new AgingMapping();
+    //    }
     physicalFrameNumber = atoi(fValue);
     pageMapping->resizeFrameTable(physicalFrameNumber);
     pageMapping->readRfile(rfile);
@@ -190,7 +190,7 @@ int readFile(const char* file, const char* rfile){
                             }
                         }
                     }
-                
+                    
                     resetTempIns();
                     j++;
                 }
