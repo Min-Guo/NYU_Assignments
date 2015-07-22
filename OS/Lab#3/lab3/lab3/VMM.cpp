@@ -2039,7 +2039,8 @@ void AgingLocalMapping::insertEmptyPage(Instruction instruction, int x){
     pageTablePosition++;
     tempAge.push_back(instruction.virtualPageIndex);
     k = pageTablePosition;
-    
+    zeroCount++;
+    mapCount++;
 }
 
 int AgingLocalMapping::presentBit(unsigned long pte){
@@ -2100,11 +2101,12 @@ void AgingLocalMapping::updateFrameTable(int inputLine, int a, Instruction instr
 }
 
 void AgingLocalMapping::printTable(Instruction instruction, int a, int sameState){
-    zeroCount++;
-    mapCount++;
     cout<<"==> inst: "<<instruction.operation << " "<<instruction.virtualPageIndex<<endl;
-    printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
-    printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+    if (sameState == 0) {
+        printf("%d: ZERO       %2d\n", a, physicalFrameNumber(instruction.virtualPageIndex));
+        printf("%d: MAP    %2d  %2d\n", a, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+    }
+
 }
 
 int AgingLocalMapping::tablePosition(){
@@ -2151,7 +2153,7 @@ int AgingLocalMapping::choosePage(int a){
 bool AgingLocalMapping::sameVaildPage(int a, int b, Instruction instruction, int state){
     for (int i = 0; i < b; i++) {
         if (frameTable[i] == instruction.virtualPageIndex) {
-            cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
+//            cout<<"==> inst: "<<instruction.operation<<" "<<instruction.virtualPageIndex<< endl;
             pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), modifiedBit(pageTable[instruction.virtualPageIndex]), 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
             if (instruction.operation ==  1) {
                 pageTable[instruction.virtualPageIndex] = calculatePTE(presentBit(pageTable[instruction.virtualPageIndex]), 1, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(instruction.virtualPageIndex));
@@ -2168,51 +2170,104 @@ bool AgingLocalMapping::sameVaildPage(int a, int b, Instruction instruction, int
 }
 
 void AgingLocalMapping::outPage(int inputLine,int page, Instruction instruction, int phyNum){
+//    outCount++;
+//    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
+//    for (int i = 0; i < phyNum; i++) {
+//        pageTable[frameTable[i]] = calculatePTE(1, modifiedBit(pageTable[frameTable[i]]), 0, pageoutBit(pageTable[frameTable[i]]), physicalFrameNumber(frameTable[i]));
+//    }
+//    pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
+//    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), 0, 1, 0);
+//    frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
     outCount++;
-    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
+    //    printf("%d: OUT    %2d  %2d\n", inputLine, page, physicalFrameNumber(page));
     for (int i = 0; i < phyNum; i++) {
         pageTable[frameTable[i]] = calculatePTE(1, modifiedBit(pageTable[frameTable[i]]), 0, pageoutBit(pageTable[frameTable[i]]), physicalFrameNumber(frameTable[i]));
     }
     pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(page));
-    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), 0, 1, 0);
+    pageTable[page] = calculatePTE(0, modifiedBit(pageTable[page]), referencedBit(pageTable[page]), 1, 0);
     frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        zeroCount++;
+        mapCount++;
+    }else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+        zeroCount++;
+        mapCount++;
+    }else {
+        inCount++;
+        mapCount++;
+    }
 }
 
 void AgingLocalMapping::printMap(int inputLine, Instruction instruction, int oldPage, int oldPhy, int sameState){
-    if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
-        zeroCount++;
-        mapCount++;
-        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-    } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
-        zeroCount++;
-        mapCount++;
-        printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-    } else {
-        inCount++;
-        mapCount++;
-        printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
-        printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+    if (sameState == 1) {
+        cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+    }else {
+        cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+        printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, oldPhy);
+        if (modifiedBit(pageTable[oldPage]) == 1) {
+            printf("%d: OUT    %2d  %2d\n", inputLine, oldPage, oldPhy);
+            if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+                printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+                printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+            } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+                printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+                printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+            } else {
+                printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+                printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+            }
+        } else if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0){
+            printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+            printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        } else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+            printf("%d: ZERO       %2d\n", inputLine, physicalFrameNumber(instruction.virtualPageIndex));
+            printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        } else {
+            printf("%d: IN     %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+            printf("%d: MAP    %2d  %2d\n", inputLine, instruction.virtualPageIndex, physicalFrameNumber(instruction.virtualPageIndex));
+        }
     }
-    
+
 }
 
 void AgingLocalMapping::replacePage(int inputLine, int oldPage, Instruction instruction, int phyNum) {
+//    unmapCount++;
+//    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
+//    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
+//    if (modifiedBit(pageTable[oldPage]) == 1) {
+//        outPage(inputLine, oldPage, instruction, phyNum);
+//        //        printMap(inputLine, instruction);
+//    } else{
+//        for (int i = 0; i < phyNum; i++) {
+//            pageTable[frameTable[i]] = calculatePTE(1, modifiedBit(pageTable[frameTable[i]]), 0, pageoutBit(pageTable[frameTable[i]]), physicalFrameNumber(frameTable[i]));
+//        }
+//        pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
+//        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), 0, pageoutBit(pageTable[oldPage]), 0);
+//        frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
+//        //        printMap(inputLine, instruction);
+//    }
+//    agebitP[instruction.virtualPageIndex] = 0;
+//    tempAge.push_back(instruction.virtualPageIndex);
     unmapCount++;
-    cout<< "==> inst: " << instruction.operation << " "<<instruction.virtualPageIndex <<endl;
-    printf("%d: UNMAP  %2d  %2d\n", inputLine, oldPage, physicalFrameNumber(oldPage));
     if (modifiedBit(pageTable[oldPage]) == 1) {
         outPage(inputLine, oldPage, instruction, phyNum);
-        //        printMap(inputLine, instruction);
     } else{
         for (int i = 0; i < phyNum; i++) {
             pageTable[frameTable[i]] = calculatePTE(1, modifiedBit(pageTable[frameTable[i]]), 0, pageoutBit(pageTable[frameTable[i]]), physicalFrameNumber(frameTable[i]));
         }
         pageTable[instruction.virtualPageIndex] = calculatePTE(1, instruction.operation, 1, pageoutBit(pageTable[instruction.virtualPageIndex]), physicalFrameNumber(oldPage));
-        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), 0, pageoutBit(pageTable[oldPage]), 0);
+        pageTable[oldPage] = calculatePTE(0, modifiedBit(pageTable[oldPage]), referencedBit(pageTable[oldPage]), pageoutBit(pageTable[oldPage]), 0);
         frameTable[physicalFrameNumber(instruction.virtualPageIndex)] = instruction.virtualPageIndex;
-        //        printMap(inputLine, instruction);
+        if (referencedBit(pageTable[instruction.virtualPageIndex]) == 0 && modifiedBit(pageTable[instruction.virtualPageIndex]) == 0) {
+            zeroCount++;
+            mapCount++;
+        }else if (pageoutBit(pageTable[instruction.virtualPageIndex]) == 0) {
+            zeroCount++;
+            mapCount++;
+        }else {
+            inCount++;
+            mapCount++;
+        }
     }
     agebitP[instruction.virtualPageIndex] = 0;
     tempAge.push_back(instruction.virtualPageIndex);

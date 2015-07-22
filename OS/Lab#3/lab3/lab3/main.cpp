@@ -100,9 +100,9 @@ void resetTempIns(){
 
 int readFile(const char* file, const char* rfile){
     int j = 0;
-    //    if (strcmp(aValue, "a") == 0) {
-    //        pageMapping = new AgingLocalMapping();
-    //    }
+    if (strcmp(aValue, "a") == 0) {
+        pageMapping = new AgingLocalMapping();
+    }
     if (strcmp(aValue, "f") == 0) {
         pageMapping = new FIFOMapping();
     }
