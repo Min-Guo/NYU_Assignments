@@ -204,7 +204,11 @@ void FIFOMapping::printSummary(int inputLine){
 }
 void FIFOMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i]<<" ";
+        if (frameTable[i] == 0 && presentBit(pageTable[frameTable[i]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
@@ -391,7 +395,11 @@ void LRUMapping::printSummary(int inputLine){
 }
 void LRUMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i][1]<<" ";
+        if (frameTable[i][1] == 0 && presentBit(pageTable[frameTable[i][1]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
@@ -586,7 +594,11 @@ void ClockMapping::printSummary(int inputLine){
 
 void ClockMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i]<<" ";
+        if (frameTable[i] == 0 && presentBit(pageTable[frameTable[i]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
@@ -789,7 +801,11 @@ void ClockGlobalMapping::printSummary(int inputLine){
 
 void ClockGlobalMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i]<<" ";
+        if (frameTable[i] == 0 && presentBit(pageTable[frameTable[i]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
@@ -1002,7 +1018,11 @@ void SecondChanceMapping::printSummary(int inputLine){
 
 void SecondChanceMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i]<<" ";
+        if (frameTable[i] == 0 && presentBit(pageTable[frameTable[i]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
@@ -1220,7 +1240,11 @@ void RandomMapping::printSummary(int inputLine){
 
 void RandomMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i]<<" ";
+        if (frameTable[i] == 0 && presentBit(pageTable[frameTable[i]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
@@ -1473,7 +1497,11 @@ void NRUMapping::printSummary(int inputLine){
 
 void NRUMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i]<<" ";
+        if (frameTable[i] == 0 && presentBit(pageTable[frameTable[i]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
@@ -1709,7 +1737,11 @@ void AgingMapping::printSummary(int inputLine){
 
 void AgingMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i]<<" ";
+        if (frameTable[i] == 0 && presentBit(pageTable[frameTable[i]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
@@ -1948,7 +1980,11 @@ void AgingLocalMapping::printSummary(int inputLine){
 
 void AgingLocalMapping::printFrameMap(int frameNum){
     for (int i = 0; i < frameNum; i++){
-        cout<< frameTable[i]<<" ";
+        if (frameTable[i] == 0 && presentBit(pageTable[frameTable[i]]) == 0) {
+            cout<<"* ";
+        } else{
+            cout<< frameTable[i]<<" ";
+        }
     }
     cout<<"\n";
 }
