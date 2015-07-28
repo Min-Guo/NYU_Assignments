@@ -18,6 +18,11 @@ bool FIFOScheduler::taskReady(int time){
     return false;
 }
 
+bool FIFOScheduler::taskQueueEmpty(){
+    if (!taskQueue.empty()) return false;
+    return true;
+}
+
 void FIFOScheduler::put_readyTask(iotask iotask){
     readyTask.push(iotask);
 }

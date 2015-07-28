@@ -35,6 +35,7 @@ public:
     virtual bool bothEmpty() = 0;
     virtual bool readyEmpty() = 0;
     virtual iotask getRunningTask() = 0;
+    virtual bool taskQueueEmpty() = 0;
 };
 
 class FIFOScheduler:public IOScheduler{
@@ -49,6 +50,7 @@ public:
     bool bothEmpty();
     iotask getRunningTask();
     bool readyEmpty();
+    bool taskQueueEmpty();
 };
 
 #endif /* defined(__Lab4__IOSch__) */

@@ -26,6 +26,7 @@ int totalTrack;
 int totalCompleteTime;
 int waitTime;
 int prevTrack;
+int taskNum;
 vector<iotask> tasksInform;
 IOScheduler* ioscheduler;
 iotask runningTask;
@@ -37,6 +38,7 @@ void resetTempTask(){
     tempTask.track = 0;
     tempTask.runningState = false;
     tempTask.completeTime = 0;
+    tempTask.issueTime = 0;
 };
 void resetRunningTask(){
     runningTask.timeState = false;
@@ -44,10 +46,10 @@ void resetRunningTask(){
     runningTask.track = 0;
     runningTask.runningState = false;
     runningTask.completeTime = 0;
+    runningTask.issueTime = 0;
 };
 
 void readInput(const char* file){
-    int i = 0;
     ifstream infile(file);
     if (!infile.is_open()) {
         cout<<"Failed to open input file"<<endl;
@@ -69,10 +71,10 @@ void readInput(const char* file){
                         }
                         token = strtok(NULL, " ");
                     }
-                    tempTask.taskID = i;
+                    tempTask.taskID = taskNum;
                     ioscheduler->put_taskQueue(tempTask);
                     resetTempTask();
-                    i++;
+                    taskNum++;
                 }
             }
         }
@@ -80,29 +82,58 @@ void readInput(const char* file){
 };
 
 void runningIO(){
-    while (ioscheduler->bothEmpty() == false) {
-        while (ioscheduler->taskReady(runningTime) == true) {
+    while (ioscheduler->bothEmpty() == false || runningTask.runningState == true) {
+        while (ioscheduler->taskReady(runningTime) == true && ioscheduler->taskQueueEmpty() == false) {
             iotask printTest;
             printTest = ioscheduler->getReadyTask();
             ioscheduler->put_readyTask(printTest);
-            printf("task:%i  timeStep:%i\n", printTest.taskID, printTest.timeStep);
+            printf("%i:   %i add %i\n", runningTime, printTest.taskID, printTest.track);
         }
         if (ioscheduler->readyEmpty() == false && runningTask.runningState == false) {
             runningTask = ioscheduler->getRunningTask();
             runningTask.runningState = true;
             runningTask.issueTime = runningTime;
-            printf("task:%i  issueTime:%i\n", runningTask.taskID, runningTask.issueTime);
-        } else if (runningTask.runningState == true && runningTime == (runningTask.track + totalCompleteTime)) {
+            printf("%i:   %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
+        } else if (runningTask.runningState == true && runningTime == (abs(runningTask.track - prevTrack) + runningTask.issueTime)) {
             runningTask.completeTime = runningTime;
             tasksInform.push_back(runningTask);
             totalTrack += abs(runningTask.track - prevTrack);
             prevTrack = runningTask.track;
-            printf("task:%i  finishTime:%i" , runningTask.taskID, runningTime);
+            printf("%i:   %i finish %i\n" , runningTime, runningTask.taskID, runningTask.completeTime - runningTask.timeStep);
             resetRunningTask();
+            if (ioscheduler->readyEmpty() == false && runningTask.runningState == false){
+                runningTask = ioscheduler->getRunningTask();
+                runningTask.runningState = true;
+                runningTask.issueTime = runningTime;
+                printf("%i:   %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
+            }
         }
         runningTime++;
     }
 };
+
+void printSum(){
+    double totalTurnAround;
+    double totalWaitTime;
+    int maxWaitTime = 0;
+    float avg_waittime = 0;
+    float avg_turnaround = 0;
+    for (int i = 0; i < tasksInform.size(); i++) {
+//        cout<< tasksInform[i].timeStep << " " << tasksInform[i].completeTime << " " << tasksInform[i].completeTime - tasksInform[i].timeStep << endl;
+        totalTurnAround += tasksInform[i].completeTime - tasksInform[i].timeStep;
+//        cout<< "totalTurn: "<< totalTurnAround<< endl;
+//        cout<< tasksInform[i].timeStep << " " << tasksInform[i].issueTime << " " << tasksInform[i].issueTime - tasksInform[i].timeStep << endl;
+        totalWaitTime += tasksInform[i].issueTime - tasksInform[i].timeStep;
+//        cout<< "totalWait: "<< totalWaitTime << endl;
+        if (maxWaitTime <= (tasksInform[i].issueTime - tasksInform[i].timeStep)) {
+            maxWaitTime = tasksInform[i].issueTime - tasksInform[i].timeStep;
+        }
+    }
+    avg_turnaround = totalTurnAround / taskNum;
+    avg_waittime = totalWaitTime / taskNum;
+    printf("SUM: %d %d %.2lf %.2lf %d\n", runningTime - 1, totalTrack, avg_turnaround, avg_waittime, maxWaitTime);
+};
+
 
 int main(int argc, char** argv) {
     while ((c = getopt (argc, argv, "s::")) != -1) {
@@ -119,5 +150,6 @@ int main(int argc, char** argv) {
     }
     readInput(argv[2]);
     runningIO();
+    printSum();
     return 0;
 }
