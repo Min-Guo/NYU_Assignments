@@ -53,4 +53,19 @@ public:
     bool taskQueueEmpty();
 };
 
+class SSTFScheduler:public IOScheduler{
+private:
+    queue<iotask> taskQueue;
+    queue<iotask> readyTask;
+public:
+    void put_taskQueue(iotask iotask);
+    iotask getReadyTask();
+    bool taskReady(int time);
+    void put_readyTask(iotask iotask);
+    bool bothEmpty();
+    iotask getRunningTask();
+    bool readyEmpty();
+    bool taskQueueEmpty();
+};
+
 #endif /* defined(__Lab4__IOSch__) */

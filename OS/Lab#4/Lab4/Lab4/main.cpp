@@ -94,7 +94,9 @@ void runningIO(){
             runningTask.runningState = true;
             runningTask.issueTime = runningTime;
             printf("%i:   %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
-        } else if (runningTask.runningState == true && runningTime == (abs(runningTask.track - prevTrack) + runningTask.issueTime)) {
+        }
+        
+        while (runningTask.runningState == true && runningTime == (abs(runningTask.track - prevTrack) + runningTask.issueTime)) {
             runningTask.completeTime = runningTime;
             tasksInform.push_back(runningTask);
             totalTrack += abs(runningTask.track - prevTrack);
@@ -119,12 +121,8 @@ void printSum(){
     float avg_waittime = 0;
     float avg_turnaround = 0;
     for (int i = 0; i < tasksInform.size(); i++) {
-//        cout<< tasksInform[i].timeStep << " " << tasksInform[i].completeTime << " " << tasksInform[i].completeTime - tasksInform[i].timeStep << endl;
         totalTurnAround += tasksInform[i].completeTime - tasksInform[i].timeStep;
-//        cout<< "totalTurn: "<< totalTurnAround<< endl;
-//        cout<< tasksInform[i].timeStep << " " << tasksInform[i].issueTime << " " << tasksInform[i].issueTime - tasksInform[i].timeStep << endl;
         totalWaitTime += tasksInform[i].issueTime - tasksInform[i].timeStep;
-//        cout<< "totalWait: "<< totalWaitTime << endl;
         if (maxWaitTime <= (tasksInform[i].issueTime - tasksInform[i].timeStep)) {
             maxWaitTime = tasksInform[i].issueTime - tasksInform[i].timeStep;
         }
@@ -147,6 +145,8 @@ int main(int argc, char** argv) {
     }
     if (strcmp(sValue, "i") == 0) {
         ioscheduler = new FIFOScheduler();
+    } else if (strcmp(sValue, "j") == 0){
+        ioscheduler = new SSTFScheduler();
     }
     readInput(argv[2]);
     runningIO();
