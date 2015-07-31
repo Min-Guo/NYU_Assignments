@@ -16,13 +16,11 @@ iotask temp = {0, 0, 0, false, 0, 0, false,};
 iotask prevTask = {0, 0, 0, false, 0, 0, false,};
 int minTrack;
 int directionState = 0;
-bool DecState = false;
+//bool DecState = false;
 
 // -----------> FIFO <------------
 
-void FIFOScheduler::separateTask(){};
 int FIFOScheduler::chooseDirection(){return 0;};
-//bool FIFOScheduler::chooseDecreasing(){return false;};
 void FIFOScheduler::put_taskQueue(iotask iotask){
     taskQueue.push(iotask);
 }
@@ -66,9 +64,7 @@ iotask FIFOScheduler::getRunningTask(){
 
 //----------> SSTF <-----------
 
-void SSTFScheduler::separateTask(){};
 int SSTFScheduler::chooseDirection(){return 0;};
-//bool SSTFScheduler::chooseDecreasing(){return false;};
 void SSTFScheduler::put_taskQueue(iotask iotask){
     taskQueue.push(iotask);
 //    printf("id:%i  timestep:%i  track:%i\n", iotask.taskID, iotask.timeStep, iotask.track);
@@ -175,100 +171,19 @@ bool SCANScheduler::readyEmpty(){
     return true;
 }
 
-void SCANScheduler::separateTask(){
-    for (int i = 0 ; i < readyTask.size(); i++) {
-        if (prevTask.track <= readyTask.front().track) {
-            IncreasingTrackQueue.push(readyTask.front());
-            readyTask.push(readyTask.front());
-            readyTask.pop();
-        } else {
-            DecreasingTrackQueue.push(readyTask.front());
-            readyTask.push(readyTask.front());
-            readyTask.pop();
-        }
-    }
-}
 
 int SCANScheduler::chooseDirection(){
-    int upTrack = 0;
-    int bottomTrack = 0;
-//    upTrack = prevTask.track;
-//    bottomTrack = prevTask.track;
+    
     for (int i = 0; i < readyTask.size(); i++) {
         if (prevTask.track < readyTask.front().track) {
-            upTrack = readyTask.front().track;
-            readyTask.push(readyTask.front());
-            readyTask.pop();
-        } else if(prevTask.track > readyTask.front().track) {
-            bottomTrack = readyTask.front().track;
+            return 2;
+        } else {
             readyTask.push(readyTask.front());
             readyTask.pop();
         }
     }
-    
-    if (abs(prevTask.track - upTrack) < abs(prevTask.track - bottomTrack)) {
-        return 2;
-    } else if (abs(prevTask.track - upTrack) > abs(prevTask.track - bottomTrack)){
-        return 1;
-    }
-    return 0;
+    return 1;
 }
-//bool SCANScheduler::chooseDecreasing(){
-//    if ((prevTask.track - IncreasingTrackQueue.top().track) > (prevTask.track - DecreasingTrackQueue.top().track) && !DecreasingTrackQueue.empty()){
-//        return true;
-//    } return false;
-//}
-//
-//iotask SCANScheduler::getRunningTask(){
-//    if (prevTask.timeState == false) {
-//        temp = readyTask.front();
-//        readyTask.pop();
-//    } else {
-//        separateTask();
-//        if (IncState == false && DecState == false) {
-//            if (chooseIncreasing() == true) {
-//                IncState = true;
-//            }
-//            if (chooseDecreasing() == true) {
-//                DecState = true;
-//            }
-//        }
-//        
-//        if (IncState == true && !IncreasingTrackQueue.empty()) {
-//            temp = IncreasingTrackQueue.top();
-//            IncreasingTrackQueue.pop();
-//            for (int i = 0; i < readyTask.size(); i++){
-//                if (temp.timeStep == readyTask.front().timeStep && temp.track == readyTask.front().track) {
-//                    readyTask.pop();
-//                } else {
-//                    readyTask.push(readyTask.front());
-//                    readyTask.pop();
-//                }
-//            }
-//        } else if (IncState == true && IncreasingTrackQueue.empty()){
-//            IncState = false;
-//        }
-//        
-//        if (DecState == true && !DecreasingTrackQueue.empty()) {
-//            temp = DecreasingTrackQueue.top();
-//            DecreasingTrackQueue.pop();
-//            for (int i = 0; i < readyTask.size(); i++){
-//                if (temp.taskID == readyTask.front().taskID && temp.track == readyTask.front().track) {
-//                    readyTask.pop();
-//                } else {
-//                    readyTask.push(readyTask.front());
-//                    readyTask.pop();
-//                }
-//            }
-//
-//        } else if (DecState == true && DecreasingTrackQueue.empty()){
-//            DecState = false;
-//        }
-//        
-//    }
-//    prevTask = temp;
-//    return temp;
-//}
 
 iotask SCANScheduler::getRunningTask(){
     if (prevTask.timeState == false) {
@@ -378,3 +293,184 @@ iotask SCANScheduler::getRunningTask(){
     return temp;
     
 }
+
+//------------------> CSCAN <-------------------
+
+void CSCANScheduler::put_taskQueue(iotask iotask){
+    taskQueue.push(iotask);
+    //    printf("id:%i  timestep:%i  track:%i\n", iotask.taskID, iotask.timeStep, iotask.track);
+}
+
+bool CSCANScheduler::taskReady(int time){
+    if (taskQueue.front().timeStep <= time) return true;
+    return false;
+}
+
+bool CSCANScheduler::taskQueueEmpty(){
+    if (!taskQueue.empty()) return false;
+    return true;
+}
+
+void CSCANScheduler::put_readyTask(iotask iotask){
+    readyTask.push(iotask);
+}
+
+bool CSCANScheduler::bothEmpty(){
+    if (!taskQueue.empty() || !readyTask.empty()) return false;
+    return true;
+}
+
+iotask CSCANScheduler::getReadyTask(){
+    iotask iotask = taskQueue.front();
+    taskQueue.pop();
+    return iotask;
+}
+
+bool CSCANScheduler::readyEmpty(){
+    if (!readyTask.empty()) return false;
+    return true;
+}
+
+
+int CSCANScheduler::chooseDirection(){
+    
+    for (int i = 0; i < readyTask.size(); i++) {
+        if (prevTask.track < readyTask.front().track) {
+            return 1;
+        } else {
+            readyTask.push(readyTask.front());
+            readyTask.pop();
+        }
+    }
+    return 0;
+//    int upTrack = 0;
+//    int bottomTrack = 0;
+//    for (int i = 0; i < readyTask.size(); i++) {
+//        if (prevTask.track < readyTask.front().track) {
+//            upTrack = readyTask.front().track;
+//            readyTask.push(readyTask.front());
+//            readyTask.pop();
+//        } else if(prevTask.track > readyTask.front().track) {
+//            bottomTrack = readyTask.front().track;
+//            readyTask.push(readyTask.front());
+//            readyTask.pop();
+//        }
+//    }
+//    
+//    if (abs(prevTask.track - upTrack) < abs(prevTask.track - bottomTrack)) {
+//        return 2;
+//    } else if (abs(prevTask.track - upTrack) > abs(prevTask.track - bottomTrack)){
+//        return 1;
+//    }
+//    return 0;
+}
+
+iotask CSCANScheduler::getRunningTask(){
+    if (prevTask.timeState == false) {
+        temp = readyTask.front();
+        readyTask.pop();
+        prevTask = temp;
+        return temp;
+    } else {
+        if (directionState == 0) {
+            if (chooseDirection() == 2) {
+                directionState = 2;
+            } else if (chooseDirection() == 1){
+                directionState = 1;
+            }
+        }
+        while (!readyTask.empty()) {
+            
+            if (directionState == 1){
+                for (int i = 0; i < readyTask.size(); i++) {
+                    if (readyTask.front().track <= prevTask.track) {
+                        temp = readyTask.front();
+                        readyTask.pop();
+//                        break;
+                    } else{
+                        readyTask.push(readyTask.front());
+                        readyTask.pop();
+                    }
+                }
+                if (temp.taskID == prevTask.taskID && !readyTask.empty()) {
+                    directionState = 2;
+                } else{
+                    for (int i = 0; i < readyTask.size(); i++) {
+                        if (readyTask.front().track >= prevTask.track) {
+                            if (temp.track > readyTask.front().track) {
+                                readyTask.push(temp);
+                                temp = readyTask.front();
+                                readyTask.pop();
+                            } else if (temp.track == readyTask.front().track){
+                                if(temp.taskID > readyTask.front().taskID){
+                                    readyTask.push(temp);
+                                    temp = readyTask.front();
+                                    readyTask.pop();
+                                } else {
+                                    readyTask.push(readyTask.front());
+                                    readyTask.pop();
+                                }
+                            } else{
+                                readyTask.push(readyTask.front());
+                                readyTask.pop();
+                            }
+                        } else {
+                            readyTask.push(readyTask.front());
+                            readyTask.pop();
+                        }
+                    }
+                    prevTask = temp;
+                    return temp;
+                }
+                
+            }
+            if (directionState == 2){
+                for (int i = 0; i < readyTask.size(); i++) {
+                    if (readyTask.front().track >= prevTask.track) {
+                        temp = readyTask.front();
+                        readyTask.pop();
+                        break;
+                    } else{
+                        readyTask.push(readyTask.front());
+                        readyTask.pop();
+                    }
+                }
+                if (temp.taskID == prevTask.taskID && !readyTask.empty()) {
+                    directionState = 1;
+                } else{
+                    for (int i = 0; i < readyTask.size(); i++) {
+                        if (readyTask.front().track >= prevTask.track) {
+                            if (temp.track > readyTask.front().track) {
+                                readyTask.push(temp);
+                                temp = readyTask.front();
+                                readyTask.pop();
+                            } else if (temp.track == readyTask.front().track){
+                                if(temp.taskID > readyTask.front().taskID){
+                                    readyTask.push(temp);
+                                    temp = readyTask.front();
+                                    readyTask.pop();
+                                } else {
+                                    readyTask.push(readyTask.front());
+                                    readyTask.pop();
+                                }
+                            } else{
+                                readyTask.push(readyTask.front());
+                                readyTask.pop();
+                            }
+                        } else{
+                            readyTask.push(readyTask.front());
+                            readyTask.pop();
+                        }
+                    }
+                    prevTask = temp;
+                    return temp;
+                }
+                
+            }
+        }
+    }
+    prevTask = temp;
+    return temp;
+    
+}
+

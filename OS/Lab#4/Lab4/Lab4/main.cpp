@@ -149,6 +149,8 @@ int main(int argc, char** argv) {
         ioscheduler = new SSTFScheduler();
     } else if (strcmp(sValue, "s") == 0){
         ioscheduler = new SCANScheduler();
+    } else if (strcmp(sValue, "c") == 0){
+        ioscheduler = new CSCANScheduler();
     }
     readInput(argv[2]);
     cout<< "TRACE"<<endl;

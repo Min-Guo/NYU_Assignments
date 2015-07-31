@@ -60,7 +60,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-ss /Users/Min/Development/NYU_Assignments/OS/Lab#4/TestData/input9"
+            argument = "-ss /Users/Min/Development/NYU_Assignments/OS/Lab#4/TestData/input0"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
