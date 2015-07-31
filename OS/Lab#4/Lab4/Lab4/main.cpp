@@ -87,13 +87,13 @@ void runningIO(){
             iotask printTest;
             printTest = ioscheduler->getReadyTask();
             ioscheduler->put_readyTask(printTest);
-            printf("%i:   %i add %i\n", runningTime, printTest.taskID, printTest.track);
+            printf("%i:     %i add %i\n", runningTime, printTest.taskID, printTest.track);
         }
         if (ioscheduler->readyEmpty() == false && runningTask.runningState == false) {
             runningTask = ioscheduler->getRunningTask();
             runningTask.runningState = true;
             runningTask.issueTime = runningTime;
-            printf("%i:   %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
+            printf("%i:     %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
         }
         
         while (runningTask.runningState == true && runningTime == (abs(runningTask.track - prevTrack) + runningTask.issueTime)) {
@@ -101,13 +101,13 @@ void runningIO(){
             tasksInform.push_back(runningTask);
             totalTrack += abs(runningTask.track - prevTrack);
             prevTrack = runningTask.track;
-            printf("%i:   %i finish %i\n" , runningTime, runningTask.taskID, runningTask.completeTime - runningTask.timeStep);
+            printf("%i:     %i finish %i\n" , runningTime, runningTask.taskID, runningTask.completeTime - runningTask.timeStep);
             resetRunningTask();
             if (ioscheduler->readyEmpty() == false && runningTask.runningState == false){
                 runningTask = ioscheduler->getRunningTask();
                 runningTask.runningState = true;
                 runningTask.issueTime = runningTime;
-                printf("%i:   %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
+                printf("%i:     %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
             }
         }
         runningTime++;
@@ -147,8 +147,11 @@ int main(int argc, char** argv) {
         ioscheduler = new FIFOScheduler();
     } else if (strcmp(sValue, "j") == 0){
         ioscheduler = new SSTFScheduler();
+    } else if (strcmp(sValue, "s") == 0){
+        ioscheduler = new SCANScheduler();
     }
     readInput(argv[2]);
+    cout<< "TRACE"<<endl;
     runningIO();
     printSum();
     return 0;

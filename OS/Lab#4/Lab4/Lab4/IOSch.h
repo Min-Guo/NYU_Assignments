@@ -21,6 +21,41 @@ struct iotask{
     int issueTime;
     int completeTime;
     bool runningState;
+    bool separateState;
+};
+
+class Increasing{
+public:
+    bool operator()(iotask& iotask1, iotask& iotask2){
+        if (iotask1.track > iotask2.track) {
+            return true;
+        } else if (iotask1.track == iotask2.track){
+            if(iotask1.timeStep > iotask2.timeStep){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+};
+
+class Decreasing{
+public:
+    bool operator()(iotask& iotask1, iotask& iotask2){
+        if (iotask1.track < iotask2.track) {
+            return true;
+        } else if (iotask1.track == iotask2.track){
+            if(iotask1.timeStep > iotask2.timeStep){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 };
 
 class IOScheduler{
@@ -36,6 +71,8 @@ public:
     virtual bool readyEmpty() = 0;
     virtual iotask getRunningTask() = 0;
     virtual bool taskQueueEmpty() = 0;
+    virtual void separateTask() = 0;
+    virtual int chooseDirection() = 0;
 };
 
 class FIFOScheduler:public IOScheduler{
@@ -51,6 +88,9 @@ public:
     iotask getRunningTask();
     bool readyEmpty();
     bool taskQueueEmpty();
+    void  separateTask();
+    int chooseDirection();
+//    bool chooseDecreasing();
 };
 
 class SSTFScheduler:public IOScheduler{
@@ -66,6 +106,29 @@ public:
     iotask getRunningTask();
     bool readyEmpty();
     bool taskQueueEmpty();
+    void  separateTask();
+    int chooseDirection();
+//    bool chooseDecreasing();
+};
+
+class SCANScheduler:public IOScheduler{
+private:
+    queue<iotask> taskQueue;
+    queue<iotask> readyTask;
+    priority_queue<iotask, vector<iotask>, Increasing> IncreasingTrackQueue;
+    priority_queue<iotask, vector<iotask>, Decreasing> DecreasingTrackQueue;
+public:
+    void put_taskQueue(iotask iotask);
+    iotask getReadyTask();
+    bool taskReady(int time);
+    void put_readyTask(iotask iotask);
+    bool bothEmpty();
+    iotask getRunningTask();
+    bool readyEmpty();
+    bool taskQueueEmpty();
+    void  separateTask();
+    int chooseDirection();
+//    bool chooseDecreasing();
 };
 
 #endif /* defined(__Lab4__IOSch__) */
