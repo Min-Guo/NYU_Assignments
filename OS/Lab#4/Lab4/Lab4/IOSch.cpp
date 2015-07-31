@@ -302,10 +302,19 @@ iotask SCANScheduler::getRunningTask(){
                 } else{
                     for (int i = 0; i < readyTask.size(); i++) {
                         if (readyTask.front().track <= prevTask.track) {
-                            if (temp.track <= readyTask.front().track) {
+                            if (temp.track < readyTask.front().track) {
                                 readyTask.push(temp);
                                 temp = readyTask.front();
                                 readyTask.pop();
+                            } else if (temp.track == readyTask.front().track){
+                                if(temp.taskID > readyTask.front().taskID){
+                                    readyTask.push(temp);
+                                    temp = readyTask.front();
+                                    readyTask.pop();
+                                } else {
+                                    readyTask.push(readyTask.front());
+                                    readyTask.pop();
+                                }
                             } else{
                                 readyTask.push(readyTask.front());
                                 readyTask.pop();
@@ -336,10 +345,19 @@ iotask SCANScheduler::getRunningTask(){
             } else{
                 for (int i = 0; i < readyTask.size(); i++) {
                     if (readyTask.front().track >= prevTask.track) {
-                        if (temp.track >= readyTask.front().track) {
+                        if (temp.track > readyTask.front().track) {
                             readyTask.push(temp);
                             temp = readyTask.front();
                             readyTask.pop();
+                        } else if (temp.track == readyTask.front().track){
+                            if(temp.taskID > readyTask.front().taskID){
+                                readyTask.push(temp);
+                                temp = readyTask.front();
+                                readyTask.pop();
+                            } else {
+                                readyTask.push(readyTask.front());
+                                readyTask.pop();
+                            }
                         } else{
                             readyTask.push(readyTask.front());
                             readyTask.pop();
