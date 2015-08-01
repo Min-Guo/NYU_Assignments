@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>A3044094-C793-41F0-BDE6-E1D1D9ECB90F</string>
 	<key>IDESourceControlProjectName</key>
-	<string>Lab4</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>A75A05D23A2C1A81900E90C5EE104F97F102929B</key>
 		<string>github.com:Min-Guo/NYU_Assignments.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>OS/Lab#4/Lab4/Lab4.xcodeproj</string>
+	<string>OS/Lab#4/Lab4/Lab4.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>A75A05D23A2C1A81900E90C5EE104F97F102929B</key>

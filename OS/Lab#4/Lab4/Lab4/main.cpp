@@ -82,23 +82,20 @@ void readInput(const char* file){
 };
 
 void runningIO(){
+    ioscheduler->init();
     while (ioscheduler->bothEmpty() == false || runningTask.runningState == true) {
         while (ioscheduler->taskReady(runningTime) == true && ioscheduler->taskQueueEmpty() == false) {
             iotask printTest;
             printTest = ioscheduler->getReadyTask();
             ioscheduler->put_readyTask(printTest);
-            printf("%i:     %i add %i\n", runningTime, printTest.taskID, printTest.track);
+//            printf("%i:     %i add %i\n", runningTime, printTest.taskID, printTest.track);
         }
-//        if (ioscheduler->readyEmpty() == true) {
-//            ioscheduler->switchQueue();
-//        }
-//        ioscheduler->putAnotherQueue();
         if (ioscheduler->readyEmpty() == false && runningTask.runningState == false) {
             runningTask = ioscheduler->getRunningTask();
             runningTask.runningState = true;
             runningTask.issueTime = runningTime;
             ioscheduler->putAnotherQueue();
-            printf("%i:     %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
+//            printf("%i:     %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
         }
         
         while (runningTask.runningState == true && runningTime == (abs(runningTask.track - prevTrack) + runningTask.issueTime)) {
@@ -106,18 +103,17 @@ void runningIO(){
             tasksInform.push_back(runningTask);
             totalTrack += abs(runningTask.track - prevTrack);
             prevTrack = runningTask.track;
-            printf("%i:     %i finish %i\n" , runningTime, runningTask.taskID, runningTask.completeTime - runningTask.timeStep);
+//            printf("%i:     %i finish %i\n" , runningTime, runningTask.taskID, runningTask.completeTime - runningTask.timeStep);
             resetRunningTask();
             if (ioscheduler->readyEmpty() == true) {
                 ioscheduler->switchQueue();
             }
-//            ioscheduler->putAnotherQueue();
             if (ioscheduler->readyEmpty() == false && runningTask.runningState == false){
                 runningTask = ioscheduler->getRunningTask();
                 runningTask.runningState = true;
                 runningTask.issueTime = runningTime;
                 ioscheduler->putAnotherQueue();
-                printf("%i:     %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
+//                printf("%i:     %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
             }
         }
         runningTime++;
@@ -165,7 +161,7 @@ int main(int argc, char** argv) {
         ioscheduler = new FSCANScheduler();
     }
     readInput(argv[2]);
-    cout<< "TRACE"<<endl;
+//    cout<< "TRACE"<<endl;
     runningIO();
     printSum();
     return 0;

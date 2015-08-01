@@ -25,6 +25,7 @@ int runQueue = 0;
 int FIFOScheduler::chooseDirection(){return 0;};
 void FIFOScheduler::switchQueue(){};
 void FIFOScheduler::putAnotherQueue(){};
+void FIFOScheduler::init(){};
 void FIFOScheduler::put_taskQueue(iotask iotask){
     taskQueue.push(iotask);
 }
@@ -71,9 +72,9 @@ iotask FIFOScheduler::getRunningTask(){
 int SSTFScheduler::chooseDirection(){return 0;};
 void SSTFScheduler::switchQueue(){};
 void SSTFScheduler::putAnotherQueue(){};
+void SSTFScheduler::init(){};
 void SSTFScheduler::put_taskQueue(iotask iotask){
     taskQueue.push(iotask);
-//    printf("id:%i  timestep:%i  track:%i\n", iotask.taskID, iotask.timeStep, iotask.track);
 }
 
 bool SSTFScheduler::taskReady(int time){
@@ -144,9 +145,9 @@ iotask SSTFScheduler::getRunningTask(){
 
 void SCANScheduler::switchQueue(){};
 void SCANScheduler::putAnotherQueue(){};
+void SCANScheduler::init(){};
 void SCANScheduler::put_taskQueue(iotask iotask){
     taskQueue.push(iotask);
-    //    printf("id:%i  timestep:%i  track:%i\n", iotask.taskID, iotask.timeStep, iotask.track);
 }
 
 bool SCANScheduler::taskReady(int time){
@@ -305,9 +306,9 @@ iotask SCANScheduler::getRunningTask(){
 //------------------> CSCAN <-------------------
 void CSCANScheduler::switchQueue(){};
 void CSCANScheduler::putAnotherQueue(){};
+void CSCANScheduler::init(){};
 void CSCANScheduler::put_taskQueue(iotask iotask){
     taskQueue.push(iotask);
-    //    printf("id:%i  timestep:%i  track:%i\n", iotask.taskID, iotask.timeStep, iotask.track);
 }
 
 bool CSCANScheduler::taskReady(int time){
@@ -489,9 +490,11 @@ iotask CSCANScheduler::getRunningTask(){
 
 //---------------->  FSCAN <----------------
 
+void FSCANScheduler::init(){
+    readyTask = & readyQueueOne;
+}
 void FSCANScheduler::put_taskQueue(iotask iotask){
     taskQueue.push(iotask);
-    //    printf("id:%i  timestep:%i  track:%i\n", iotask.taskID, iotask.timeStep, iotask.track);
 }
 
 bool FSCANScheduler::taskReady(int time){
@@ -507,7 +510,7 @@ bool FSCANScheduler::taskQueueEmpty(){
 void FSCANScheduler::put_readyTask(iotask iotask){
     if (putTask == 0) {
         readyQueueOne.push(iotask);
-        readyTask = readyQueueOne;
+        readyTask = &readyQueueOne;
         putTask = 1;
         runQueue = 1;
     } else if(putTask == 1){
@@ -519,12 +522,12 @@ void FSCANScheduler::put_readyTask(iotask iotask){
 
 void FSCANScheduler::switchQueue(){
     if (runQueue == 1) {
-        readyTask = readyQueueTwo;
+        readyTask = &readyQueueTwo;
         readyQueueOne = queue<iotask>();
         runQueue = 2;
         directionState = 0;
     }else if (runQueue == 2) {
-        readyTask = readyQueueOne;
+        readyTask = &readyQueueOne;
         readyQueueTwo = queue<iotask>();
         runQueue = 1;
         directionState = 0;
@@ -540,7 +543,7 @@ void FSCANScheduler::putAnotherQueue(){
 }
 
 bool FSCANScheduler::bothEmpty(){
-    if (!taskQueue.empty() || !readyTask.empty()) return false;
+    if (!taskQueue.empty() || !readyTask->empty()) return false;
     return true;
 }
 
@@ -551,19 +554,19 @@ iotask FSCANScheduler::getReadyTask(){
 }
 
 bool FSCANScheduler::readyEmpty(){
-    if (!readyTask.empty()) return false;
+    if (!readyTask->empty()) return false;
     return true;
 }
 
 
 int FSCANScheduler::chooseDirection(){
     
-    for (int i = 0; i < readyTask.size(); i++) {
-        if (prevTask.track < readyTask.front().track) {
+    for (int i = 0; i < readyTask->size(); i++) {
+        if (prevTask.track < readyTask->front().track) {
             return 2;
         } else {
-            readyTask.push(readyTask.front());
-            readyTask.pop();
+            readyTask->push(readyTask->front());
+            readyTask->pop();
         }
     }
     return 1;
@@ -571,8 +574,8 @@ int FSCANScheduler::chooseDirection(){
 
 iotask FSCANScheduler::getRunningTask(){
     if (prevTask.timeState == false) {
-        temp = readyTask.front();
-        readyTask.pop();
+        temp = readyTask->front();
+        readyTask->pop();
         prevTask = temp;
         return temp;
     } else {
@@ -583,44 +586,44 @@ iotask FSCANScheduler::getRunningTask(){
                 directionState = 1;
             }
         }
-        while (!readyTask.empty()) {
+        while (!readyTask->empty()) {
             
             if (directionState == 1){
-                for (int i = 0; i < readyTask.size(); i++) {
-                    if (readyTask.front().track <= prevTask.track) {
-                        temp = readyTask.front();
-                        readyTask.pop();
+                for (int i = 0; i < readyTask->size(); i++) {
+                    if (readyTask->front().track <= prevTask.track) {
+                        temp = readyTask->front();
+                        readyTask->pop();
                         break;
                     } else{
-                        readyTask.push(readyTask.front());
-                        readyTask.pop();
+                        readyTask->push(readyTask->front());
+                        readyTask->pop();
                     }
                 }
-                if (temp.taskID == prevTask.taskID && !readyTask.empty()) {
+                if (temp.taskID == prevTask.taskID && !readyTask->empty()) {
                     directionState = 2;
                 } else{
-                    for (int i = 0; i < readyTask.size(); i++) {
-                        if (readyTask.front().track <= prevTask.track) {
-                            if (temp.track < readyTask.front().track) {
-                                readyTask.push(temp);
-                                temp = readyTask.front();
-                                readyTask.pop();
-                            } else if (temp.track == readyTask.front().track){
-                                if(temp.taskID > readyTask.front().taskID){
-                                    readyTask.push(temp);
-                                    temp = readyTask.front();
-                                    readyTask.pop();
+                    for (int i = 0; i < readyTask->size(); i++) {
+                        if (readyTask->front().track <= prevTask.track) {
+                            if (temp.track < readyTask->front().track) {
+                                readyTask->push(temp);
+                                temp = readyTask->front();
+                                readyTask->pop();
+                            } else if (temp.track == readyTask->front().track){
+                                if(temp.taskID > readyTask->front().taskID){
+                                    readyTask->push(temp);
+                                    temp = readyTask->front();
+                                    readyTask->pop();
                                 } else {
-                                    readyTask.push(readyTask.front());
-                                    readyTask.pop();
+                                    readyTask->push(readyTask->front());
+                                    readyTask->pop();
                                 }
                             } else{
-                                readyTask.push(readyTask.front());
-                                readyTask.pop();
+                                readyTask->push(readyTask->front());
+                                readyTask->pop();
                             }
                         } else {
-                            readyTask.push(readyTask.front());
-                            readyTask.pop();
+                            readyTask->push(readyTask->front());
+                            readyTask->pop();
                         }
                     }
                     prevTask = temp;
@@ -629,41 +632,41 @@ iotask FSCANScheduler::getRunningTask(){
                 
             }
             if (directionState == 2){
-                for (int i = 0; i < readyTask.size(); i++) {
-                    if (readyTask.front().track >= prevTask.track) {
-                        temp = readyTask.front();
-                        readyTask.pop();
+                for (int i = 0; i < readyTask->size(); i++) {
+                    if (readyTask->front().track >= prevTask.track) {
+                        temp = readyTask->front();
+                        readyTask->pop();
                         break;
                     } else{
-                        readyTask.push(readyTask.front());
-                        readyTask.pop();
+                        readyTask->push(readyTask->front());
+                        readyTask->pop();
                     }
                 }
-                if (temp.taskID == prevTask.taskID && !readyTask.empty()) {
+                if (temp.taskID == prevTask.taskID && !readyTask->empty()) {
                     directionState = 1;
                 } else{
-                    for (int i = 0; i < readyTask.size(); i++) {
-                        if (readyTask.front().track >= prevTask.track) {
-                            if (temp.track > readyTask.front().track) {
-                                readyTask.push(temp);
-                                temp = readyTask.front();
-                                readyTask.pop();
-                            } else if (temp.track == readyTask.front().track){
-                                if(temp.taskID > readyTask.front().taskID){
-                                    readyTask.push(temp);
-                                    temp = readyTask.front();
-                                    readyTask.pop();
+                    for (int i = 0; i < readyTask->size(); i++) {
+                        if (readyTask->front().track >= prevTask.track) {
+                            if (temp.track > readyTask->front().track) {
+                                readyTask->push(temp);
+                                temp = readyTask->front();
+                                readyTask->pop();
+                            } else if (temp.track == readyTask->front().track){
+                                if(temp.taskID > readyTask->front().taskID){
+                                    readyTask->push(temp);
+                                    temp = readyTask->front();
+                                    readyTask->pop();
                                 } else {
-                                    readyTask.push(readyTask.front());
-                                    readyTask.pop();
+                                    readyTask->push(readyTask->front());
+                                    readyTask->pop();
                                 }
                             } else{
-                                readyTask.push(readyTask.front());
-                                readyTask.pop();
+                                readyTask->push(readyTask->front());
+                                readyTask->pop();
                             }
                         } else{
-                            readyTask.push(readyTask.front());
-                            readyTask.pop();
+                            readyTask->push(readyTask->front());
+                            readyTask->pop();
                         }
                     }
                     prevTask = temp;

@@ -40,6 +40,7 @@ public:
     virtual int chooseDirection() = 0;
     virtual void switchQueue() = 0;
     virtual void putAnotherQueue() = 0;
+    virtual void init() = 0;
 };
 
 class FIFOScheduler:public IOScheduler{
@@ -58,6 +59,7 @@ public:
     int chooseDirection();
     void switchQueue();
     void putAnotherQueue();
+    void init();
 };
 
 class SSTFScheduler:public IOScheduler{
@@ -76,6 +78,7 @@ public:
     int chooseDirection();
     void switchQueue();
     void putAnotherQueue();
+    void init();
 };
 
 class SCANScheduler:public IOScheduler{
@@ -94,6 +97,7 @@ public:
     int chooseDirection();
     void switchQueue();
     void putAnotherQueue();
+    void init();
 };
 
 
@@ -113,13 +117,14 @@ public:
     int chooseDirection();
     void switchQueue();
     void putAnotherQueue();
+    void init();
 };
 
 class FSCANScheduler:public IOScheduler{
 private:
     queue<iotask> taskQueue;
-    queue<iotask> readyTask;
     queue<iotask> readyQueueOne;
+    queue<iotask>* readyTask;
     queue<iotask> readyQueueTwo;
 public:
     void put_taskQueue(iotask iotask);
@@ -133,5 +138,6 @@ public:
     int chooseDirection();
     void switchQueue();
     void putAnotherQueue();
+    void init();
 };
 #endif /* defined(__Lab4__IOSch__) */
