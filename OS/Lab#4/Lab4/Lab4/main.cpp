@@ -89,10 +89,15 @@ void runningIO(){
             ioscheduler->put_readyTask(printTest);
             printf("%i:     %i add %i\n", runningTime, printTest.taskID, printTest.track);
         }
+//        if (ioscheduler->readyEmpty() == true) {
+//            ioscheduler->switchQueue();
+//        }
+//        ioscheduler->putAnotherQueue();
         if (ioscheduler->readyEmpty() == false && runningTask.runningState == false) {
             runningTask = ioscheduler->getRunningTask();
             runningTask.runningState = true;
             runningTask.issueTime = runningTime;
+            ioscheduler->putAnotherQueue();
             printf("%i:     %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
         }
         
@@ -103,10 +108,15 @@ void runningIO(){
             prevTrack = runningTask.track;
             printf("%i:     %i finish %i\n" , runningTime, runningTask.taskID, runningTask.completeTime - runningTask.timeStep);
             resetRunningTask();
+            if (ioscheduler->readyEmpty() == true) {
+                ioscheduler->switchQueue();
+            }
+//            ioscheduler->putAnotherQueue();
             if (ioscheduler->readyEmpty() == false && runningTask.runningState == false){
                 runningTask = ioscheduler->getRunningTask();
                 runningTask.runningState = true;
                 runningTask.issueTime = runningTime;
+                ioscheduler->putAnotherQueue();
                 printf("%i:     %i issue %i %i\n", runningTime, runningTask.taskID, runningTask.track, prevTrack);
             }
         }
@@ -151,6 +161,8 @@ int main(int argc, char** argv) {
         ioscheduler = new SCANScheduler();
     } else if (strcmp(sValue, "c") == 0){
         ioscheduler = new CSCANScheduler();
+    } else if (strcmp(sValue, "f") == 0){
+        ioscheduler = new FSCANScheduler();
     }
     readInput(argv[2]);
     cout<< "TRACE"<<endl;
