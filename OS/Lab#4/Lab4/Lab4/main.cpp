@@ -124,8 +124,8 @@ void printSum(){
     double totalTurnAround;
     double totalWaitTime;
     int maxWaitTime = 0;
-    float avg_waittime = 0;
-    float avg_turnaround = 0;
+    double avg_waittime = 0.0;
+    double avg_turnaround = 0.0;
     for (int i = 0; i < tasksInform.size(); i++) {
         totalTurnAround += tasksInform[i].completeTime - tasksInform[i].timeStep;
         totalWaitTime += tasksInform[i].issueTime - tasksInform[i].timeStep;
